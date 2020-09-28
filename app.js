@@ -1,3 +1,6 @@
+const { json } = require('body-parser');
+const { addListener } = require('process');
+
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
@@ -11,15 +14,17 @@ let a = 0;
 
 
 app.get('/', (req, res) => {
-  res.render('index.ejs');
+  res.render('index.ejs',{
+    join_id: req.query.id,
+    join_name: req.query.name
+  });
 });
 
-
 io.on('connection', (socket) => {
+
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
-
 
   socket.on('leaveRoom', (num, name) => {
     socket.leave(room[num], () => {
@@ -28,7 +33,6 @@ io.on('connection', (socket) => {
     });
   });
 
-
   socket.on('joinRoom', (num, name) => {
     socket.join(room[num], () => {
       console.log(name + ' join a ' + room[num]);
@@ -36,11 +40,25 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('info',(num, data) => {
+    a = num;
+
+    var result = JSON.parse(data);
+
+    var input = result.result;
+    var output = result.count;
+
+    var msg = "result = " + input + "\n output = " + output;
+
+    io.to(room[a]).emit('chat message', "server", msg);
+
+  });
 
   socket.on('chat message', (num, name, msg) => {
     a = num;
     io.to(room[a]).emit('chat message', name, msg);
   });
+
 });
 
 
