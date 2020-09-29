@@ -2,8 +2,25 @@ var express = require('express')
 var app = express(); // 이번 예제에서는 express를 사용합니다.
 var socketio = require('socket.io');
 
+//DB세팅
+var mysqlDB = require('./mariadb.js');
+mysqlDB.connect();
+
+mysqlDB.query('select * from user', function (err, rows, fields) {
+  if (!err) {
+      console.log(rows);
+      console.log(fields);
+      var result = 'rows : ' + JSON.stringify(rows) + '<br><br>' +
+          'fields : ' + JSON.stringify(fields);
+      res.send(result);
+  } else {
+      console.log('query error : ' + err);
+      res.send(err);
+  }
+});
+
 var server = app.listen(3000,()=>{
-    console.log('Listening at port number 3001') //포트는 원하시는 번호로..
+    console.log('Listening at port number 3000') //포트는 원하시는 번호로..
 })
 
 //return socket.io server.
@@ -13,15 +30,14 @@ var io = socketio.listen(server) // 이 과정을 통해 우리의 express 서�
 let room = ['station','admin']
 
 //이 배열은 누가 chatroom에 있는지를 보여줍니다.
-var whoIsOn= [];
+var StationIsOn= [];
+var AdminIsOn= [];
+var UserIsOn= [];
 
 //이 서버에서는 어떤 클라이언트가 connection event를 발생시키는 것인지 듣고 있습니다.
 // callback 으로 넘겨지는 socket에는 현재 클라이언트와 연결되어있는 socket 관련 정보들이 다 들어있습니다.
 io.on('connection',function (socket){
-   
     var nickname = ``
-    
-
     console.log(`Connection : SocketId = ${socket.id}`)
     //console.log('join : socketid = ${socket.id}');
 
@@ -36,19 +52,34 @@ io.on('connection',function (socket){
         socket_type = login_data.type;
 
         socket.join(`${socket_type}`)
-  
         console.log(`${nickname} has entered ${socket_type} chatroom! ---------------------`)
-        whoIsOn.push(nickname) //
+
+        switch(socket_type){
+          case 'station' :
+            StationIsOn.push(nickname) //
+            break;
+
+          case 'admin' :
+            AdminIsOn.push(nickname) //
+            break;
+
+          case 'user' :
+              UserIsOn.push(nickname) //
+              break;
+        }
   
         // 아래와 같이 하면 그냥 String 으로 넘어가므로 쉽게 파싱을 할 수 있습니다.
         // 그냥 넘기면 JSONArray로 넘어가서 복잡해집니다.
-        var whoIsOnJson = `${whoIsOn}`
+        var whoIsOnJson = `${StationIsOn}`
         console.log(whoIsOnJson)
           
+        var whoIsOnJson = `${AdminIsOn}`
+        console.log(whoIsOnJson)
+
         //io.emit 과 socket.emit과 다른 점은 io는 서버에 연결된 모든 소켓에 보내는 것이고
         // socket.emit은 현재 그 소켓에만 보내는 것입니다.       
         
-        io.emit('newUser',whoIsOnJson)
+        //io.emit('newUser',whoIsOnJson)
       } catch (exception){
         console.log(exception);
       }
@@ -65,9 +96,15 @@ io.on('connection',function (socket){
       console.log(`${nickname} : ${data}`)
       var j_data = JSON.parse(data);
 
-      console.log(`${nickname} charge : ${j_data.charge}`)
-      console.log(`${nickname} volt : ${j_data.volt}`)
+      var pv_charge_v = j_data.pv.charge_v;
+      var pv_charge_a = j_data.pv.charge_a;
+      var pcb_input_v = j_data.pcb[0].input_v;
+      var pcb_output_a = j_data.pcb[0].output_a;
 
+      console.log(`${nickname} pv_charge_a : ${pv_charge_a}`)
+      console.log(`${nickname} pv_charge_v : ${pv_charge_v}`)
+      console.log(`${nickname} pcb_input_v : ${pcb_input_v}`)
+      console.log(`${nickname} pcb_output_a : ${pcb_output_a}`)
   })
 
     socket.on('disconnect',function(){
