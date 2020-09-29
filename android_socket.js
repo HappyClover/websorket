@@ -2,7 +2,7 @@ var express = require('express')
 var app = express(); // 이번 예제에서는 express를 사용합니다.
 var socketio = require('socket.io');
 
-var server = app.listen(3001,()=>{
+var server = app.listen(3000,()=>{
     console.log('Listening at port number 3001') //포트는 원하시는 번호로..
 })
 
