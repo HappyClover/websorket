@@ -80,7 +80,7 @@
 
     $('form').submit(() => {
       socket.emit('chat message', num, name, $('#m').val());
-      socket.emit('info',(num,$('#m').val()));
+      socket.emit('info',num,$('#m').val());
 
       $('#m').val('');
 
