@@ -2,30 +2,28 @@ var express = require('express')
 var app = express(); // 이번 예제에서는 express를 사용합니다.
 var socketio = require('socket.io');
 
+var station_current;
+
+//스테이션 클래스 배치
+var station_class = require('./C_station.js');
+var user_class = require('./C_user.js');
+var admin_class = require('./C_admin.js');
+
+var myinfo;
+
 //DB세팅
 var mysqlDB = require('./mariadb.js');
 mysqlDB.connect();
 
-mysqlDB.query('select * from user', function (err, rows, fields) {
-  if (!err) {
-      console.log(rows);
-      console.log(fields);
-      var result = 'rows : ' + JSON.stringify(rows) + '<br><br>' +
-          'fields : ' + JSON.stringify(fields);
-  } else {
-      console.log('query error : ' + err);
-  }
-});
-
-var server = app.listen(3000,()=>{
-    console.log('Listening at port number 3000') //포트는 원하시는 번호로..
+var server = app.listen(3001,()=>{
+    console.log('Listening at port number 3001') //포트는 원하시는 번호로..
 })
 
 //return socket.io server.
 var io = socketio.listen(server) // 이 과정을 통해 우리의 express 서버를 socket io 서버로 업그레이드를 시켜줍니다.
 
-//룸 종류 선언 (스테이션 접속 룸, 관리자 룸)
-let room = ['station','admin']
+//룸 종류 선언 (스테이션 접속 룸, 관리자 룸, 사용자 룸)
+let room = ['station','admin','user']
 
 //이 배열은 누가 chatroom에 있는지를 보여줍니다.
 var StationIsOn= [];
@@ -36,6 +34,7 @@ var UserIsOn= [];
 // callback 으로 넘겨지는 socket에는 현재 클라이언트와 연결되어있는 socket 관련 정보들이 다 들어있습니다.
 io.on('connection',function (socket){
     var nickname = ``
+    var socket_type = `` 
     console.log(`Connection : SocketId = ${socket.id}`)
     //console.log('join : socketid = ${socket.id}');
 
@@ -54,7 +53,22 @@ io.on('connection',function (socket){
 
         switch(socket_type){
           case 'station' :
+            var id, name;
+
             StationIsOn.push(nickname) //
+
+            var station_query = 'select station.*, station_port.* from station inner join station_port on station.id = station_port.station_id where station.name = ?';
+            mysqlDB.query(station_query,nickname, function (err, rows, fields) {
+              if (!err) {
+                station_current = rows;
+                id = station_current.id;
+                opp = new station_class(id, nickname, socket.id);
+                
+                console.log(rows);
+              } else {
+                console.log('query error : ' + err);
+              }
+            });
             break;
 
           case 'admin' :
@@ -98,6 +112,16 @@ io.on('connection',function (socket){
       var pv_charge_a = j_data.pv.charge_a;
       var pcb_input_v = j_data.pcb[0].input_v;
       var pcb_output_a = j_data.pcb[0].output_a;
+
+      var station_query = 'insert into port_log()';
+      mysqlDB.query(station_query,nickname, function (err, rows, fields) {
+        if (!err) {
+          station_current = rows;
+          console.log(rows);
+        } else {
+          console.log('query error : ' + err);
+        }
+      });
 
       console.log(`${nickname} pv_charge_a : ${pv_charge_a}`)
       console.log(`${nickname} pv_charge_v : ${pv_charge_v}`)
