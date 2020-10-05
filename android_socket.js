@@ -15,7 +15,7 @@ var myinfo;
 var mysqlDB = require('./mariadb.js');
 mysqlDB.connect();
 
-var server = app.listen(3001,()=>{
+var server = app.listen(3000,()=>{
     console.log('Listening at port number 3001') //포트는 원하시는 번호로..
 })
 
@@ -63,7 +63,7 @@ io.on('connection',function (socket){
                 station_current = rows;
                 id = station_current.id;
                 opp = new station_class(id, nickname, socket.id);
-                
+
                 console.log(rows);
               } else {
                 console.log('query error : ' + err);
