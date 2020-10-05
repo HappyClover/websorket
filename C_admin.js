@@ -1,4 +1,4 @@
-function C_station(id, name, socket_id){
+function C_admin(id, name, socket_id){
 	this.id = id;
 	this.name = name;
 	this.socket_id = this.socket_id;
@@ -15,7 +15,7 @@ function C_station(id, name, socket_id){
 	this.pv_device_temp = null;
 }
 
-var proto = C_station.prototype;
+var proto = C_admin.prototype;
 
 proto.setInfo = function (id, name, socket_id){
 	this.id = id;
@@ -71,3 +71,5 @@ proto.getInfo = function(){
 
 	return result;
 }
+
+module.exports = C_admin;

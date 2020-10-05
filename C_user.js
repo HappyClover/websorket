@@ -21,3 +21,5 @@ proto.getInfo = function(){
 
 	return result;
 }
+
+module.exports = C_user;

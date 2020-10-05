@@ -1,7 +1,7 @@
 function C_station(id, name, socket_id){
 	this.id = id;
 	this.name = name;
-	this.socket_id = this.socket_id;
+	this.socket_id = socket_id;
 
 	this.pv_charge_a = null;
 	this.pv_charge_v = null;
@@ -15,15 +15,13 @@ function C_station(id, name, socket_id){
 	this.pv_device_temp = null;
 }
 
-var proto = C_station.prototype;
-
-proto.setInfo = function (id, name, socket_id){
+C_station.prototype.setInfo = function(id, name, socket_id){
 	this.id = id;
 	this.name = name;
 	this.socket_id = socket_id;
 }
 
-proto.setValue = function (code, value){
+C_station.prototype.setValue = function (code, value){
 	switch(code){
 		case 'charge_a':
 			this.pv_charge_a = value;
@@ -49,7 +47,15 @@ proto.setValue = function (code, value){
 		}
 }
 
-proto.getInfo = function(){
+C_station.prototype.getStationId = function(){
+	return this.id;
+}
+
+C_station.prototype.getStationName = function(){
+	return this.name;
+}
+
+C_station.prototype.getInfo = function(){
 	var json = new Object;
 
 	json.id = this.id;
@@ -71,3 +77,5 @@ proto.getInfo = function(){
 
 	return result;
 }
+
+module.exports = C_station;

@@ -9,13 +9,13 @@ var station_class = require('./C_station.js');
 var user_class = require('./C_user.js');
 var admin_class = require('./C_admin.js');
 
-var myinfo;
+var WhoAmI;
 
 //DB세팅
 var mysqlDB = require('./mariadb.js');
 mysqlDB.connect();
 
-var server = app.listen(3000,()=>{
+var server = app.listen(3001,()=>{
     console.log('Listening at port number 3001') //포트는 원하시는 번호로..
 })
 
@@ -55,16 +55,17 @@ io.on('connection',function (socket){
           case 'station' :
             var id, name;
 
-            StationIsOn.push(nickname) //
-
-            var station_query = 'select station.*, station_port.* from station inner join station_port on station.id = station_port.station_id where station.name = ?';
+            var station_query = 'select station.*, station_port.id as port_id, station_port.number as port_numb, station_port.type as port_type from station inner join station_port on station.id = station_port.station_id where station.name = ?';
             mysqlDB.query(station_query,nickname, function (err, rows, fields) {
               if (!err) {
-                station_current = rows;
-                id = station_current.id;
-                opp = new station_class(id, nickname, socket.id);
-
                 console.log(rows);
+
+                id = rows[0].id;
+
+                console.log(id);
+
+                WhoAmI = new station_class(id, nickname, socket.id);
+                StationIsOn.push(WhoAmI) //
               } else {
                 console.log('query error : ' + err);
               }
@@ -97,6 +98,7 @@ io.on('connection',function (socket){
       }
     })
 
+    //채팅 처리
     socket.on('say',function(data){
         console.log(`${nickname} : ${data}`)
     
@@ -104,8 +106,11 @@ io.on('connection',function (socket){
         socket.broadcast.emit('newMsg',data) // socket.broadcast.emit은 현재 소켓이외의 서버에 연결된 모든 소켓에 보내는 것.
     })
 
+    //데이터 인풋 처리
     socket.on('insert',function(data){
-      console.log(`${nickname} : ${data}`)
+      console.log(`${nickname} : ${data}`);
+
+      
       var j_data = JSON.parse(data);
 
       var pv_charge_v = j_data.pv.charge_v;
@@ -113,20 +118,108 @@ io.on('connection',function (socket){
       var pcb_input_v = j_data.pcb[0].input_v;
       var pcb_output_a = j_data.pcb[0].output_a;
 
-      var station_query = 'insert into port_log()';
-      mysqlDB.query(station_query,nickname, function (err, rows, fields) {
-        if (!err) {
-          station_current = rows;
-          console.log(rows);
-        } else {
-          console.log('query error : ' + err);
-        }
-      });
+      {
+        if(j_data.hasOwnProperty('pv')){
+          var key = Object.getOwnPropertyNames(j_data.pv)
+          var station_query = 'insert into station_pv(station_id, code, value, date) value(?,?,?,?)';
 
-      console.log(`${nickname} pv_charge_a : ${pv_charge_a}`)
-      console.log(`${nickname} pv_charge_v : ${pv_charge_v}`)
-      console.log(`${nickname} pcb_input_v : ${pcb_input_v}`)
-      console.log(`${nickname} pcb_output_a : ${pcb_output_a}`)
+          var stringDate = getTimeStamp();
+
+          for(i=0; i<key.length; i++){
+            switch(key[i]){
+              case 'charge_a':
+                code = 11;
+                sql_query(station_query,[WhoAmI.getStationId(), code, j_data.pv.charge_a, stringDate]);
+                console.log('pv_charge_a :' + j_data.pv.charge_a);
+                break;
+
+              case 'charge_v':
+                code = 12;
+                sql_query(station_query,[WhoAmI.getStationId(), code, j_data.pv.charge_v, stringDate]);
+                console.log('pv_charge_v : '+ j_data.pv.charge_v);
+
+                break;
+
+              case 'load_a':
+                code = 21;
+                sql_query(station_query,[WhoAmI.getStationId(), code,j_data.pv.load_a, stringDate]);
+                console.log('pv_load_a : '+ j_data.pv.load_a);
+                break;
+
+              case 'load_v':
+                code = 22;
+                sql_query(station_query,[WhoAmI.getStationId(), code,j_data.pv.load_v, stringDate]);
+                console.log('pv_load_v : '+ j_data.pv.load_v);
+                break;
+
+              case 'battery_temp':
+                code = 31;
+                sql_query(station_query,[WhoAmI.getStationId(), code,j_data.pv.battery_temp, stringDate]);
+                console.log('pv_battery_temp : '+ j_data.pv.battery_temp);
+
+                break;
+
+              case 'device_temp':
+                code = 41;
+                sql_query(station_query,[WhoAmI.getStationId(), code,j_data.pv.device_temp, stringDate]);
+                console.log('pv_device_temp : '+ j_data.pv.device_temp);
+
+                break;
+            }
+          }
+        }
+
+        if(j_data.hasOwnProperty('pcb')){
+          var station_query = 'insert into port_log(port_id, code, value) value(?,?,?,?)';
+
+          for(i=0; i<j_data.pcb.length; i++){
+            var key = Object.getOwnPropertyNames(j_data.pcb[i]);
+
+            for(j=0; j<key.length; j++){
+              switch(key[j]){
+                case 'input_v':
+                  code = 11;
+                  sql_query(station_query,[WhoAmI.getStationId(), code, j_data.pv.charge_a, stringDate]);
+                  console.log('pv_'+j_data.pcb[i].numb+'_input_v :' + j_data.pcb[i].input_v);
+                  break;
+
+                case 'input_a':
+                  code = 12;
+                  sql_query(station_query,[WhoAmI.getStationId(), code, j_data.pv.charge_a, stringDate]);
+                  console.log('pv_'+j_data.pcb[i].numb+'_input_a :' + j_data.pcb[i].input_a);
+                  break;
+
+                case 'output_a':
+                  code = 21;
+                  sql_query(station_query,[WhoAmI.getStationId(), code, j_data.pv.charge_a, stringDate]);
+                  console.log('pv_'+j_data.pcb[i].numb+'_output_a :'+ j_data.pcb[i].output_a);
+                  break;
+
+                case 'output_v':
+                  code = 22;
+                  sql_query(station_query,[WhoAmI.getStationId(), code, j_data.pv.charge_a, stringDate]);
+                  console.log('pv_'+j_data.pcb[i].numb+'_output_v : '+ j_data.pcb[i].output_v);
+                  break;
+
+                case 'status':
+                  code = 31;
+                  sql_query(station_query,[WhoAmI.getStationId(), code, j_data.pv.charge_a, stringDate]);
+                  console.log('pv_'+j_data.pcb[i].numb+'_status :' + j_data.pcb[i].status);
+                  break;
+              }
+            }
+          }
+        }
+        // var station_query = 'insert into port_log(port_id, code, value) value(?,?,?,?)';
+        // mysqlDB.query(station_query,[port_id, code, value], function (err, rows, fields) {
+        //   if (!err) {
+        //     station_current = rows;
+        //     console.log(rows);
+        //   } else {
+        //     console.log('query error : ' + err);
+        //   }
+        // });
+      }
   })
 
     socket.on('disconnect',function(){
@@ -145,3 +238,41 @@ io.on('connection',function (socket){
     })
 
 })
+
+
+function sql_query(query, value){
+  mysqlDB.query(query,value, function (err, rows, fields) {
+    if (!err) {
+      return true;
+    } else {
+      console.log('query error : ' + err);
+      return false;
+    }
+  });
+}
+
+function getTimeStamp() {
+  var d = new Date();
+  var s =
+    leadingZeros(d.getFullYear(), 4) + '-' +
+    leadingZeros(d.getMonth() + 1, 2) + '-' +
+    leadingZeros(d.getDate(), 2) + ' ' +
+
+    leadingZeros(d.getHours(), 2) + ':' +
+    leadingZeros(d.getMinutes(), 2) + ':' +
+    leadingZeros(d.getSeconds(), 2);
+
+  return s;
+}
+
+function leadingZeros(n, digits) {
+  var zero = '';
+  n = n.toString();
+
+  if (n.length < digits) {
+    for (i = 0; i < digits - n.length; i++)
+      zero += '0';
+  }
+  return zero + n;
+}
+
