@@ -44,7 +44,7 @@ C_station.prototype.setValue = function (code, value){
 		case 'device_temp':
 			this.pv_device_temp = value;
 			break;
-		}
+	}
 }
 
 C_station.prototype.getStationId = function(){
