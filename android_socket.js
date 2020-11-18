@@ -431,7 +431,7 @@ io.on('connection',function (socket){
             port_list[idlePort].setValue('status',1);
   
             socket.emit('charge_ready',input_data);;
-            io.to(room['admin']).emit('charge_ready', input_data);
+            //io.to(room['admin']).emit('charge_ready', input_data);
 
           } else {
             console.log('query error : ' + err);
