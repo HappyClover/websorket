@@ -2,6 +2,8 @@ var express = require('express')
 var app = express(); // 이번 예제에서는 express를 사용합니다.
 var socketio = require('socket.io');
 
+var fs = require('fs');
+
 var station_current;
 
 //스테이션 클래스 배치
@@ -30,6 +32,39 @@ let room = ['station','admin','user']
 var StationIsOn= [];
 var AdminIsOn= [];
 var UserIsOn= [];
+
+//관제 페이지
+app.set('view engine', 'ejs');
+app.set('views', './');
+app.get('/img/Logo', (req, res) => {
+  fs.readFile('./img/Logo.png', function(error, data){
+    res.writeHead(200,{'Content-Type': 'text/html'});
+    res.end(data);
+  })
+});
+app.get('/img/port_xiaomi', (req, res) => {
+  fs.readFile('./img/xiaomi.png', function(error, data){
+    res.writeHead(200,{'Content-Type': 'text/html'});
+    res.end(data);
+  })
+});
+app.get('/img/port_defalut', (req, res) => {
+  fs.readFile('./img/default.png', function(error, data){
+    res.writeHead(200,{'Content-Type': 'text/html'});
+    res.end(data);
+  })
+});
+app.get('/js/smoothie.js', (req, res) => {
+  fs.readFile('./js/smoothie.js', function(error, data){
+    res.writeHead(200,{'Content-Type': 'text/javascript'});
+    res.end(data);
+  })
+});
+
+app.get('/', (req, res) => {
+  res.render('index_station.ejs');
+});
+
 
 //이 서버에서는 어떤 클라이언트가 connection event를 발생시키는 것인지 듣고 있습니다.
 // callback 으로 넘겨지는 socket에는 현재 클라이언트와 연결되어있는 socket 관련 정보들이 다 들어있습니다.
@@ -79,6 +114,8 @@ io.on('connection',function (socket){
                     console.log(port.getPortNumb());
                     port_list[Number(port.getPortNumb())-1] = port;
                     result = true;
+                    io.to(room['admin']).emit('join_status', 1);
+                    socket.join(room['station']);
 
                   }
                 } else { //조회결과가 없을때
@@ -90,12 +127,14 @@ io.on('connection',function (socket){
                 result = false;
               }
 
+
               
             });
             break;
 
           case 'admin' :
             AdminIsOn.push(nickname) //
+            socket.join(room['admin']);
             result = true;
             break;
 
@@ -133,9 +172,20 @@ io.on('connection',function (socket){
     
         socket.emit('myMsg',data)
         socket.broadcast.emit('newMsg',data) // socket.broadcast.emit은 현재 소켓이외의 서버에 연결된 모든 소켓에 보내는 것.
-        socket.emit('newMsg',data)
 
     })
+
+    socket.on('station_list',function(){
+      io.of('/').in('station').clients((error, clients) => {
+        if (error) throw error;
+        // console.log('station_list = '+clients); // => [Anw2LatarvGVVXEIAAAD] 
+
+        if(clients.length>0){
+          io.to(room['admin']).emit('station_status', true);
+        }
+    });
+
+  })
 
     //데이터 인풋 처리
     socket.on('insert',function(data){
@@ -143,6 +193,8 @@ io.on('connection',function (socket){
       if(typeof(data) != 'object'){
         var j_data = JSON.parse(data);
       }
+
+      io.to(room['admin']).emit('change_info', data);
 
       try{
         if(j_data.hasOwnProperty('pv')){
@@ -255,6 +307,46 @@ io.on('connection',function (socket){
     socket.on('disconnect',function(){
 
       console.log(`${nickname} is disconnect this chatroom ------------------------  `)
+
+      switch(socket_type){
+          case 'station' :
+            //Delete user in the whoIsOn Arryay
+            StationIsOn.splice(StationIsOn.indexOf(nickname),1);
+            var data = {
+                disconnected : nickname
+            }
+            socket.emit('logout',data)
+            console.log(`${StationIsOn}`)
+            io.to(room['admin']).emit('station_status', false);
+
+            break;
+            
+          case 'admin':
+            //Delete user in the whoIsOn Arryay
+            AdminIsOn.splice(AdminIsOn.indexOf(nickname),1);
+            var data = {
+                whoIsOn: whoIsOn,
+                disconnected : nickname
+            }
+            socket.emit('logout',data)
+            console.log(`${AdminIsOn}`)
+
+            break;
+
+          case 'user':
+            //Delete user in the whoIsOn Arryay
+            UserIsOn.splice(UserIsOn.indexOf(nickname),1);
+            var data = {
+                whoIsOn: whoIsOn,
+                disconnected : nickname
+            }
+            socket.emit('logout',data)
+            console.log(`${UserIsOn}`)
+            break;
+            
+          default:
+            console.log(`${socket_type} is unknown type`);
+        }
     })
 
     socket.on('logout',function(){
@@ -269,6 +361,7 @@ io.on('connection',function (socket){
             }
             socket.emit('logout',data)
             console.log(`${StationIsOn}`)
+            io.to(room['admin']).emit('station_status', false);
 
             break;
             
@@ -338,6 +431,8 @@ io.on('connection',function (socket){
             port_list[idlePort].setValue('status',1);
   
             socket.emit('charge_ready',input_data);;
+            io.to(room['admin']).emit('charge_ready', input_data);
+
           } else {
             console.log('query error : ' + err);
           }
@@ -351,6 +446,7 @@ io.on('connection',function (socket){
       var response_data;
 
       code = get_data.code;
+      
       switch(code){
         case 'start' : //충전 시작 통보를 받았을때
           var query = "";
@@ -380,6 +476,8 @@ io.on('connection',function (socket){
 
           port_list[idlePort].setStatus('charge_start',null);
           socket.emit('result',response_data);
+          io.to(room['admin']).emit('charge', response_data);
+
           break;
 
 
@@ -393,6 +491,7 @@ io.on('connection',function (socket){
               detail: "충전 대기 상태 포트가 아님"
             }
             socket.emit('result',response_data);
+            
             break;
           }
 
@@ -406,6 +505,7 @@ io.on('connection',function (socket){
           }
           port_list[idlePort].setStatus('charge_cancel',null);
           socket.emit('result',response_data);
+          io.to(room['admin']).emit('charge', response_data);
           break;
 
 
@@ -432,6 +532,7 @@ io.on('connection',function (socket){
           }
           port_list[idlePort].setStatus('charge_complete',null);
           socket.emit('result',response_data);
+          io.to(room['admin']).emit('charge', response_data);
           break;
 
 
@@ -456,6 +557,8 @@ io.on('connection',function (socket){
           }
           port_list[Number(data.port)-1].setStatus('short_circuit',null);
           socket.emit('result',response_data);
+          io.to(room['admin']).emit('charge', response_data);
+
           break;
       }
       console.log(`${data.port} for ${code} result ${response_data.data}`);

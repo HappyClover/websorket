@@ -1,0 +1,459 @@
+<html ng-app>
+    <head>
+        <title>WING STATION</title>
+
+        <!-- socket setting -->
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+        <!-- chart setting -->
+        <script src="/js/smoothie.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
+        <script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+
+    </head>
+    <body>
+        <header>
+            <img src="./img/Logo"> </img>
+        </header>
+
+        <fieldset id="field_station" >
+            <div id="station_title" class="title_land">
+                <span class="title">스테이션 정보</span>
+            </div>
+            <div>
+                <span>스테이션 이름 : 알파시티 스테이션 1 </span> <br>
+                <span>스테이션 아이디 : wingstation_alpha_1</span> <br>
+                <span>스테이션 접속 상태 : <span id="join_status">접속 끊김</span></span>
+            </div>
+        </fieldset>
+
+        <fieldset id="field_pv">
+            <div id="pv_title" class="title_land">
+                <span class="title">태양광 현황</span>
+            </div>
+
+            <div>
+                <canvas id="myChart"></canvas>
+                <div>
+                    <span>발전 전압 : <span id="pv_input_v">30.1</span>V</span> <br>
+                    <span>발전 전류 : <span id="pv_input_a">46.5</span> A</span> <br>
+                    <span>부하 전압 : <span id="pv_output_v">45.0</span> V</span> <br>
+                    <span>부하 전류 : <span id="pv_output_a">2.5</span> A</span> <br>
+                </div>
+
+
+            </div>
+
+            
+
+        </fieldset>
+
+        <fieldset id="field_port">
+            <div id="port_title" class="title_land">
+                <span class="title">포트별 상태</span>
+            </div>
+            <div class="info_land" style="float: inline-end;">
+                <div style="width: 49%; margin: 0; float: left;">
+                    <div id="port1" class="port_status" style="float: left; background-image: url(/img/port_xiaomi); background-repeat: no-repeat; background-size: contain; background-size: 80%; background-position: center;">
+
+                    </div>
+                    <div>
+                        <span>포트 상태 : <span class="port_status_info">대기</span></span> <br>
+                        <span>입력 전압 : <span class="port_input_v">46.5</span> V</span> <br>
+                        <span>출력 전압 : <span class="port_output_v">45.0</span> V</span> <br>
+                        <span>출력 전류 : <span class="port_output_a">2.5</span> A</span> <br>
+                    </div>
+                </div>
+                
+                <div style="width: 49%; float: left;" >
+                    <div id="port2" class="port_status" style="float: left; background-image: url(/img/port_xiaomi); background-repeat: no-repeat; background-size: contain; background-size: 80%; background-position: center;">
+
+                    </div>
+                    <div>
+                        <span>포트 상태 : <span class="port_status_info">대기</span></span> <br>
+                        <span>입력 전압 : <span class="port_input_v">46.5</span> V</span> <br>
+                        <span>출력 전압 : <span class="port_output_v">45.0</span> V</span> <br>
+                        <span>출력 전류 : <span class="port_output_a">2.5</span> A</span> <br>
+                    </div>
+                </div>
+            </div>
+
+        <br><br>
+        <div class="info_land" >
+            <div style="width: 49%; margin: 0; float: left;">
+                <div id="port3" class="port_status" style="float: left; background-image: url(/img/port_defalut); background-repeat: no-repeat; background-size: contain; background-size: 80%; background-position: center;">
+
+                </div>
+                <div>
+                    <span>포트 상태 : <span class="port_status_info">대기</span></span> <br>
+                    <span>입력 전압 : <span class="port_input_v">46.5</span> V</span> <br>
+                    <span>출력 전압 : <span class="port_output_v">45.0</span> V</span> <br>
+                    <span>출력 전류 : <span class="port_output_a">2.5</span> A</span> <br>
+                </div>
+            </div>
+            
+            <div style="width: 49%; float: left;">
+                <div id="port4" class="port_status" style="float: left; background-image: url(/img/port_defalut); background-repeat: no-repeat; background-size: contain; background-size: 80%; background-position: center;">
+
+                </div>
+                <div>
+                    <span>포트 상태 : <span class="port_status_info">대기</span></span> <br>
+                    <span>입력 전압 : <span class="port_input_v">46.5</span> V</span> <br>
+                    <span>출력 전압 : <span class="port_output_v">45.0</span> V</span> <br>
+                    <span>출력 전류 : <span class="port_output_a">2.5</span> A</span> <br>
+                </div>
+            </div>
+        </div>
+        </fieldset>
+
+        <div id="input_data">
+
+        </div>
+    </body>
+
+    <script>
+    //chartjs
+    var port_status = document.getElementsByClassName("port_status_info");
+    var port_input_v = document.getElementsByClassName("port_input_v");
+    var port_output_a = document.getElementsByClassName("port_output_a");
+    var port_output_v = document.getElementsByClassName("port_output_v");
+
+    function newDate(days) {
+			return moment().add(days, 'd').toDate();
+		}
+
+		function newDateString(days) {
+			return moment().add(days, 'd').format();
+		}
+
+		var color = Chart.helpers.color;
+		var config = {
+			type: 'line',
+			data: {
+				datasets: [{
+					label: '발전 전류량',
+					backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+					borderColor: window.chartColors.red,
+					fill: false,
+					data: [],
+				}, {
+					label: '부하 전류량',
+					backgroundColor: color(window.chartColors.blue).alpha(0.5).rgbString(),
+					borderColor: window.chartColors.blue,
+					fill: false,
+					data: []
+				}]
+			},
+			options: {
+				responsive: true,
+				title: {
+					display: true,
+					text: '발전 현황'
+				},
+				scales: {
+					xAxes: [{
+						type: 'time',
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Date'
+						},
+						ticks: {
+							major: {
+								fontStyle: 'bold',
+								fontColor: '#FF0000'
+							}
+						}
+					}],
+					yAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'value'
+						}
+					}]
+				}
+			}
+		};
+
+		window.onload = function() {
+			var ctx = document.getElementById('myChart').getContext('2d');
+			window.myLine = new Chart(ctx, config);
+		};
+
+        function addData(input, output){
+			if (config.data.datasets.length > 0) {
+				config.data.datasets[0].data.push({
+					x: newDateString(config.data.datasets[0].data.length),
+					y: Number(input)
+				});
+				config.data.datasets[1].data.push({
+					x: newDate(config.data.datasets[1].data.length),
+					y: Number(output)
+				});
+
+				window.myLine.update();
+			}
+        }
+
+
+	
+    
+    $(() => {
+        // const name = "<%= //join_name; %>";
+        // const id = <%= //join_id; %>;
+
+        const socket = io();
+
+        var user_data = {"name" : "TestWeb", "type":"admin"}
+        socket.emit('login', JSON.stringify(user_data));
+
+
+        $('select').change(() => {
+        socket.emit('leaveRoom', num, name);
+        num++;
+        num = num % 2;
+        socket.emit('joinRoom', num, name);
+        });
+
+        $('form').submit(() => {
+        socket.emit('chat message', num, name, $('#m').val());
+        socket.emit('info',num,$('#m').val());
+
+        $('#m').val('');
+
+        return false;
+        });
+        socket.emit('station_list');
+
+
+        socket.on('charge_ready', (data) => {
+            if(data.result == true){
+                port_status[data.port-1].innerHTML = "충전 준비";
+            }
+        });
+
+        socket.on('charge', (data) => {
+            $('#input_data').text(JSON.stringify(data));
+
+            code = data.code;
+            switch(code){
+                case 'charge_start' : //충전 시작 통보를 받았을때
+                // data=JSON.parse(data);
+
+                port_status[data.port-1].innerHTML = "충전 중";
+                break;
+
+
+                case 'charge_cancel' : //충전 취소 통보를 받았을때
+                // data=JSON.parse(data);
+
+                port_status[data.port-1].innerHTML = "충전 취소";
+                setTimeout(function() {
+                    port_status[data.port-1].innerHTML = "대기";
+                }, 3000);
+                break;
+
+
+                case 'charge_complete' : //충전완료 통보
+                // data=JSON.parse(data);
+
+                port_status[data.port-1].innerHTML = "충전 완료";
+                setTimeout(function() {
+                    port_status[data.port-1].innerHTML = "대기";
+                }, 3000);
+                break;
+
+
+                case 'short_circuit' : //단락 통보
+                // data=JSON.parse(data);
+
+                port_status[data.port-1].innerHTML = "충전 중단";
+                setTimeout(function() {
+                    port_status[data.port-1].innerHTML = "대기";
+                }, 3000);
+                break;
+            }
+            // console.log(`${data.port} for ${code} result ${response_data.data}`);
+
+        });
+
+        socket.on('joinRoom', (num, name) => {
+        $('#messages').append($('<li>').text(name + '    joined '
+            + room[num] + ':)'));
+        });
+
+        socket.on('station_status', (data) => {
+            if(data)
+                $('#join_status').text("접속 됨");
+            else
+                $('#join_status').text("접속 끊김");
+
+        });
+
+        socket.on('join_status', (status) => {
+            var msg;
+            switch(status){
+                case 0:
+                    msg = "접속 끊김"
+                    break;
+                case 1:
+                    msg = "접속 됨"
+                    break;
+                case 2:
+                    msg = "접속 에러"
+                    break;
+            }
+        $('#join_status').text(msg);
+        });
+
+        socket.on('change_info', (j_data) => {
+            j_data = JSON.parse(j_data);
+            addData(j_data.pv.charge_a, j_data.pv.load_a);
+
+            try{
+                if(j_data.hasOwnProperty('pv')){
+                    var key = Object.getOwnPropertyNames(j_data.pv)
+
+                    for(i=0; i<key.length; i++){
+                        switch(key[i]){
+                        case 'charge_a':
+                            $('#pv_input_a').text(j_data.pv.charge_a);
+                            break;
+
+                        case 'charge_v':
+                            $('#pv_input_v').text(j_data.pv.charge_v);
+                            break;
+
+                        case 'load_a':
+                            $('#pv_output_a').text(j_data.pv.load_a);
+                            break;
+
+                        case 'load_v':
+                            $('#pv_output_v').text(j_data.pv.load_v);
+                            break;
+
+                        // case 'battery_temp':
+                        //     code = 31;
+                        //     sql_query(station_query,[WhoAmI.getStationId(), code,j_data.pv.battery_temp, stringDate]);
+                        //     console.log('pv_battery_temp : '+ j_data.pv.battery_temp);
+                        //     break;
+
+                        // case 'device_temp':
+                        //     console.log('pv_device_temp : '+ j_data.pv.device_temp);
+                        //     break;
+                        }
+                    }
+                }
+
+                if(j_data.hasOwnProperty('pcb')){
+                    for(i=0; i<j_data.pcb.length; i++){
+                        var key = Object.getOwnPropertyNames(j_data.pcb[i]);
+                        var port_numb = j_data.pcb[i].numb;
+                        var port_id = null;
+
+                        // for(i=0; i<station_rows.length; i++){
+                        //     alert(station_rows[i].port_numb == port_numb);
+
+                        //     if(station_rows[i].port_numb == port_numb){
+                        //         port_id = station_rows[i].port_id ;
+                        //         break;
+                        //     } 
+                        // }
+
+                        for(j=0; j<key.length; j++){
+                            
+                            switch(key[j]){
+                                case 'input_v':
+                                port_input_v[i].innerHTML=j_data.pcb[i].input_v;
+                                break;
+
+                                case 'output_v':
+                                port_output_v[i].innerHTML = j_data.pcb[i].output_v;
+                                break;
+
+                                case 'output_a':
+                                port_output_a[i].innerHTML = j_data.pcb[i].output_a;
+                                break;
+
+                                case 'status':
+                                port_status[i].innerHTML = j_data.pcb[i].status;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            } catch(e){
+            }
+        });
+    });
+    </script>
+
+    <style>
+        html{
+            font-size: large;
+        }
+
+        #myChart{
+            width: 70% !important;  
+            float: left;
+            min-width: 320px; 
+            max-width: 800px;
+            height: 100px;
+        }
+
+
+
+        header{
+            text-align: center;
+        }
+
+        header img{
+            width: 75%;
+
+            margin-top: 100px;
+            margin-bottom: 100px;
+            max-width: 800px;
+            max-height: 250px;
+        }
+
+        fieldset{
+            border: 0;
+            margin-bottom: 30px;
+        }
+
+        .title_land{
+            border-bottom: 1px black solid;            
+        }
+
+        .title{
+            border: 1px #000000 solid;
+            padding: 10px;
+        }
+
+        fieldset div span{
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        fieldset div span span{
+            margin-top: 0px;
+        }
+
+        fieldset#field_port div#info_land{
+            height: 200px;
+        }
+
+        div.port_status{
+            width: 200px;
+            height: 200px;
+            margin: 0;
+        }
+    </style>
+</html>
