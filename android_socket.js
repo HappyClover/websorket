@@ -114,7 +114,7 @@ io.on('connection',function (socket){
                     console.log(port.getPortNumb());
                     port_list[Number(port.getPortNumb())-1] = port;
                     result = true;
-                    io.to(room['admin']).emit('join_status', 1);
+                    io.to(room['admin']).emit('a_join_status', 1);
                     socket.join(room['station']);
 
                   }
@@ -181,7 +181,7 @@ io.on('connection',function (socket){
         // console.log('station_list = '+clients); // => [Anw2LatarvGVVXEIAAAD] 
 
         if(clients.length>0){
-          io.to(room['admin']).emit('station_status', true);
+          io.to(room['admin']).emit('a_station_status', true);
         }
     });
 
@@ -194,7 +194,7 @@ io.on('connection',function (socket){
         var j_data = JSON.parse(data);
       }
 
-      io.to(room['admin']).emit('change_info', data);
+      io.to(room['admin']).emit('a_change_info', data);
 
       try{
         if(j_data.hasOwnProperty('pv')){
@@ -317,17 +317,17 @@ io.on('connection',function (socket){
             }
             socket.emit('logout',data)
             console.log(`${StationIsOn}`)
-            io.to(room['admin']).emit('station_status', false);
+            io.to(room['admin']).emit('a_station_status', false);
 
             break;
             
           case 'admin':
             //Delete user in the whoIsOn Arryay
             AdminIsOn.splice(AdminIsOn.indexOf(nickname),1);
-            var data = {
-                whoIsOn: whoIsOn,
-                disconnected : nickname
-            }
+            // var data = {
+            //     whoIsOn: whoIsOn,
+            //     disconnected : nickname
+            // }
             socket.emit('logout',data)
             console.log(`${AdminIsOn}`)
 
@@ -361,7 +361,7 @@ io.on('connection',function (socket){
             }
             socket.emit('logout',data)
             console.log(`${StationIsOn}`)
-            io.to(room['admin']).emit('station_status', false);
+            io.to(room['admin']).emit('a_station_status', false);
 
             break;
             
@@ -431,7 +431,7 @@ io.on('connection',function (socket){
             port_list[idlePort].setValue('status',1);
   
             socket.emit('charge_ready',input_data);;
-            //io.to(room['admin']).emit('charge_ready', input_data);
+            io.to(room['admin']).emit('a_charge_ready', input_data);
 
           } else {
             console.log('query error : ' + err);
@@ -476,7 +476,7 @@ io.on('connection',function (socket){
 
           port_list[idlePort].setStatus('charge_start',null);
           socket.emit('result',response_data);
-          io.to(room['admin']).emit('charge', response_data);
+          io.to(room['admin']).emit('a_charge', response_data);
 
           break;
 
@@ -505,7 +505,7 @@ io.on('connection',function (socket){
           }
           port_list[idlePort].setStatus('charge_cancel',null);
           socket.emit('result',response_data);
-          io.to(room['admin']).emit('charge', response_data);
+          io.to(room['admin']).emit('a_charge', response_data);
           break;
 
 
@@ -532,7 +532,7 @@ io.on('connection',function (socket){
           }
           port_list[idlePort].setStatus('charge_complete',null);
           socket.emit('result',response_data);
-          io.to(room['admin']).emit('charge', response_data);
+          io.to(room['admin']).emit('a_charge', response_data);
           break;
 
 
@@ -557,7 +557,7 @@ io.on('connection',function (socket){
           }
           port_list[Number(data.port)-1].setStatus('short_circuit',null);
           socket.emit('result',response_data);
-          io.to(room['admin']).emit('charge', response_data);
+          io.to(room['admin']).emit('a_charge', response_data);
 
           break;
       }

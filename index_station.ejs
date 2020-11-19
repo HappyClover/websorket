@@ -232,13 +232,13 @@
         socket.emit('station_list');
 
 
-        socket.on('charge_ready', (data) => {
+        socket.on('a_charge_ready', (data) => {
             if(data.result == true){
                 port_status[data.port-1].innerHTML = "충전 준비";
             }
         });
 
-        socket.on('charge', (data) => {
+        socket.on('a_charge', (data) => {
             $('#input_data').text(JSON.stringify(data));
 
             code = data.code;
@@ -283,12 +283,12 @@
 
         });
 
-        socket.on('joinRoom', (num, name) => {
+        socket.on('a_joinRoom', (num, name) => {
         $('#messages').append($('<li>').text(name + '    joined '
             + room[num] + ':)'));
         });
 
-        socket.on('station_status', (data) => {
+        socket.on('a_station_status', (data) => {
             if(data)
                 $('#join_status').text("접속 됨");
             else
@@ -296,7 +296,7 @@
 
         });
 
-        socket.on('join_status', (status) => {
+        socket.on('a_join_status', (status) => {
             var msg;
             switch(status){
                 case 0:
@@ -312,7 +312,7 @@
         $('#join_status').text(msg);
         });
 
-        socket.on('change_info', (j_data) => {
+        socket.on('a_change_info', (j_data) => {
             j_data = JSON.parse(j_data);
             addData(j_data.pv.charge_a, j_data.pv.load_a);
 
@@ -331,11 +331,11 @@
                             break;
 
                         case 'load_a':
-                            $('#pv_output_a').text(j_data.pv.load_a);
+                            $('#pv_output_a').text(j_data.pv.use_a);
                             break;
 
                         case 'load_v':
-                            $('#pv_output_v').text(j_data.pv.load_v);
+                            $('#pv_output_v').text(j_data.pv.use_v);
                             break;
 
                         // case 'battery_temp':
