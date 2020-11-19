@@ -425,7 +425,7 @@ io.on('connection',function (socket){
 
             input_data = {
               result : true,
-              port: (idlePort+3)%5
+              port: idlePort+1
             }
 
             port_list[idlePort].setValue('status',1);
