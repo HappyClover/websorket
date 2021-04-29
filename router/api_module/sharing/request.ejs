@@ -1,0 +1,228 @@
+<html ng-app>
+    <head>
+        <title>WING 스테이션 요청</title>
+
+        <!-- socket setting -->
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+        <script>
+
+        </script>
+    </head>
+
+
+    <body>
+        <header>
+            <img src="/img/Logo"> </img>
+        </header>
+
+        <section id="info">
+            <div>
+                <p>스테이션 이름 : <span id="info_status"> <%= station_name %></span></p>
+                <p>스테이션 포트번호 : <span id="info_status"><%= station_port %></span></p>
+                <p>통신결과 : <span id="info_status"><%= result %></span></p>
+                
+                <% if(result){ %>
+                    <p id="status">연동 진행중입니다.</p>
+
+                <% } else { %>
+                    <p>오류가 발생하였습니다.</p>
+                    <p>code : <%= err_code %> </p>
+                    <p>msg :  <%= msg %></p>
+                    <% } %>  
+
+                    <script>
+                        window.Android.charge_fail(name, port, <%= err_code %>, <%= msg %>);
+                    </script>
+            </div>
+
+            <div>
+                <button id="cancel_btn">충전 취소하기</button>
+            </div>
+        </section>
+    </body>
+
+    <script>
+        let result = <%= result %>;
+        let status = 0;
+        const id = "<%= station_id %>";
+        const name = "<%= station_name %>";
+        const port = "<%= station_port %>";
+        const port_code = "<%= port_code %>";
+        const company = "<%= company_name %>";
+        const key = "<%= api_key %>";
+
+    $(() => {
+        if(result){
+            status = 1;
+        } else {
+            window.Android.charge_fail(name, port, 992, '<%= msg %>');
+            return false;
+        }
+
+
+        const socket = io();
+
+        var user_data = {"api" : "test", "type":"company"}
+        socket.emit('login', JSON.stringify(user_data));
+
+        $('select').change(() => {
+            socket.emit('leaveRoom', num, name);
+            num++;
+            num = num % 2;
+            socket.emit('joinRoom', num, name);
+        });
+
+        //취소버튼 클릭시 충전 취소 작동
+        $('#cancel_btn').click(() => {
+
+            alert('버튼 클릭됨')
+            // socket.emit('charge', data);
+            // $('#status').text('취소 요청 중');
+        });
+
+        //충전 시작 이벤트를 받았을때
+        socket.on('charge_start', (data) => {
+            $('#status').text('충전이 시작되었습니다.');
+            window.Android.charge_start(name, port);
+        });
+
+        //충전 취소 요청 받았을 때
+        socket.on('charge_cancel', (data) => {
+            $('#status').text('충전이 취소되었습니다.');
+            window.Android.charge_fail(name, port, 990, '충전이 취소되었습니다. : 시간초과');
+        });
+
+        //충전 
+        socket.on('a_join_status', (status) => {
+            var msg;
+            switch(status){
+                case 0:
+                    msg = "접속 끊김"
+                    break;
+                case 1:
+                    msg = "접속 됨"
+                    break;
+                case 2:
+                    msg = "접속 에러"
+                    break;
+            }
+            $('#join_status').text(msg);
+        });
+
+        socket.on('result', (data) => {
+            //j_data = JSON.parse(data);
+            let result = data.data;
+
+            switch(data.code){
+                case 'port_ready':
+                    if(result){
+                        $('#status').text('충전 준비 완료');
+                    } else {
+                        console.log(data);
+                        $('#status').text('충전 준비 실패 : ' + data.detail);
+                        window.Android.charge_fail(name, port, 992, ''+data.detail);
+                    }
+                    break;
+
+                case 'port_cancel':
+                if(result){
+                        $('#status').text('충전 취소 처리 완료');
+                    } else {
+                        console.log(data);
+                        $('#status').text('충전 취소 처리 실패 : ' + data.detail);
+                        window.Android.charge_fail(name, port, 999, "사용자 취소 요청");
+                    }
+                    break;
+
+                case 'login':
+
+                    if(result){
+                        $('#status').text('로그인 성공');
+
+                        let station_data = {
+                            station_id: id,
+                            port_numb: port
+                        }
+                        socket.emit('port_ready', station_data);
+                        $('#status').text('충전 준비 요청');
+                    } else {
+                        $('#status').text('로그인 실패 : ' + j_data.msg);
+                    }
+                    break;
+            }
+        });
+    });
+
+    function check_status(now, code){
+        if(now == code)
+            return true;
+        else
+            return false;
+    }
+    </script>
+
+    <style>
+        html{
+            font-size: large;
+        }
+
+        #myChart{
+            width: 70% !important;  
+            float: left;
+            min-width: 320px; 
+            max-width: 800px;
+            height: 100px;
+        }
+
+
+
+        header{
+            text-align: center;
+        }
+
+        header img{
+            width: 75%;
+
+            margin-top: 100px;
+            margin-bottom: 100px;
+            max-width: 800px;
+            max-height: 250px;
+        }
+
+        fieldset{
+            border: 0;
+            margin-bottom: 30px;
+        }
+
+        .title_land{
+            border-bottom: 1px black solid;            
+        }
+
+        .title{
+            border: 1px #000000 solid;
+            padding: 10px;
+        }
+
+        fieldset div span{
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        fieldset div span span{
+            margin-top: 0px;
+        }
+
+        fieldset#field_port div#info_land{
+            height: 200px;
+        }
+
+        div.port_status{
+            width: 200px;
+            height: 200px;
+            margin: 0;
+        }
+    </style>
+</html>

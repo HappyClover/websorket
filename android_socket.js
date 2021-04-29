@@ -10,16 +10,40 @@ const cryKey = "WINGSTATION";
 var station_current;
 
 //스테이션 클래스 배치
-var station_class = require('./C_station.js');
-var user_class = require('./C_user.js');
-var admin_class = require('./C_admin.js');
-var port_class = require('./C_port.js');
+var station_class = require('./class/C_station.js');
+var user_class = require('./class/C_user.js');
+var admin_class = require('./class/C_admin.js');
+var company_class = require('./class/C_company.js');
+var port_class = require('./class/C_port.js');
 
-var WhoAmI;
+//기본 세팅
+var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+//라우터 세팅
+//어플리케이션 api 라우터
+var router_app_login = require('./router/api_module/application/login');
+var router_app_join = require('./router/api_module/application/join');
+var router_app_station = require('./router/api_module/application/station');
+//협력업체 api 라우터
+var router_app_sharing = require('./router/api_module/sharing/station');
+
+//관제페이지 라우터
+
 
 //DB세팅
 var mysqlDB = require('./stationDB.js');
+const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 mysqlDB.connect();
+
+//어플리케이션 api
+app.use('/join', router_app_join);
+app.use('/login', router_app_login);
+
+//협력업체 제공 웹앱
+app.use('/station', router_app_sharing);
+
 
 var server = app.listen(3001,()=>{
     console.log('Listening at port number 3001') //포트는 원하시는 번호로..
@@ -35,6 +59,7 @@ let room = ['station','admin','user']
 var StationIsOn= [];
 var AdminIsOn= [];
 var UserIsOn= [];
+var companyIsOn= [];
 
 //관제 페이지
 app.set('view engine', 'ejs');
@@ -71,578 +96,15 @@ app.get('/', (req, res) => {
   res.render('index_station.ejs');
 });
 
-//
-var bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-//회원가입 처리
-app.post('/join/', (req, res) => {
-console.log(req.body);
-
-  const api_key = req.body.key;
-  const phone = req.body.phone;
-  const first_name = req.body.first_name;
-  const last_name = req.body.last_name;
-  const email = req.body.email;
-  const marketing = req.body.marketing;
-
-  const port_type = req.body.port_type;
-  const port_voltage = req.body.port_voltage;
-  const port_ampere = req.body.port_ampere;
-
-  if(checkAPI(api_key)){
-
-  }else{
-    let result = {
-      "result": false,
-      "code": "100",
-      "detail": "API키 불일치"
-    }
-  }
-
-  var query = "insert into user(first_name, last_name, phone, status) values(?,?,?,?)";
-  var value = [first_name, last_name, phone, 1];
-
-  // mysqlDB.query(query,value, function (err, rows, fields) {
-  //   if (!err) {
-  //     var result = [
-  //       {'result' : true }
-  //     ]
-  //   } else {
-  //     console.log('query error : ' + err);
-  //     return false;
-  //   }
-  // });  
-
-
-});
-
-
-//자동 로그인 처리
-app.post('/login/', (req, res) => {
-  var api_key = req.body.key;
-  const token = req.body.token;
-  const identifier = req.body.identifier;
-  // const identifier = req.body.identifier;
-  // const token = req.body.token;
-
-  if(api_key != "test"){
-    let result = {
-      "result": false,
-      "code": "100",
-      "detail": "API키 불일치"
-    }
-
-    res.send(result);
-  } else {
-    var query = "select id, phone, identifier from user where token = ?";
-    var value = [token];
-  
-    mysqlDB.query(query,value, function (err, rows, fields) {
-      if (!err) {
-        if(rows.length<1){
-          let result = {
-            "result": false,
-            "code": "500",
-            "detail": "일치하는 토큰이 없음"
-          }
-          res.send(result);
-        } else {
-          let user_numb = rows[0].id;
-          let user_identifier = rows[0].identifier;
-          let phone = rows[0].phone;
-          
-          if(user_identifier==identifier){
-            let newToken = encrypt(phone,cryKey);
-            var query = "update user set token = ? where token = ?";
-            var value = [newToken, token];
-          
-            mysqlDB.query(query,value, function (err, rows, fields) {
-              if(err){
-                let result = {
-                  "result": false,
-                  "code": "550",
-                  "detail": "DB 업데이트 실패"
-                }
-                res.send(result);
-              } else{
-                let result = {
-                  "result": true,
-                  "token": newToken
-                }
-                res.send(result);
-              }
-            });
-          } else {
-            console.log(identifier +"  "+user_identifier);
-
-            let result = {
-              "result": false,
-              "code": "501",
-              "detail": "식별자 불일치"
-            }
-            res.send(result);
-          }
-        }
-      } else {
-        console.log('query error : ' + err);
-        return false;
-      }
-    });  
-}
-});
-
-//새로운 로그인 처리
-app.post('/login/new/', (req, res) => {
-  var api_key = req.body.key;
-  const identifier = req.body.identifier;
-  const phone = req.body.phone;
-
-  if(checkAPI(api_key)){
-    var query = "select * from user where phone = ?";
-    var value = phone;
-    
-    mysqlDB.query(query,value, function (err, rows, fields) {
-      if (!err) {
-        if(rows.length<1){
-          let result = {
-            "result": true,
-            "token": null
-          }
-          res.send(result);
-        } else {
-          let user_numb = rows[0].id;
-          
-            let newToken = encrypt(phone,cryKey);
-            var query = "update user set token = ?, identifier = ? where id = ?";
-            var value = [newToken,identifier, user_numb];
-          
-            mysqlDB.query(query,value, function (err, rows, fields) {
-              if(err){
-                let result = {
-                  "result": false,
-                  "code": "550",
-                  "detail": "DB 업데이트 실패"
-                }
-                res.send(result);
-              } else{
-                let result = {
-                  "result": true,
-                  "token": newToken
-                }
-                res.send(result);
-              }
-            });
-          }
-        return true;
-      } else {
-        console.log('query error : ' + err);
-        return false;
-      }
-    });  
-  }
-});
-
-//인증번호 발송
-app.post('/login/getcert/', (req, res) => {
-  const api_key = req.body.key;
-  const phone = req.body.phone;
-
-  if(checkAPI(api_key)){
-    let cert = Mathjs.randomInt(100000,999999);
-    let result = {
-      "result": true,
-      "numb": cert
-    }
-    res.send(result);
-  } else {
-    let result = {
-      "result": false,
-      "code": "100",
-      "detail": "API키 불일치"
-    }
-    res.send(result);
-  }
-});
-
-//회원가입 처리
-app.post('/login/join/', (req, res) => {
-  console.log(req.body);
-
-  const api_key = req.body.key;
-  const phone = req.body.phone;
-  const first_name = req.body.first_name;
-  const last_name = req.body.last_name;
-  const email = req.body.email;
-  const marketing = req.body.marketing;
-  const identifier = req.body.identifier;
-
-  const port_type = req.body.port_type;
-  const port_voltage = req.body.port_voltage;
-  const port_ampere = req.body.port_ampere;
-
-  const billing_key = req.body.billing_key;
-
-  const status = 1;
-
-  var token = null;
-
-
-  if(checkAPI(api_key)){
-    token = encrypt(phone, cryKey);
-  
-
-  var query = "insert into user(first_name, last_name, phone, email, marketing, billingkey, status, token, identifier) values(?,?,?,?,?,?,?,?,?)";
-  var param = [first_name, last_name, phone, email, marketing, billing_key, status, token, identifier];
-
-  //, port_type, port_voltage, port_ampere, 
-  mysqlDB.query(query,param, function (err, rows, fields) {
-    if (!err) {
-      var user_numb = rows.insertId;
-
-      let query1 = "insert into charge_spec(user_id, mobility_type, port_type, volt, ampere, date) values(?,?,?,?,?,?)";
-      let param1 = [user_numb, 1, port_type, port_voltage, port_ampere, getTimeStamp()];
-
-      mysqlDB.query(query1,param1, function (err, rows, fields) {
-       
-        if(!err){
-
-        } else {
-          console.log(err);
-        }
-
-      });
-
-      const result = {
-        "resualt" : true,
-        "token": token
-      }
-      res.send(result);
-    } else {
-      console.log('query error : ' + err);
-      res.send(err);
-
-      return false;
-    }
-  });
-} else {
-  let result = {
-    "result": false,
-    "code": "100",
-    "detail": "API키 불일치"
-  }
-
-  res.send(result);
-
-}
-});
-
-
-//충전 전 유저 확인
-app.get('/chage/user_check/', (req, res) => {
-  var api_key = req.query.key;
-  const token = req.query.token;
-  // const identifier = req.body.identifier;
-  // const token = req.body.token;
-
-  if(api_key != "test"){
-    res.send("잘못된 api키 입니다.");
-    return false;
-  }
-
-  //사용중인 충전소가 있는지
-
-  //미결제 내역이 있는지
-
-  //블랙리스트 유저인지
-
-  //충전규격 등록이 되어 있는지
-
-  var query = "select * from user where phone = ?";
-  var value = (phone);
-  
-  mysqlDB.query(query,value, function (err, rows, fields) {
-    if (!err) {
-      if(rows.length<1){
-        res.send("검색 결과가 없습니다.");
-        return false;
-      }
-      res.send(rows[0]);
-      return true;
-    } else {
-      console.log('query error : ' + err);
-      return false;
-    }
-  });  
-});
-
-//메인 화면
-app.post('/get/main/', (req, res) => {
-  const api_key = req.body.key;
-  const min_lat = req.body.min_lat;
-  const min_long = req.body.min_long;  
-  const max_lat = req.body.max_lat;
-  const max_long = req.body.max_long;
-
-  var station_result = null;
-  let result;
-
-  // const identifier = req.body.identifier;
-  // const token = req.body.token;
-
-
-  //api키 체크
-  if(!checkAPI(api_key)){
-    result = {
-      "result": false,
-      "code": "100",
-      "detail": "API키 불일치"
-    }
-    res.send(result);
-  } else {
-    //스테이션 리스트 가져오기
-    var query = "select id, latitude, longitude, adress from station where (latitude > ? and longitude > ?) and (latitude < ? and longitude < ?)";
-    var value = [min_lat, min_long, max_lat, max_long];
-    
-    mysqlDB.query(query,value, function (err, rows, fields) {
-      if (!err) {
-        if(rows.length<1){
-          station_result = null;
-
-        } else {
-          station_result = rows;
-          console.log(station_result);
-        }
-      } else {
-        console.log('query error : ' + err);
-        station_result = null;
-      }
-
-      console.log(station_result);
-      let use_data = null;
-      //사용 여부
-  
-      
-      let result = {
-        "result": true,
-        "station": station_result,
-        "use": use_data
-      }
-  
-      res.send(result);
-    });  
-  }
-});
-
-
-//주소 검색 기능
-app.get('/get/station_address/', (req, res) => {
-  var api_key = req.query.key;
-  const address = "%"+req.query.address+"%";
-
-  if(!checkAPI(api_key)){
-    result = {
-      "result": false,
-      "code": "100",
-      "detail": "API키 불일치"
-    }
-    res.send(result);
-  } else {
-    var query = "select id, name, adress, latitude, longitude from station where adress like ?";
-    var value = address;
-    
-    mysqlDB.query(query,value, function (err, rows, fields) {
-      if (!err) {
-        if(rows.length<1){
-          result = {
-            "result": false,
-            "code": "201",
-            "detail": "일치하는 데이터가 없습니다."
-          }
-          res.send(result);
-        } else {
-          result = {
-            "result": true,
-            "station": rows,
-          }
-          res.send(result);
-        }
-      } else {
-        console.log('query error : ' + err);
-        return false;
-      }
-    });  
-  }
-});
-
-
-//마이페이지
-app.get('/mypage/info/get/myinfo/', (req, res) => {
-  var api_key = req.query.key;
-  const token = req.query.token;
-
-  if(!checkAPI(api_key)){
-    result = {
-      "result": false,
-      "code": "100",
-      "detail": "API키 불일치"
-    }
-    res.send(result);
-  } else {
-    var query = "select user.first_name, user.last_name, user.email, user.billingcard, charge_spec.volt, charge_spec.ampere, charge_spec.port_type from user left join charge_spec on user.id = charge_spec.user_id where token = ?";
-    var value = token;
-    
-    mysqlDB.query(query,value, function (err, rows, fields) {
-      if (!err) {
-        if(rows.length<1){
-          result = {
-            "result": false,
-            "code": "201",
-            "detail": "일치하는 데이터가 없습니다."
-          }
-          res.send(result);
-        } else {
-          result = {
-            "result": true,
-            "user": {
-              "name": rows[0].last_name+" "+rows[0].first_name,
-              "email": rows[0].email,
-              "card_info": rows[0].billingcard,
-            },
-            "charge":{
-              "type": rows[0].port_type,
-              "voltage": rows[0].volt,
-              "ampere": rows[0].ampere
-            }
-          }
-          res.send(result);
-        }
-      } else {
-        console.log('query error : ' + err);
-        return false;
-      }
-    });  
-  }
-});
-
-//마이페이지
-app.post('/mypage/info/update/myinfo/', (req, res) => {
-  var api_key = req.query.key;
-  const token = req.query.token;
-
-  if(!checkAPI(api_key)){
-    result = {
-      "result": false,
-      "code": "100",
-      "detail": "API키 불일치"
-    }
-    res.send(result);
-  } else {
-    var query = "select user.first_name, user.last_name, user.email, user.billingcard, charge_spec.volt, charge_spec.ampere, charge_spec.port_type from user left join charge_spec on user.id = charge_spec.user_id where token = ?";
-    var value = token;
-    
-    mysqlDB.query(query,value, function (err, rows, fields) {
-      if (!err) {
-        if(rows.length<1){
-          result = {
-            "result": false,
-            "code": "201",
-            "detail": "일치하는 데이터가 없습니다."
-          }
-          res.send(result);
-        } else {
-          result = {
-            "result": true,
-            "user": {
-              "name": rows[0].last_name+" "+rows[0].first_name,
-              "email": rows[0].email,
-              "card_info": rows[0].billingcard,
-            },
-            "charge":{
-              "type": rows[0].port_type,
-              "voltage": rows[0].volt,
-              "ampere": rows[0].ampere
-            }
-          }
-          res.send(result);
-        }
-      } else {
-        console.log('query error : ' + err);
-        return false;
-      }
-    });  
-  }
-});
-
-
-//공지사항
-app.get('/notice/get/list/', (req, res) => {
-  var api_key = req.query.key;
-  const page = req.query.page;
-  const type = req.query.type;
-
-  var type_where = "";
-
-  if(!checkAPI(api_key)){
-    result = {
-      "result": false,
-      "code": "100",
-      "detail": "API키 불일치"
-    }
-
-    res.send(result);
-  } else {
-
-    if(page == null || page =="" || page == " "){
-      page = 1;
-    }
-
-    if(type == null || type =="" || type == " " || type==0){
-      type_where = ""
-    } else {
-      type_where = "where type = ?"
-    }
-
-  
-    var query = "select id, title, accent as important, date, type from notice "+type_where;
-
-    var value;
-
-    if(type_where != ""){
-      value = [type];
-    }
-    
-    mysqlDB.query(query,value, function (err, rows, fields) {
-      if (!err) {
-        if(rows.length<1){
-          result = {
-            "result": false,
-            "code": "201",
-            "detail": "일치하는 데이터가 없습니다."
-          }
-          res.send(result);
-        } else {
-          result = {
-            "result": true,
-            "list": rows
-          }
-          res.send(result);
-        }
-      } else {
-        console.log('query error : ' + err);
-        return false;
-      }
-    });  
-  }
-});
-
 //이 서버에서는 어떤 클라이언트가 connection event를 발생시키는 것인지 듣고 있습니다.
 // callback 으로 넘겨지는 socket에는 현재 클라이언트와 연결되어있는 socket 관련 정보들이 다 들어있습니다.
 io.on('connection',function (socket){
     var nickname = ``;
     var socket_type = ``; 
     var station_rows;
+    var socketID = '';
+    var WhoAmI;
+
     var port_list = new Array();
 
 
@@ -668,7 +130,7 @@ io.on('connection',function (socket){
           case 'station' :
             var id, name, result;
 
-            var station_query = 'select station.*, station_port.id as port_id, station_port.number as port_numb, station_port.type as port_type from station inner join station_port on station.id = station_port.station_id where station.name = ?';
+            var station_query = 'select station.*, station_port.id as port_id, station_port.number as port_numb, station_port.type as port_type from station left join station_port on station.id = station_port.station_id where station.identifier = ?';
             mysqlDB.query(station_query,nickname, function (err, rows, fields) {
               if (!err) { 
                 if(rows.length>0){
@@ -676,11 +138,9 @@ io.on('connection',function (socket){
 
                   station_rows = rows;
                   id = rows[0].id;
-                  WhoAmI = new station_class(id, nickname, socket.id);
-                  StationIsOn.push(nickname) //
 
                   for(i=0; i<rows.length; i++){
-                    port = new port_class(rows[i].port_id, rows[i].port_numb)
+                    port = new port_class(rows[i].port_id, rows[i].port_numb, id)
 
                     console.log(port.getPortNumb());
                     port_list[Number(port.getPortNumb())-1] = port;
@@ -689,8 +149,13 @@ io.on('connection',function (socket){
                     socket.join(room['station']);
 
                   }
+                  WhoAmI = new station_class(id, nickname, socket.id, port_list);
+                  StationIsOn[nickname] = WhoAmI //
+
+                  shoot_result(socket, "login", true);
+
                 } else { //조회결과가 없을때
-                  shoot_result(io, "login", false);
+                  shoot_result(socket, "login", false);
                   result = false;
                 }
               } else {
@@ -707,41 +172,103 @@ io.on('connection',function (socket){
             break;
 
           case 'user' :
-            UserIsOn.push(nickname) //
-            result = true;
+            nickname = login_data.name;
+            socket_type = login_data.type;
+
+            console.log(nickname);
+
+            var temp = (nickname);
+            var user_query = 'select * from user where token = ?';
+            mysqlDB.query(user_query,temp, function (err, rows, fields) {
+              if (!err) { 
+                console.log(rows);
+
+                if(rows.length>0){
+                  console.log(`${nickname} has entered ${socket_type} chatroom! ---------------------`)
+                  id = rows[0].id;
+
+                  WhoAmI = new user_class(id, nickname, socket.id);
+                  UserIsOn[nickname] = WhoAmI //
+
+                  shoot_result(socket, "login", true);
+
+                } else { //조회결과가 없을때
+                  console.log("토큰 불일치")
+                  shoot_result(socket, "login", false);
+                  result = false;
+                }
+              } else {
+                console.log('query error : ' + err);
+                result = false;
+              }
+            });
             break;
-        }
+
+            //api를 이용하는 업체
+            case 'company' :
+              nickname = login_data.api;
+              socket_type = login_data.type;
+              console.log(nickname);
+
+              var temp = (nickname);
+              var user_query = 'select * from admin where api = ?';
+              mysqlDB.query(user_query,temp, function (err, rows, fields) {
+                if (!err) { 
+                  console.log(rows);
   
-        if(result == true){
-        // 아래와 같이 하면 그냥 String 으로 넘어가므로 쉽게 파싱을 할 수 있습니다.
-        // 그냥 넘기면 JSONArray로 넘어가서 복잡해집니다.
-        var whoIsOnJson = `${StationIsOn}`
-        console.log(whoIsOnJson)
-          
-        var whoIsOnJson = `${AdminIsOn}`
-        console.log(whoIsOnJson)
+                  if(rows.length>0){
+                    console.log(`${nickname} has entered ${socket_type} chatroom! ---------------------`)
+                    id = rows[0].id;
+                    identifier = rows[0].identifier;
+                    name = rows[0].name;
 
-        //io.emit 과 socket.emit과 다른 점은 io는 서버에 연결된 모든 소켓에 보내는 것이고
-        // socket.emit은 현재 그 소켓에만 보내는 것입니다.       
-        
-        //io.emit('newUser',whoIsOnJson)
+                    WhoAmI = new company_class(id, identifier, name, socket.id);
+                    companyIsOn[id] = WhoAmI //
+      
+                    shoot_result(socket, "login", true);
+                    
+                  } else { //조회결과가 없을때
+                    console.log("토큰 불일치")
+                    shoot_result(socket, "login", false);
+                    result = false;
+                  }
+                } else {
+                  console.log('query error : ' + err);
+                  result = false;
+                }
+              });
+              break;
 
-        shoot_result(io, "login", true);
-        }
+            default:
+              shoot_result(socket, "login", false,'알수없는 접속자 타입');
+              break;
+          }
+
+
       } catch (exception){
+        console.log("캐치 에러")
         shoot_result(io, "login", false);
         console.log(exception);
       }
+
     })
 
     //채팅 처리
     socket.on('say',function(data){
         console.log(`${nickname} : ${data}`)
+
+        console.log(StationIsOn);
     
         socket.emit('myMsg',data)
-        socket.broadcast.emit('newMsg',data) // socket.broadcast.emit은 현재 소켓이외의 서버에 연결된 모든 소켓에 보내는 것.
 
-    })
+        var d = {
+          code: 'message',
+          data: true
+        }
+        console.log(d);
+        io.to(StationIsOn['wingstation_knu_2']).emit('result',d);
+      
+    });
 
     socket.on('station_list',function(){
       io.of('/').in('station').clients((error, clients) => {
@@ -762,6 +289,13 @@ io.on('connection',function (socket){
         var j_data = JSON.parse(data);
       }
 
+      // var staiton_index = StationIsOn.findIndex((station_element, station_value) => {
+      //   return station_element.socket_id === socket.id});
+
+
+      // console.log(StationIsOn[staiton_index]);
+
+      // var station_id = StationIsOn[staiton_index].id
       io.to(room['admin']).emit('a_change_info', data);
 
       try{
@@ -818,19 +352,26 @@ io.on('connection',function (socket){
 
           for(i=0; i<j_data.pcb.length; i++){
             var key = Object.getOwnPropertyNames(j_data.pcb[i]);
+            console.log(key);
+            
+                        
             var port_numb = j_data.pcb[i].numb;
             var port_id = null;
 
-            for(i=0; i<station_rows.length; i++){
-              if(station_rows[i].port_numb == port_numb){
-                port_id = station_rows[i].port_id ;
+            for(j=0; j<station_rows.length; j++){
+              if(station_rows[j].port_numb == port_numb){
+                port_id = station_rows[i].port_id ;                
                 break;
               } 
             }
-            for(j=0; j<key.length; j++){
-              switch(key[j]){
+
+            for(k=0; k<key.length; k++){
+
+              switch(key[k]){
                 case 'input_v':
                   code = 11;
+                  console.log("i 값 : "+i);
+
                   console.log('pcb_'+j_data.pcb[i].numb+'_input_v :' + j_data.pcb[i].input_v);
                   sql_query(station_query,[port_id, code, j_data.pcb[i].input_v, stringDate]);
                   break;
@@ -863,10 +404,10 @@ io.on('connection',function (socket){
           }
         }
 
-        shoot_result(io,'insert',true);
+        shoot_result(socket,'insert',true);
 
       } catch(e){
-        shoot_result(io,'insert',false);
+        shoot_result(socket,'insert',false);
         console.log(`${e}`);
 
       }
@@ -879,7 +420,7 @@ io.on('connection',function (socket){
       switch(socket_type){
           case 'station' :
             //Delete user in the whoIsOn Arryay
-            StationIsOn.splice(StationIsOn.indexOf(nickname),1);
+            StationIsOn.splice(nickname,1);
             var data = {
                 disconnected : nickname
             }
@@ -904,11 +445,8 @@ io.on('connection',function (socket){
           case 'user':
             //Delete user in the whoIsOn Arryay
             UserIsOn.splice(UserIsOn.indexOf(nickname),1);
-            var data = {
-                whoIsOn: whoIsOn,
-                disconnected : nickname
-            }
-            socket.emit('logout',data)
+            var data = true;
+            shoot_result(socket,'result',data);
             console.log(`${UserIsOn}`)
             break;
             
@@ -936,12 +474,9 @@ io.on('connection',function (socket){
           case 'admin':
             //Delete user in the whoIsOn Arryay
             AdminIsOn.splice(AdminIsOn.indexOf(nickname),1);
-            var data = {
-                whoIsOn: whoIsOn,
-                disconnected : nickname
-            }
-            socket.emit('logout',data)
-            console.log(`${AdminIsOn}`)
+            var data = true;
+            shoot_result(socket,'result',data);
+            console.log(`${AdminIsOn}`);
 
             break;
 
@@ -971,7 +506,11 @@ io.on('connection',function (socket){
 
       mysqlDB.query(nfcquery,data, function (err, rows, fields) {
         if (!err) {
-          nfc_user = rows[0].id
+          if(rows.length < 1){
+            nfc_user = rows[0].id
+          } else {
+            shoot_result(socket, 'nfc', false);
+          }
         } else {
           console.log('query error : ' + err);
           return false;
@@ -982,14 +521,14 @@ io.on('connection',function (socket){
 
       console.log(idlePort);
       if(typeof(idlePort)=='boolean' && !idlePort){
-        shoot_result(io, "nfc", "no_port");
+        shoot_result(socket, "port_ready", false);
       } else {
         var station_query = 'select * from user where nfc_key = ?';
         mysqlDB.query(station_query,data, function (err, rows, fields) {
           if (!err) {
             user_id = rows[0].id;
             
-            port_list[idlePort].setStatus("charge_ready", user_id);
+            port_list[idlePort].setStatus("charge_ready", user_id, mysqlDB);
 
             input_data = {
               result : true,
@@ -1006,7 +545,7 @@ io.on('connection',function (socket){
           }
         });
       }
-    })
+    });
 
     //충전 관련 처리
     socket.on('charge',function(data){
@@ -1014,6 +553,7 @@ io.on('connection',function (socket){
       var response_data;
 
       code = get_data.code;
+
       
       switch(code){
         case 'start' : //충전 시작 통보를 받았을때
@@ -1022,9 +562,11 @@ io.on('connection',function (socket){
 
           data=JSON.parse(data);
 
+          console.log(Number(data.port)-1);
+
           if (port_list[Number(data.port)-1].getStatus() !== 1 || data.port == null){
             response_data = {
-              code: "charge_start",
+              code: "start",
               data: false,
               detail: "충전 대기 상태 포트가 아님"
             }
@@ -1032,48 +574,94 @@ io.on('connection',function (socket){
             break;
           }
 
+
           //sql_query(query,value);
-          port_list[Number(data.port)-1].setStatus('charge_start',null);
+          port_list[Number(data.port)-1].setStatus('charge_start',null ,null, mysqlDB);
           
 
           response_data = {
             "data" : true,
-            "code" : "charge_start",
-            "port": idlePort+1
+            "code" : "start",
+            "port": Number(data.port)
           }
 
-          port_list[idlePort].setStatus('charge_start',null);
+          port_list[Number(data.port)-1].setStatus('charge_start',null, null, mysqlDB);
+          var temp = port_list[Number(data.port)-1].getUser();
+          var user_info;
+
+          if(temp.type == 'user'){
+            user_info = UserIsOn[temp.id].socket_id;
+          } else if (temp.type == 'company'){
+            user_info = companyIsOn[temp.id].getInfo();
+          }
+
+          console.log(user_info);
+
+          socket.to(user_info.socket_id).emit('charge_start');
           socket.emit('result',response_data);
+
           io.to(room['admin']).emit('a_charge', response_data);
+          console.log(`${data.port} for ${code} result ${response_data.data}`);
+
 
           break;
 
 
         case 'cancel' : //충전 취소 통보를 받았을때
           data=JSON.parse(data);
-
+          
           if (port_list[Number(data.port)-1].getStatus() !== 1 || data.port == null){
             response_data = {
               code: "charge_cancel",
               data: false,
               detail: "충전 대기 상태 포트가 아님"
             }
+
             socket.emit('result',response_data);
-            
+          
             break;
           }
 
-          //sql_query(query,value);
-          port_list[Number(data.port)-1].setStatus('charge_cancel',null);
-
+          
+          
           response_data = {
             "data" : true,
             "code" : "charge_cancel",
-            "port": idlePort+1
+            "port": data.port
           }
-          port_list[idlePort].setStatus('charge_cancel',null);
+          
+
+          var temp = port_list[Number(data.port)-1].getUser();
+          var user_info;
+
+          console.log("취소 값 "+temp);
+
+          for (var key in temp) {
+            console.log("Attributes : " + key + ", value : " + temp[key]);
+            }
+
+          if(temp.type == 'user'){
+            user_info = UserIsOn[temp.id].socket_id;
+          } else if (temp.type == 'company'){
+            user_info = companyIsOn[temp.id].getInfo();
+          }
+
+          console.log(user_info);
+
+          var result_data = {
+
+          };
+
+          socket.to(user_info.socket_id).emit('charge_cancel');
+
           socket.emit('result',response_data);
           io.to(room['admin']).emit('a_charge', response_data);
+
+          console.log("차지 이벤트 디비 변수" + mysqlDB);
+
+          port_list[Number(data.port)-1].setStatus('charge_cancel',null,null, mysqlDB);
+
+          console.log(`${data.port} for ${code} result ${response_data.data}`);
           break;
 
 
@@ -1087,20 +675,26 @@ io.on('connection',function (socket){
               detail: "충전중인 포트가 아님"
             }
             socket.emit('result',response_data);
+
+            console.log(`${data.port} for ${code} result ${response_data.data}`);
+
             break;
           }
 
           //sql_query(query,value);
-          port_list[Number(data.port)-1].setStatus('charge_complete',null);
+          port_list[Number(data.port)-1].setStatus('charge_complete',null, null, mysqlDB);
 
           response_data = {
             "data" : true,
             "code" : "charge_complete",
-            "port": idlePort+1
+            "port": Number(data.port)
           }
-          port_list[idlePort].setStatus('charge_complete',null);
+
+          port_list[Number(data.port)-1].setStatus('charge_complete',null, null, mysqlDB);
           socket.emit('result',response_data);
           io.to(room['admin']).emit('a_charge', response_data);
+
+          console.log(`${data.port} for ${code} result ${response_data.data}`);
           break;
 
 
@@ -1121,27 +715,250 @@ io.on('connection',function (socket){
           response_data = {
             "data" : true,
             "code" : "short_circuit",
-            "port": idlePort+1
+            "port": Number(data.port)
           }
-          port_list[Number(data.port)-1].setStatus('short_circuit',null);
+          port_list[Number(data.port)-1].setStatus('short_circuit',null, null, mysqlDB);
           socket.emit('result',response_data);
           io.to(room['admin']).emit('a_charge', response_data);
 
+          console.log(`${data.port} for ${code} result ${response_data.data}`);
+
           break;
       }
-      console.log(`${data.port} for ${code} result ${response_data.data}`);
 
 
-    })
+    });
+
+        //로그 이벤트
+        socket.on('log',function(data){
+          console.log(`user_nfc_tag : ${data}`)
+          nfcquery = "select id from user where nfc_key = ?";
+    
+          var nfc_user;
+    
+          mysqlDB.query(nfcquery,data, function (err, rows, fields) {
+            if (!err) {
+              nfc_user = rows[0].id
+            } else {
+              console.log('query error : ' + err);
+              return false;
+            }
+          });
+    
+          idlePort = getIdlePort(port_list);
+    
+          console.log(idlePort);
+          if(typeof(idlePort)=='boolean' && !idlePort){
+            shoot_result(socket, "nfc", "no_port");
+          } else {
+            var station_query = 'select * from user where nfc_key = ?';
+            mysqlDB.query(station_query,data, function (err, rows, fields) {
+              if (!err) {
+                user_id = rows[0].id;
+                
+                port_list[idlePort].setStatus("charge_ready", user_id, mysqlDB);
+    
+                input_data = {
+                  result : true,
+                  port: idlePort+1
+                }
+    
+                port_list[idlePort].setValue('status',1);
+      
+                socket.emit('charge_ready',input_data);;
+                io.to(room['admin']).emit('a_charge_ready', input_data);
+    
+              } else {
+                console.log('query error : ' + err);
+              }
+            });
+          }
+        });
+
+
+
+    //사용자 소켓 통신 부분
+    socket.on('port_ready',function(data){
+      if(checkType(WhoAmI) == 'user' || checkType(WhoAmI) == 'company'){
+      console.log(data);
+      if(data instanceof Object){}
+      else{ data = JSON.parse(data); }
+        
+      var station_identifier;
+      console.log(`station_code : ${data.station_id}`);
+      console.log(`port_numb : ${data.port_numb}`);
+
+      //스테이션 코드로 아이디 값으로 아이디 추출
+      nfcquery = "select identifier from station where code = ?";
+
+      mysqlDB.query(nfcquery, data.station_id, function (err, rows, fields) {
+        if (!err) {
+          if(rows.length < 1){
+            shoot_result(socket, 'port_ready', false, '일치하는 스테이션 아이디가 없음');
+          } else {
+
+            //스테이션이 접속된 상태인지 점검
+            station_identifier = rows[0].identifier;
+            if(StationIsOn[station_identifier] == undefined || StationIsOn[station_identifier] == null){
+              shoot_result(socket, "port_ready", false, '사용가능한 스테이션이 아님');
+
+            } else {//스테이션이 접속 된 상태면
+
+              //포트 리스트 가져오기
+              port_list = StationIsOn[station_identifier].getPortList();
+
+              //포트 상태 확인
+              if(port_list[Number(data.port_numb)-1].status != 0){ //포트가 준비 상태가 아니라면
+                console.log(port_list[Number(data.port_numb)-1].status);
+                shoot_result(socket, "port_ready", false, '대기 상태의 포트가 아님');
+              } else {
+                if(checkType(WhoAmI) == 'user'){
+                  var station_query = 'select id from user where token = ?';
+                  mysqlDB.query(station_query,nickname, function (err, rows, fields) {
+                    if (!err) {
+                      user_id = rows[0].id;
+            
+                      console.log(WhoAmI);
+  
+                      port_list[Number(data.port_numb)-1].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI), mysqlDB);
+    
+                      input_data = {
+                        port: Number(data.port_numb),
+                        admin: 0,
+                        setting: {
+                          volt: 36,
+                          ampere: 2.5
+                        }
+                      }
+    
+                      port_list[Number(data.port_numb)-1].setValue('status',1);
+  
+                      shoot_result(socket, "port_ready", true);
+                      //console.log(StationIsOn[station_identifier].socket_id);
+    
+                      io.to(room['admin']).emit('a_charge_ready', input_data);
+    
+                    } else {
+                      console.log('query error : ' + err);
+                    }
+                  });
+                } else if (checkType(WhoAmI) == 'company') {
+                  
+                  port_list[Number(data.port_numb)-1].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI), mysqlDB);
+    
+                  input_data = {
+                    port: Number(data.port_numb),
+                    admin: 0,
+                    setting: {
+                      volt: 42,
+                      ampere: 2.5
+                    }
+                  }
+  
+                  port_list[Number(data.port_numb)-1].setValue('status',1);
+        
+                  shoot_result(socket, "port_ready", true);
+                  console.log(StationIsOn[station_identifier]);
+  
+                  socket.to(StationIsOn[station_identifier].socket_id).emit('port_ready',input_data);
+                  io.to(room['admin']).emit('a_charge_ready', input_data);
+  
+                }
+              }
+              
+              
+              // idlePort = getIdlePort(port_list);
+  
+              // if(typeof(idlePort)=='boolean' && !idlePort){
+              //   shoot_result(socket, "port_ready", false, '비어있는 포트가 없음');
+              // } else {
+  
+              //   if(checkType(WhoAmI) == 'user'){
+              //     var station_query = 'select id from user where token = ?';
+              //     mysqlDB.query(station_query,nickname, function (err, rows, fields) {
+              //       if (!err) {
+              //         user_id = rows[0].id;
+            
+              //         console.log(WhoAmI);
+  
+              //         port_list[idlePort].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI));
+    
+              //         input_data = {
+              //           port: idlePort+1,
+              //           admin: 0,
+              //           setting: {
+              //             volt: 36,
+              //             ampere: 2.5
+              //           }
+              //         }
+    
+              //         port_list[idlePort].setValue('status',1);
+  
+              //         shoot_result(socket, "port_ready", true);
+              //         //console.log(StationIsOn[station_identifier].socket_id);
+    
+              //         io.to(room['admin']).emit('a_charge_ready', input_data);
+    
+              //       } else {
+              //         console.log('query error : ' + err);
+              //       }
+              //     });
+              //   } else if (checkType(WhoAmI) == 'company') {
+                  
+              //     port_list[idlePort].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI));
+    
+              //     input_data = {
+              //       port: idlePort+1,
+              //       admin: 0,
+              //       setting: {
+              //         volt: 42,
+              //         ampere: 2.5
+              //       }
+              //     }
+  
+              //     port_list[idlePort].setValue('status',1);
+        
+              //     shoot_result(socket, "port_ready", true);
+              //     console.log(StationIsOn[station_identifier]);
+  
+              //     socket.to(StationIsOn[station_identifier].socket_id).emit('port_ready',input_data);
+              //     io.to(room['admin']).emit('a_charge_ready', input_data);
+  
+              //   }
+              // }
+            }
+          }
+
+        } else {
+          console.log('query error : ' + err);
+          return false;
+        }
+      });
+    } else {
+      shoot_result(socket,'port_ready',false,'접근 가능한 이벤트가 아님');
+      return false;
+    }
+          });
+          
 })
 
-function shoot_result(io, code, data){
+function shoot_result(soket, code, data, msg){
+if(msg == undefined || msg == null){
   var d = {
     code: code,
     data: data
   }
+} else {
+  var d = {
+    code: code,
+    data: data,
+    detail: msg
+  }
+}
+
   console.log(d);
-  io.emit('result',d);
+  io.to(soket.id).emit('result',d);
+
 }
 
 
@@ -1171,6 +988,7 @@ function AddPortLog(port_id, status, value){
 
 function getIdlePort(port_list){
   for(i=0; i<port_list.length; i++){
+    console.log("check port : "+ i);
     if (port_list[i].getStatus() == 0) return i;
   }
   return false;
@@ -1199,6 +1017,28 @@ function leadingZeros(n, digits) {
       zero += '0';
   }
   return zero + n;
+}
+
+function checkType(WhoAmI){
+  console.log(WhoAmI);
+  if(WhoAmI instanceof admin_class){
+    return "admin";
+  }
+  else if(WhoAmI instanceof user_class){
+    return "user";
+  }
+  else if(WhoAmI instanceof station_class){
+    return "station";
+  }
+  else if(WhoAmI instanceof station_class){
+    return "station";
+  }
+  else if(WhoAmI instanceof company_class){
+    return "company";
+  }
+  else {
+    return undefined;
+  }
 }
 
 function checkAPI(key){
