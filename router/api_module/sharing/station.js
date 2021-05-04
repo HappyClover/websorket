@@ -1,4 +1,4 @@
-var express = require('express')
+var express = require('express');
 var router = express.Router(); // 이번 예제에서는 express를 사용합니다.
 
 //DB세팅
@@ -29,42 +29,42 @@ router.post('/request/', (req, res) => {
     
     if (api_key == "test"){
 
-    var query = "select station.code, station.name, station_port.number from station_port "
-    +"inner join station on station_port.station_id = station.id "
-    +"where station_port.code = ?";
-    var value = (port_code);
+        var query = "select station.code, station.name, station_port.number from station_port "
+        +"inner join station on station_port.station_id = station.id "
+        +"where station_port.code = ?";
+        var value = (port_code);
 
-    mysqlDB.query(query,value, function (err, rows, fields) {
+        mysqlDB.query(query,value, function (err, rows, fields) {
 
-        if (!err) {
-        if(rows.length<1){
-            result = false;
-            err_code = 989;
-            msg = "qr코드 불일치";
+            if (!err) {
+            if(rows.length<1){
+                result = false;
+                err_code = 989;
+                msg = "qr코드 불일치";
 
+                res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+
+            } else {
+                result = true;
+                err_code = 000;
+                msg = "정상";
+
+                station_name = rows[0].name;
+                station_id = rows[0].code;
+                station_port = rows[0].number;
+            }
             res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
 
-        } else {
-            result = true;
-            err_code = 000;
-            msg = "정상";
+            } else {
+            console.log(err);
 
-            station_name = rows[0].name;
-            station_id = rows[0].code;
-            station_port = rows[0].number;
-        }
-        res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+            result = false;
+            err_code = 979;
+            msg = "DB에러";
+            res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code});
 
-        } else {
-        console.log(err);
-
-        result = false;
-        err_code = 979;
-        msg = "DB에러";
-        res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code});
-
-        }
-    });  
+            }
+        });  
     } else {
     result = false;
     err_code = 999;

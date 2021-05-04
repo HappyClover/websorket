@@ -75,6 +75,10 @@ C_station.prototype.setPort = function (numb, status){
 	}
 }
 
+C_station.prototype.setPortList = function (port_list){
+	this.port_list = port_list;
+}
+
 C_station.prototype.getStationId = function(){
 	return this.id;
 }

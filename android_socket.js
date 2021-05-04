@@ -1,8 +1,21 @@
+var vhost = require('vhost');
 var express = require('express')
 var app = express(); // 이번 예제에서는 express를 사용합니다.
 var socketio = require('socket.io');
-
 var fs = require('fs');
+var https = require('https');
+var http = require('http');
+// var option = {
+//   pfx: fs.readFileSync('/Users/rlathdgus1/ssl/_wildcard_.wingstation.co.kr_202105030C96.pfx'),
+//   passphrase: '9bk5rs',
+//   minVersion: "TLSv1.2"
+// }
+var option = {
+  pfx: fs.readFileSync('~/ssl/_wildcard_.wingstation.co.kr_202105030C96.pfx'),
+  passphrase: '9bk5rs',
+  minVersion: "TLSv1.2"
+}
+
 const Crypto = require('crypto-js');
 const Mathjs = require('mathjs');
 const cryKey = "WINGSTATION";
@@ -18,6 +31,7 @@ var port_class = require('./class/C_port.js');
 
 //기본 세팅
 var bodyParser = require('body-parser');
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -30,24 +44,37 @@ var router_app_station = require('./router/api_module/application/station');
 var router_app_sharing = require('./router/api_module/sharing/station');
 
 //관제페이지 라우터
+var router_admin_main = require('./router/controll/detail.js');
 
 
 //DB세팅
 var mysqlDB = require('./stationDB.js');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
+const { rejects } = require('assert');
 mysqlDB.connect();
 
 //어플리케이션 api
+// app.use(subdomain('station',router_app_station));
 app.use('/join', router_app_join);
 app.use('/login', router_app_login);
 
 //협력업체 제공 웹앱
 app.use('/station', router_app_sharing);
 
+//관제페이지
+app.use(vhost('admin.wingstation.co.kr',router_admin_main));
 
-var server = app.listen(3001,()=>{
-    console.log('Listening at port number 3001') //포트는 원하시는 번호로..
+var server;
+
+try {
+  server = https.createServer(app).listen(3001,()=>{
+    console.log('Listening at port number 80') //포트는 원하시는 번호로..
 })
+} catch (error) {
+    server = http.createServer(app).listen(80,()=>{
+      console.log('Listening at port number 80') //포트는 원하시는 번호로..
+  })
+}
 
 //return socket.io server.
 var io = socketio.listen(server) // 이 과정을 통해 우리의 express 서버를 socket io 서버로 업그레이드를 시켜줍니다.
@@ -92,9 +119,7 @@ app.get('/js/smoothie.js', (req, res) => {
   })
 });
 
-app.get('/', (req, res) => {
-  res.render('index_station.ejs');
-});
+
 
 //이 서버에서는 어떤 클라이언트가 connection event를 발생시키는 것인지 듣고 있습니다.
 // callback 으로 넘겨지는 socket에는 현재 클라이언트와 연결되어있는 socket 관련 정보들이 다 들어있습니다.
@@ -119,8 +144,6 @@ io.on('connection',function (socket){
           var login_data = JSON.parse(data);
         }
 
-        console.log(`${JSON.stringify(data)}`);
-
         nickname = login_data.name;
         socket_type = login_data.type;
 
@@ -130,38 +153,66 @@ io.on('connection',function (socket){
           case 'station' :
             var id, name, result;
 
-            var station_query = 'select station.*, station_port.id as port_id, station_port.number as port_numb, station_port.type as port_type from station left join station_port on station.id = station_port.station_id where station.identifier = ?';
-            mysqlDB.query(station_query,nickname, function (err, rows, fields) {
-              if (!err) { 
-                if(rows.length>0){
-                  console.log(`${nickname} has entered ${socket_type} chatroom! ---------------------`)
+            //스테이션 정보 확인
+            var station_info = new Promise((resolve,rejects)=>{
+              var station_query = 'select station.*, station_port.id as port_id, station_port.number as port_numb, station_port.type as port_type from station left join station_port on station.id = station_port.station_id where station.identifier = ?';
+              mysqlDB.query(station_query,nickname, function (err, rows, fields) {
+                if (!err) { 
+                  if(rows.length>0){  
+                    station_rows = rows;
+                    id = rows[0].id;
 
-                  station_rows = rows;
-                  id = rows[0].id;
+                    for(i=0; i<rows.length; i++){
+                      //기존 서버 데이터 확인 후 배열 세팅
+                      var station_query = 'select * from connect_station where id = ?';
+                      mysqlDB.query(station_query,station_rows[i].port_id, function (err, connect_port_rows, fields) {
+                        if (!err) { 
+                          if(connect_port_rows.length>0){
+                            var temp_numb = connect_port_rows.numb;
+                            var temp_usage_id = connect_port_rows.usage_id;
+                            var temp_status = connect_port_rows.status;
+                            var temp_user_id = connect_port_rows.user_id;
+                            var temp_user_type = connect_port_rows.user_type;
 
-                  for(i=0; i<rows.length; i++){
-                    port = new port_class(rows[i].port_id, rows[i].port_numb, id)
+                            var temp_port = new port_class(rows[i].port_id, rows[i].port_numb, id)
 
-                    console.log(port.getPortNumb());
-                    port_list[Number(port.getPortNumb())-1] = port;
-                    result = true;
-                    io.to(room['admin']).emit('a_join_status', 1);
-                    socket.join(room['station']);
 
+
+                          } else { //조회결과가 없을때
+                            console.log("접속 기록이 없음")
+                            
+                          }
+                        } else {
+                          console.log('query error : ' + err);
+                          result = false;
+                        }
+                      });
+
+
+
+
+
+                      port = new port_class(rows[i].port_id, rows[i].port_numb, id)
+                      port_list[Number(port.getPortNumb())-1] = port;
+                      result = true;
+                      io.to(room['admin']).emit('a_join_status', 1);
+                      socket.join(room['station']);
+  
+                    }
+                    WhoAmI = new station_class(id, nickname, socket.id, port_list);
+                    StationIsOn[nickname] = WhoAmI //
+  
+                    shoot_result(socket, "login", true);
+  
+                  } else { //조회결과가 없을때
+                    shoot_result(socket, "login", false);
+                    result = false;
                   }
-                  WhoAmI = new station_class(id, nickname, socket.id, port_list);
-                  StationIsOn[nickname] = WhoAmI //
-
-                  shoot_result(socket, "login", true);
-
-                } else { //조회결과가 없을때
-                  shoot_result(socket, "login", false);
+                } else {
+                  console.log('query error : ' + err);
                   result = false;
                 }
-              } else {
-                console.log('query error : ' + err);
-                result = false;
-              }
+              });
             });
             break;
 
