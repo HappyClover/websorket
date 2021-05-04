@@ -64,11 +64,15 @@ app.use('/station', router_app_sharing);
 //관제페이지
 app.use(vhost('admin.wingstation.co.kr',router_admin_main));
 
+app.get('/', (req, res) => {
+  res.render('index_station.ejs');
+});
+
 var server;
 
 try {
-  server = https.createServer(app).listen(3001,()=>{
-    console.log('Listening at port number 80') //포트는 원하시는 번호로..
+  server = https.createServer(option, app).listen(443,()=>{
+    console.log('Listening at port number 443') //포트는 원하시는 번호로..
 })
 } catch (error) {
     server = http.createServer(app).listen(80,()=>{
