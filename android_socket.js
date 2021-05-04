@@ -11,7 +11,7 @@ var http = require('http');
 //   minVersion: "TLSv1.2"
 // }
 var option = {
-  pfx: fs.readFileSync('~/ssl/_wildcard_.wingstation.co.kr_202105030C96.pfx'),
+  pfx: fs.readFileSync('/home/ubuntu/ssl/_wildcard_.wingstation.co.kr_202105030C96.pfx'),
   passphrase: '9bk5rs',
   minVersion: "TLSv1.2"
 }
