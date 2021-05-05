@@ -1,4 +1,4 @@
-var subdomain = require('express_subdomain');
+var subdomain = require('express-subdomain');
 var express = require('express')
 var app = express(); // 이번 예제에서는 express를 사용합니다.
 var socketio = require('socket.io');
