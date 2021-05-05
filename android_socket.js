@@ -1,4 +1,4 @@
-var subdomain = require('express-subdomain');
+var subdomain = require('subdomain');
 var express = require('express')
 var app = express(); // 이번 예제에서는 express를 사용합니다.
 var socketio = require('socket.io');
@@ -31,7 +31,7 @@ var port_class = require('./class/C_port.js');
 
 //기본 세팅
 var bodyParser = require('body-parser');
-
+app.use(subdomain({ base : 'localhost', removeWWW : true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -62,7 +62,7 @@ app.use('/login', router_app_login);
 app.use('/station', router_app_sharing);
 
 //관제페이지
-app.use(subdomain('admin',router_admin_main));
+app.use(subdomain('/subdomain/admin/',router_admin_main));
 
 app.get('/', (req, res) => {
   res.render('index_station.ejs');
