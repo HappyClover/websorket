@@ -59,10 +59,10 @@ app.use('/join', router_app_join);
 app.use('/login', router_app_login);
 
 //협력업체 제공 웹앱
-app.use(express.vhost('station.wingstation.co.kr', router_app_sharing));
+app.use(subdomain('station.wingstation.co.kr', router_app_sharing));
 
 //관제페이지
-app.use(express.vhost('admin.wingstation.co.kr',router_admin_main));
+app.use(subdomain('admin.wingstation.co.kr',router_admin_main));
 
 app.get('/', (req, res) => {
   res.render('index_station.ejs');
