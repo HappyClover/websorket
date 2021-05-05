@@ -59,6 +59,8 @@ app.use('/join', router_app_join);
 app.use('/login', router_app_login);
 
 //협력업체 제공 웹앱
+app.use('/station', router_app_sharing);
+
 app.use(subdomain('station', router_app_sharing));
 
 //관제페이지
