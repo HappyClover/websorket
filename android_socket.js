@@ -63,6 +63,7 @@ app.use(subdomain('station.wingstation.co.kr', router_app_sharing));
 
 //관제페이지
 app.use(subdomain('admin.wingstation.co.kr',router_admin_main));
+app.use(express.static('static'));
 
 app.get('/', (req, res) => {
   res.render('index_station.ejs');
