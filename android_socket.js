@@ -62,7 +62,7 @@ app.use('/login', router_app_login);
 app.use('/station', router_app_sharing);
 
 //관제페이지
-app.use(subdomain('/subdomain/admin/',router_admin_main));
+app.use('/subdomain/admin/',router_admin_main);
 
 app.get('/', (req, res) => {
   res.render('index_station.ejs');
