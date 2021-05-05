@@ -1,4 +1,4 @@
-var subdomain = require('vhost');
+var subdomain = require('express_subdomain');
 var express = require('express')
 var app = express(); // 이번 예제에서는 express를 사용합니다.
 var socketio = require('socket.io');
@@ -59,10 +59,10 @@ app.use('/join', router_app_join);
 app.use('/login', router_app_login);
 
 //협력업체 제공 웹앱
-app.use(subdomain('station.wingstation.co.kr', router_app_sharing));
+app.use(subdomain('station', router_app_sharing));
 
 //관제페이지
-app.use(subdomain('admin.wingstation.co.kr',router_admin_main));
+app.use(subdomain('admin',router_admin_main));
 app.use(express.static('static'));
 
 app.get('/', (req, res) => {
