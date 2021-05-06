@@ -63,7 +63,7 @@ router.post('/request/', (req, res) => {
             result = false;
             err_code = 979;
             msg = "DB에러";
-            res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code});
+            res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
 
             }
         });  
@@ -71,7 +71,7 @@ router.post('/request/', (req, res) => {
     result = false;
     err_code = 999;
     msg = "api키 불일치";
-    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code});
+    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
 
     }
     console.log(result);
