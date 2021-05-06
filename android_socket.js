@@ -269,32 +269,32 @@ io.on('connection',function (socket){
               console.log(nickname);
 
               var temp = (nickname);
-              // var user_query = 'select * from admin where api = ?';
-              // mysqlDB.query(user_query,temp, function (err, rows, fields) {
-              //   if (!err) { 
-              //     console.log(rows);
+              var user_query = 'select * from admin where key = ?';
+              mysqlDB.query(user_query,temp, function (err, rows, fields) {
+                if (!err) { 
+                  console.log(rows);
   
-              //     if(rows.length>0){
-              //       console.log(`${nickname} has entered ${socket_type} chatroom! ---------------------`)
-              //       id = rows[0].id;
-              //       identifier = rows[0].identifier;
-              //       name = rows[0].name;
+                  if(rows.length>0){
+                    console.log(`${nickname} has entered ${socket_type} chatroom! ---------------------`)
+                    id = rows[0].id;
+                    identifier = rows[0].identifier;
+                    name = rows[0].name;
 
-              //       WhoAmI = new company_class(id, identifier, name, socket.id);
-              //       companyIsOn[id] = WhoAmI //
+                    WhoAmI = new company_class(id, identifier, name, socket.id);
+                    companyIsOn[id] = WhoAmI //
       
-              //       shoot_result(socket, "login", true);
+                    shoot_result(socket, "login", true);
                     
-              //     } else { //조회결과가 없을때
-              //       console.log("토큰 불일치")
-              //       shoot_result(socket, "login", false);
-              //       result = false;
-              //     }
-              //   } else {
-              //     console.log('query error : ' + err);
-              //     result = false;
-              //   }
-              // });
+                  } else { //조회결과가 없을때
+                    console.log("토큰 불일치")
+                    shoot_result(socket, "login", false);
+                    result = false;
+                  }
+                } else {
+                  console.log('query error : ' + err);
+                  result = false;
+                }
+              });
               break;
 
             default:
