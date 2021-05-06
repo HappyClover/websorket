@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/request/', (req, res) => {
-    res.render('./router/api_module/sharing/index.ejs');
+    res.render('./router/webapp/index.ejs');
 });
   
 router.post('/request/', (req, res) => {
@@ -44,7 +44,7 @@ router.post('/request/', (req, res) => {
                 err_code = 989;
                 msg = "qr코드 불일치";
 
-                res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+                res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
 
             } else {
                 result = true;
@@ -55,7 +55,7 @@ router.post('/request/', (req, res) => {
                 station_id = rows[0].code;
                 station_port = rows[0].number;
             }
-            res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+            res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
 
             } else {
             console.log(err);
@@ -63,7 +63,7 @@ router.post('/request/', (req, res) => {
             result = false;
             err_code = 979;
             msg = "DB에러";
-            res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code});
+            res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code});
 
             }
         });  
@@ -71,7 +71,7 @@ router.post('/request/', (req, res) => {
     result = false;
     err_code = 999;
     msg = "api키 불일치";
-    res.render('./router/api_module/sharing/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code});
+    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code});
 
     }
     console.log(result);
