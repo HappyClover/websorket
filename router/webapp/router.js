@@ -27,6 +27,57 @@ router.post('/request/', (req, res) => {
     let station_port = "알수없음";
 
     let company_name = "테스트";
+
+    var value = (api_key);
+    var query = "select * from admin where api = ?";
+    mysqlDB.query(query,value, function (err, rows, fields) {
+        if(!err){
+            if(rows.length < 1){
+                result = false;
+                err_code = 999;
+                msg = "api키 불일치";
+                res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});            
+            } else {
+                var query = "select station.code, station.name, station_port.number from station_port "
+                +"inner join station on station_port.station_id = station.id "
+                +"where station_port.code = ?";
+                var value = (port_code);
+        
+                mysqlDB.query(query,value, function (err, rows, fields) {
+        
+                    if (!err) {
+                    if(rows.length<1){
+                        result = false;
+                        err_code = 989;
+                        msg = "qr코드 불일치";
+        
+                        res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+        
+                    } else {
+                        result = true;
+                        err_code = 000;
+                        msg = "정상";
+        
+                        station_name = rows[0].name;
+                        station_id = rows[0].code;
+                        station_port = rows[0].number;
+                    }
+                    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+        
+                    } else {
+                    console.log(err);
+        
+                    result = false;
+                    err_code = 979;
+                    msg = "DB에러";
+                    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+        
+                    }
+                }); 
+            }
+        }
+    });
+
     
     
     if (api_key == "test"){
