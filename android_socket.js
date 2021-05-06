@@ -175,39 +175,35 @@ io.on('connection',function (socket){
                     id = rows[0].id;
 
                     for(i=0; i<rows.length; i++){
-                      //기존 서버 데이터 확인 후 배열 세팅
-                      var station_query = 'select * from connect_station where id = ?';
-                      mysqlDB.query(station_query,station_rows[i].port_id, function (err, connect_port_rows, fields) {
-                        if (!err) { 
-                          if(connect_port_rows.length>0){
-                            var temp_numb = connect_port_rows.numb;
-                            var temp_usage_id = connect_port_rows.usage_id;
-                            var temp_status = connect_port_rows.status;
-                            var temp_user_id = connect_port_rows.user_id;
-                            var temp_user_type = connect_port_rows.user_type;
+                      // //기존 서버 데이터 확인 후 배열 세팅
+                      // var station_query = 'select * from connect_station where id = ?';
+                      // mysqlDB.query(station_query,station_rows[i].port_id, function (err, connect_port_rows, fields) {
+                      //   if (!err) { 
+                      //     if(connect_port_rows.length>0){
+                      //       var temp_numb = connect_port_rows.numb;
+                      //       var temp_usage_id = connect_port_rows.usage_id;
+                      //       var temp_status = connect_port_rows.status;
+                      //       var temp_user_id = connect_port_rows.user_id;
+                      //       var temp_user_type = connect_port_rows.user_type;
 
-                            var temp_port = new port_class(rows[i].port_id, rows[i].port_numb, id)
+                      //       var temp_port = new port_class(rows[i].port_id, rows[i].port_numb, id)
 
-                            port_list[Number(temp_port.getPortNumb())-1] = port;
-                            result = true;
-                            io.to(room['admin']).emit('a_join_status', 1);
-                            socket.join(room['station']);
 
-                          } else { //조회결과가 없을때
-                            console.log("접속 기록이 없음")
+                      //     } else { //조회결과가 없을때
+                      //       console.log("접속 기록이 없음")
                             
-                          }
-                        } else {
-                          console.log('query error : ' + err);
-                          result = false;
-                        }
-                      });
+                      //     }
+                      //   } else {
+                      //     console.log('query error : ' + err);
+                      //     result = false;
+                      //   }
+                      // });
 
-                      // port = new port_class(rows[i].port_id, rows[i].port_numb, id)
-                      // port_list[Number(port.getPortNumb())-1] = port;
-                      // result = true;
-                      // io.to(room['admin']).emit('a_join_status', 1);
-                      // socket.join(room['station']);
+                      port = new port_class(rows[i].port_id, rows[i].port_numb, id)
+                      port_list[Number(port.getPortNumb())-1] = port;
+                      result = true;
+                      io.to(room['admin']).emit('a_join_status', 1);
+                      socket.join(room['station']);
   
                     }
                     WhoAmI = new station_class(id, nickname, socket.id, port_list);
