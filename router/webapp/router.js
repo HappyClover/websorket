@@ -28,11 +28,16 @@ router.post('/request/', (req, res) => {
 
     let company_name = "테스트";
 
+    console.log("key : " + api_key);
+    console.log("port : " + port_code);
+    
+
     var value = (api_key);
     var query = "select * from admin where api = ?";
     mysqlDB.query(query,value, function (err, rows, fields) {
         if(!err){
             if(rows.length < 1){
+
                 result = false;
                 err_code = 999;
                 msg = "api키 불일치";
