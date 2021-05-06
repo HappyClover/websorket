@@ -68,6 +68,7 @@ router.post('/request/', (req, res) => {
                         station_id = rows[0].code;
                         station_port = rows[0].number;
                     }
+                    console.log({result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
                     res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
         
                     } else {
