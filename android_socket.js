@@ -40,6 +40,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var router_app_login = require('./router/api_module/application/login');
 var router_app_join = require('./router/api_module/application/join');
 var router_app_station = require('./router/api_module/application/station');
+var router_api = require('./router/api_module/application/router');
+
 //협력업체 api 라우터
 var router_app_sharing = require('./router/webapp/router');
 
@@ -57,9 +59,10 @@ mysqlDB.connect();
 // app.use(subdomain('station',router_app_station));
 app.use('/join', router_app_join);
 app.use('/login', router_app_login);
+app.use(subdomain('api.wingstation.co.kr', router_api));
 
 //협력업체 제공 웹앱
-app.use(subdomain('station.wingstation.co.kr', router_app_sharing));
+app.use(subdomain('webapp.wingstation.co.kr', router_app_sharing));
 
 //관제페이지
 app.use(subdomain('admin.wingstation.co.kr',router_admin_main));

@@ -8,7 +8,7 @@ function C_port(id, numb, station_id){
 	this.station = station_id;
 	this.numb = numb;
 
-	this.useage_id = null;
+	this.usage_id = null;
 
 	this.input_a = null;
 	this.input_v = null;
@@ -71,13 +71,13 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 			var parameter = [user_type_numb, user_id, this.station, this.id, code, stringDate, this.status];
 			var query = "insert into station_usage_history(user_type, user_id, station_id, port_id, code, date, status) values(?,?,?,?,?,?,?)"
 
-			var useage_id;
+			var usage_id;
 
 			var queryPromise = new Promise((resolve, reject) =>{
 				mysqlDB.query(query, parameter, function (err, rows, fields) {
 					if (!err) {
-						useage_id = rows.insertId;
-						resolve(useage_id);
+						usage_id = rows.insertId;
+						resolve(usage_id);
 					} else {
 						console.log(err);
 					}
@@ -85,11 +85,11 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 			});
 
 			queryPromise.then((usage_id)=>{
-				this.useage_id = usage_id;
+				this.usage_id = usage_id;
 			});
 
 
-			console.log("인서트 아이디 : " + this.useage_id);
+			console.log("인서트 아이디 : " + this.usage_id);
 
 			break;
 		case 'charge_start':
@@ -98,7 +98,7 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 
 			var queryPromise = new Promise((resolve, reject) =>{
 				var query = "update station_usage_history set start = ?, status = ? where id = ?";
-				var parameter = [stringDate, this.status, this.useage_id]
+				var parameter = [stringDate, this.status, this.usage_id]
 	
 				mysqlDB.query(query, parameter, function (err, rows, fields) {
 					if (!err) {
@@ -122,7 +122,7 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 
 			var queryPromise = new Promise((resolve, reject) =>{
 				var query = "update station_usage_history set end = ?, status = ? where id = ?";
-				var parameter = [stringDate, this.status, this.useage_id]
+				var parameter = [stringDate, this.status, this.usage_id]
 				mysqlDB.query(query, parameter, function (err, rows, fields) {
 					if (!err) {
 						console.log(parameter);
@@ -145,7 +145,7 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 
 			var queryPromise = new Promise((resolve, reject) =>{
 				var query = "update station_usage_history set charge_complete = ?, status = ? where id = ?";
-				var parameter = [stringDate, this.status, this.useage_id]
+				var parameter = [stringDate, this.status, this.usage_id]
 				mysqlDB.query(query, parameter, function (err, rows, fields) {
 					if (!err) {
 						resolve("update ok");
@@ -170,7 +170,7 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 
 			var queryPromise = new Promise((resolve, reject) =>{
 				var query = "update station_usage_history set end = ?, status = ? where id = ?";
-				var parameter = [stringDate, this.status, this.useage_id]
+				var parameter = [stringDate, this.status, this.usage_id]
 				mysqlDB.query(query, parameter, function (err, rows, fields) {
 					if (!err) {
 						resolve("update ok");
@@ -195,6 +195,16 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 
 	// var station_query = 'insert into port_log(port_id, code, value, date) value(?,?,?,?)';
 	// sql_query(station_query,[this.id, code, 0, stringDate]);
+}
+
+C_port.prototype.recovery = function (code, user_id, user_type, usage_id, mysqlDB){
+	this.status = 2;
+	this.user_id = user_id;
+	this.user_type = user_type;
+	this.usage_id = usage_id;
+	
+// var station_query = 'insert into port_log(port_id, code, value, date) value(?,?,?,?)';
+// sql_query(station_query,[this.id, code, 0, stringDate]);
 }
 
 C_port.prototype.getPortId = function(){
