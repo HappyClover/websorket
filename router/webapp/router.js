@@ -35,6 +35,8 @@ router.post('/request/', (req, res) => {
     var value = (api_key);
     var query = "select * from admin where api = ?";
     mysqlDB.query(query,value, function (err, rows, fields) {
+        console.log(rows);
+        
         if(!err){
             if(rows.length < 1){
 
