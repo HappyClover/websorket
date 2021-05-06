@@ -7,7 +7,6 @@ const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 router.get('/', (req, res) => {
     res.render('index_station.ejs');
-    res.end('admin.LOCALHOST.test: "/"');
   });
 
 module.exports = router;

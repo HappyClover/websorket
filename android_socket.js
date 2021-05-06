@@ -41,7 +41,7 @@ var router_app_login = require('./router/api_module/application/login');
 var router_app_join = require('./router/api_module/application/join');
 var router_app_station = require('./router/api_module/application/station');
 //협력업체 api 라우터
-var router_app_sharing = require('./router/api_module/sharing/station');
+var router_app_sharing = require('./router/webapp/router');
 
 //관제페이지 라우터
 var router_admin_main = require('./router/controll/detail.js');
@@ -59,8 +59,6 @@ app.use('/join', router_app_join);
 app.use('/login', router_app_login);
 
 //협력업체 제공 웹앱
-app.use('/station', router_app_sharing);
-
 app.use(subdomain('station.wingstation.co.kr', router_app_sharing));
 
 //관제페이지
@@ -187,7 +185,10 @@ io.on('connection',function (socket){
 
                             var temp_port = new port_class(rows[i].port_id, rows[i].port_numb, id)
 
-
+                            port_list[Number(temp_port.getPortNumb())-1] = port;
+                            result = true;
+                            io.to(room['admin']).emit('a_join_status', 1);
+                            socket.join(room['station']);
 
                           } else { //조회결과가 없을때
                             console.log("접속 기록이 없음")
@@ -199,15 +200,11 @@ io.on('connection',function (socket){
                         }
                       });
 
-
-
-
-
-                      port = new port_class(rows[i].port_id, rows[i].port_numb, id)
-                      port_list[Number(port.getPortNumb())-1] = port;
-                      result = true;
-                      io.to(room['admin']).emit('a_join_status', 1);
-                      socket.join(room['station']);
+                      // port = new port_class(rows[i].port_id, rows[i].port_numb, id)
+                      // port_list[Number(port.getPortNumb())-1] = port;
+                      // result = true;
+                      // io.to(room['admin']).emit('a_join_status', 1);
+                      // socket.join(room['station']);
   
                     }
                     WhoAmI = new station_class(id, nickname, socket.id, port_list);
