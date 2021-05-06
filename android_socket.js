@@ -264,14 +264,14 @@ io.on('connection',function (socket){
 
             //api를 이용하는 업체
             case 'company' :
-              nickname = login_data.api;
+              nickname = login_data.key;
               socket_type = login_data.type;
               console.log(nickname);
 
               var temp = (nickname);
 
               console.log("API키 : "+temp);
-              
+
               var user_query = 'select * from admin where api = ?';
               mysqlDB.query(user_query,temp, function (err, rows, fields) {
                 if (!err) { 
