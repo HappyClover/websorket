@@ -269,6 +269,9 @@ io.on('connection',function (socket){
               console.log(nickname);
 
               var temp = (nickname);
+
+              console.log("API키 : "+temp);
+              
               var user_query = 'select * from admin where api = ?';
               mysqlDB.query(user_query,temp, function (err, rows, fields) {
                 if (!err) { 
