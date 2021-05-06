@@ -65,7 +65,9 @@
 
         const socket = io();
 
-        var user_data = {"api" : key, "type":"company"}
+        var user_data = {"api" : key, "type":"company"};
+        alert(key);
+        
         socket.emit('login', JSON.stringify(user_data));
 
         $('select').change(() => {
