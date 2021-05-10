@@ -8,7 +8,7 @@ const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 
 //자동 로그인 처리
-router.post('/login/', (req, res) => {
+router.post('/', (req, res) => {
     var api_key = req.body.key;
     const token = req.body.token;
     const identifier = req.body.identifier;
@@ -82,7 +82,7 @@ router.post('/login/', (req, res) => {
 });
 
 //새로운 로그인 처리
-router.post('/login/new/', (req, res) => {
+router.post('/new/', (req, res) => {
 var api_key = req.body.key;
 const identifier = req.body.identifier;
 const phone = req.body.phone;
@@ -133,7 +133,7 @@ if(checkAPI(api_key)){
 });
 
 //인증번호 발송
-router.post('/login/getcert/', (req, res) => {
+router.post('/getcert/', (req, res) => {
     const api_key = req.body.key;
     const phone = req.body.phone;
 
@@ -155,7 +155,7 @@ router.post('/login/getcert/', (req, res) => {
 });
 
 //회원가입 처리
-router.post('/login/join/', (req, res) => {
+router.post('/join/', (req, res) => {
     console.log(req.body);
 
     const api_key = req.body.key;
