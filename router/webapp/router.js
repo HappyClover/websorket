@@ -10,6 +10,8 @@ router.get('/', (req, res) => {
     res.send("스테이션 사용하기 위한 웹앱 접근 홈페이지입니다. \n상세 문의는 주식회사 셰빌리티(1600-2834)로 연락주세요");
 });
 
+router.use('/request/static', express.static('./router/webapp/static/'));
+
 router.get('/request/', (req, res) => {
     res.render('./router/webapp/index_b.ejs');
 });
