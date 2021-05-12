@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/request/', (req, res) => {
-    res.render('./router/webapp/index.ejs');
+    res.render('./router/webapp/index_b.ejs');
 });
   
 router.post('/request/', (req, res) => {
