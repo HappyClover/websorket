@@ -1,0 +1,100 @@
+<html ng-app>
+    <head>
+        <title>WING 스테이션 요청</title>
+
+        <!-- socket setting -->
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+        <!-- chart setting -->
+        <script src="/js/smoothie.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
+        <script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+
+        <script>
+
+        </script>
+    </head>
+
+
+    <body>
+        <header>
+            <img src="/img/Logo"> </img>
+        </header>
+
+        <section id="info">
+            <form method="POST">
+                <input name="key" placeholder="키값">
+                <input name="code" placeholder="포트코드">
+                <input type="submit">
+            </form>
+
+        </section>
+    </body>
+    
+    <style>
+        html{
+            font-size: large;
+        }
+
+        #myChart{
+            width: 70% !important;  
+            float: left;
+            min-width: 320px; 
+            max-width: 800px;
+            height: 100px;
+        }
+
+
+
+        header{
+            text-align: center;
+        }
+
+        header img{
+            width: 75%;
+
+            margin-top: 100px;
+            margin-bottom: 100px;
+            max-width: 800px;
+            max-height: 250px;
+        }
+
+        fieldset{
+            border: 0;
+            margin-bottom: 30px;
+        }
+
+        .title_land{
+            border-bottom: 1px black solid;            
+        }
+
+        .title{
+            border: 1px #000000 solid;
+            padding: 10px;
+        }
+
+        fieldset div span{
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        fieldset div span span{
+            margin-top: 0px;
+        }
+
+        fieldset#field_port div#info_land{
+            height: 200px;
+        }
+
+        div.port_status{
+            width: 200px;
+            height: 200px;
+            margin: 0;
+        }
+    </style>
+</html>
