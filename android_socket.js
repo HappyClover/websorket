@@ -55,6 +55,9 @@ const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 const { rejects } = require('assert');
 mysqlDB.connect();
 
+//static 선언
+app.use('/static', express.static('./router/webapp/static/'));
+
 //어플리케이션 api
 // app.use(subdomain('station',router_app_station));
 app.use('/join', router_app_join);
