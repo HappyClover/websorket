@@ -93,7 +93,7 @@
         //충전 취소 요청 받았을 때
         socket.on('charge_cancel', (data) => {
             $('#status').text('충전이 취소되었습니다.');
-            window.Android.charge_fail(name, port, 990, '충전이 취소되었습니다. : 시간초과');
+            window.Android.charge_fail(name, port, 890, '충전이 취소되었습니다. : 시간초과');
         });
 
         //충전 
@@ -124,7 +124,7 @@
                     } else {
                         console.log(data);
                         $('#status').text('충전 준비 실패 : ' + data.detail);
-                        window.Android.charge_fail(name, port, 992, ''+data.detail);
+                        window.Android.charge_fail(name, port, 891, ''+data.detail);
                     }
                     break;
 
@@ -134,7 +134,7 @@
                     } else {
                         console.log(data);
                         $('#status').text('충전 취소 처리 실패 : ' + data.detail);
-                        window.Android.charge_fail(name, port, 999, "사용자 취소 요청");
+                        window.Android.charge_fail(name, port, 892, "사용자 취소 요청");
                     }
                     break;
 
