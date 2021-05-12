@@ -42,7 +42,7 @@ router.post('/request/', (req, res) => {
                 result = false;
                 err_code = 999;
                 msg = "api키 불일치";
-                res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});            
+                res.render('./router/webapp/index.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});            
             } else {
                 var query = "select station.code, station.name, station_port.number from station_port "
                 +"inner join station on station_port.station_id = station.id "
@@ -57,7 +57,7 @@ router.post('/request/', (req, res) => {
                         err_code = 989;
                         msg = "qr코드 불일치";
         
-                        res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+                        res.render('./router/webapp/index.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
         
                     } else {
                         result = true;
@@ -69,7 +69,7 @@ router.post('/request/', (req, res) => {
                         station_port = rows[0].number;
                     }
                     console.log({result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
-                    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+                    res.render('./router/webapp/index.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
         
                     } else {
                     console.log(err);
@@ -77,11 +77,17 @@ router.post('/request/', (req, res) => {
                     result = false;
                     err_code = 979;
                     msg = "DB에러";
-                    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+                    res.render('./router/webapp/index.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
         
                     }
                 }); 
             }
+        } else {
+            result = false;
+            err_code = 978;
+            msg = "DB에러";
+            res.render('./router/webapp/index.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+
         }
     });
 
