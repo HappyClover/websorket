@@ -9,7 +9,7 @@ const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 //스테이션 
 // var router_api_app = require('./router/api_module/api/app/router.js');
-var router_api_station = require('./router/api_module/api/station/router');
+// var router_api_station = require('./router/api_module/api/station/router');
 
 
 //자동 로그인 처리
@@ -18,9 +18,11 @@ router.get('/', (req, res) => {
 
 });
 
-router.use('/v1', router_api_app);
+// router.use('/v1', router_api_app);
 
-router.use('/station', router_api_station);
+router.get('/station', (req, res) => {
+    res.send("스테이션 라우터");
 
+});
 
 module.exports = router;
