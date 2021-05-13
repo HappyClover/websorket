@@ -219,7 +219,7 @@ router.get('/station/usage', (req, res) => {
                         'id' : rows[i].id,
                         'date' : rows[i].date,
                         'start' : rows[i].start,
-                        'complete' : rows[i].complete,
+                        'complete' : rows[i].charge_complete,
                         'end' : rows[i].end,
                         'station' : {
                             'id' : rows[i].station_id,
@@ -232,8 +232,8 @@ router.get('/station/usage', (req, res) => {
                 result = {
                     'result': true,
                     'code': 000,
-                    'total': count(rows),
-                    'total_page': (count(rows)/15)+1,
+                    'total': rows.length,
+                    'total_page': (rows.length/15)+1,
                     'page': page,
                     'info': info
                 } 
