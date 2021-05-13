@@ -56,6 +56,8 @@ router.get('/station/list', (req, res) => {
         
         mysqlDB.query(query, value, function (err, rows, fields) {
             if (!err) {
+                console.log(rows);
+                
                 if(rows.length<1){
                     station_result = null;
                     
