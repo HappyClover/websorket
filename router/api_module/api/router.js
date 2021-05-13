@@ -100,7 +100,7 @@ router.get('/station/list', (req, res) => {
 //스테이션 관련 처리
 router.get('/station/info', (req, res) => {
     var api_key = req.body.key;
-    const station_id = req.body.station_id;
+    const station_id = req.body.id;
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
