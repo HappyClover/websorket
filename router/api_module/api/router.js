@@ -180,8 +180,8 @@ router.get('/station/info', (req, res) => {
 //스테이션 관련 처리
 router.get('/station/usage', (req, res) => {
     var api_key = req.query.key;
-    const page = req.query.page;
-    const period = req.query.period;
+    var page = req.query.page;
+    var period = req.query.period;
 
     // const identifier = req.body.identifier;
     // const token = req.body.token;
