@@ -1,4 +1,6 @@
-var express = require('express')
+var express = require('express');
+var moment = require('moment');
+
 var router = express.Router(); // 이번 예제에서는 express를 사용합니다.
 
 //DB세팅
@@ -195,63 +197,66 @@ router.get('/station/usage', (req, res) => {
         res.json(result);
     } else {
 
-    //스테이션 정보 확인
-    var query = "select station_usage_history.*, station.identifier as station_id, station.name as station_name, station_port.number as port_numb "+
-        "from station_usage_history "+
-        "inner join station on station_usage_history.station_id = station.id "+
-        "inner join station_port on station_usage_history.port_id = station_port.id "+
-        "where user_type = 2 and "+
-        "user_id = ?";
-    var value = [1];
+        if(page == undefined || page == null) page = 1;
+        if(period == undefined || period == null) period = 0;
 
-    var result;
+        //스테이션 정보 확인
+        var query = "select station_usage_history.*, station.identifier as station_id, station.name as station_name, station_port.number as port_numb "+
+            "from station_usage_history "+
+            "inner join station on station_usage_history.station_id = station.id "+
+            "inner join station_port on station_usage_history.port_id = station_port.id "+
+            "where user_type = 2 and "+
+            "user_id = ?";
+        var value = [1];
 
-    mysqlDB.query(query,value, function (err, rows, fields) {
-        if (!err) {
-            if(rows.length<1){
-                result = null;
-                
-            } else{
-                var info = Array();
+        var result;
 
-                for(let i=0; i<rows.length; i++){
-                    var temp = {
-                        'id' : rows[i].id,
-                        'date' : rows[i].date,
-                        'start' : rows[i].start,
-                        'complete' : rows[i].charge_complete,
-                        'end' : rows[i].end,
-                        'station' : {
-                            'id' : rows[i].station_id,
-                            'name' : rows[i].station_name,
-                            'port_numb' : rows[i].port_numb
+        mysqlDB.query(query,value, function (err, rows, fields) {
+            if (!err) {
+                if(rows.length<1){
+                    result = null;
+                    
+                } else{
+                    var info = Array();
+
+                    for(let i=0; i<rows.length; i++){
+                        var temp = {
+                            'id' : rows[i].id,
+                            'date' : moment(rows[i].date).format("YYYY-MM-DD HH:mm:ss"),
+                            'start' : moment(rows[i].start).format("YYYY-MM-DD HH:mm:ss"),
+                            'complete' : moment(rows[i].charge_complete).format("YYYY-MM-DD HH:mm:ss"),
+                            'end' : moment(rows[i].end).format("YYYY-MM-DD HH:mm:ss"),
+                            'station' : {
+                                'id' : rows[i].station_id,
+                                'name' : rows[i].station_name,
+                                'port_numb' : rows[i].port_numb
+                            }
                         }
+                        info.push(temp);
                     }
-                    info.push(temp);
+                    result = {
+                        'result': true,
+                        'code': 000,
+                        'total': rows.length,
+                        'total_page': Math.floor(rows.length%15)+1,
+                        'page': page,
+                        'info': info
+                    } 
                 }
+                res.json(result);
+
+            } else {
+                console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+
                 result = {
-                    'result': true,
-                    'code': 000,
-                    'total': rows.length,
-                    'total_page': (rows.length%15)+1,
-                    'page': page,
-                    'info': info
+                    'result': false,
+                    'code': 510,
+                    'detail': 'DB 에러',
                 } 
+                res.json(result);
+                return false;
             }
-            res.json(result);
-
-        } else {
-            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
-
-            result = {
-                'result': false,
-                'code': 510,
-                'detail': 'DB 에러',
-            } 
-            res.json(result);
-            return false;
-        }
-        });
+            });
     }
 
 });
