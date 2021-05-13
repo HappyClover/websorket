@@ -105,15 +105,14 @@ router.get('/station/info', (req, res) => {
     // const token = req.body.token;
 
     if(checkAPI(api_key)){
-    result = {
-        'result': false,
-        'code': 999,
-        'detail': '일치하는 API키가 없음',
-    } 
-    console.log(result);
-    res.send(result);
-    return false;
-    }
+        result = {
+            'result': false,
+            'code': 999,
+            'detail': '일치하는 API키가 없음',
+        } 
+        console.log(result);
+        res.json(result);
+    } else {
 
     //스테이션 정보 확인
     var query = "select station.identifier as station_id, station.name as station_name, station.latitude, station.longitude, station_port.code as port_code, station_port.number as port_numb, station_port.type as port_type "+
@@ -127,53 +126,54 @@ router.get('/station/info', (req, res) => {
 
 
     mysqlDB.query(query,value, function (err, rows, fields) {
-    if (!err) {
-        if(rows.length<1){
+        if (!err) {
+            if(rows.length<1){
+                result = {
+                    'result': false,
+                    'code': 500,
+                    'message': '일치하는 스테이션이 없습니다.'
+                } 
+            } else{
+                var port = Array();
+
+                for(let i=0; i<rows.length; i++){
+                    var result = {
+                        'code' : rows[i].port_code,
+                        'numb' : rows[i].port_numb,
+                        'type' : rows[i].port_type,
+                        'status' : 0
+                    }
+                    port.push(result);
+                }
+                result = {
+                    'result': true,
+                    'code': 000,
+                    'message': 'success',
+                    'station': {
+                    'id': rows[0].station_id,
+                    'name': rows[0].station_name,
+                    'lat': rows[0].latitude,
+                    'long': rows[0].longitude,
+                    'port' : port
+                    }
+                } 
+            }
+            res.send(result);
+
+        } else {
+            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+
             result = {
                 'result': false,
-                'code': 500,
-                'message': '일치하는 스테이션이 없습니다.'
+                'code': 510,
+                'detail': 'DB 에러',
             } 
-        } else{
-            var port = Array();
-
-            for(let i=0; i<rows.length; i++){
-                var result = {
-                    'code' : rows[i].port_code,
-                    'numb' : rows[i].port_numb,
-                    'type' : rows[i].port_type,
-                    'status' : 0
-                }
-                port.push(result);
-            }
-        result = {
-            'result': true,
-            'code': 000,
-            'message': 'success',
-            'station': {
-            'id': rows[0].station_id,
-            'name': rows[0].station_name,
-            'lat': rows[0].latitude,
-            'long': rows[0].longitude,
-            'port' : port
-            }
-        } 
-        console.log(result);
+            res.send(result);
+            return false;
         }
-        res.send(result);
-
-    } else {
-        console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
-
-        result = {
-            'result': false,
-            'code': 510,
-            'detail': 'DB 에러',
-        } 
-        res.send(result);
-        return false;
+        });
     }
-    });
+
 });
 
 //스테이션 관련 처리
