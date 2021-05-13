@@ -22,5 +22,9 @@ router.use('/v1', router_api_app);
 
 router.use('/station', router_api_station);
 
+router.get('/station', (req, res) => {
+    res.send("스테이션 라우터");
+
+});
 
 module.exports = router;
