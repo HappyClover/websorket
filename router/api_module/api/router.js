@@ -122,7 +122,7 @@ router.get('/station/info', (req, res) => {
     var value = [station_id];
 
     var result;
-    console.log("파라메터2 : "+station_id);
+    console.log("파라메터2 : "+api_key);
 
 
     mysqlDB.query(query,value, function (err, rows, fields) {
@@ -158,7 +158,7 @@ router.get('/station/info', (req, res) => {
                     }
                 } 
             }
-            res.send(result);
+            res.json(result);
 
         } else {
             console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
@@ -168,7 +168,7 @@ router.get('/station/info', (req, res) => {
                 'code': 510,
                 'detail': 'DB 에러',
             } 
-            res.send(result);
+            res.json(result);
             return false;
         }
         });
