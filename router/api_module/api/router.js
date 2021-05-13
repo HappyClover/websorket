@@ -233,7 +233,7 @@ router.get('/station/usage', (req, res) => {
                     'result': true,
                     'code': 000,
                     'total': rows.length,
-                    'total_page': (rows.length/15)+1,
+                    'total_page': (rows.length%15)+1,
                     'page': page,
                     'info': info
                 } 
