@@ -40,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var router_app_login = require('./router/api_module/application/login');
 var router_app_join = require('./router/api_module/application/join');
 var router_app_station = require('./router/api_module/application/station');
-var router_api = require('./router/api_module/application/router');
+var router_api = require('./router/api_module/api/router');
 
 //협력업체 api 라우터
 var router_app_sharing = require('./router/webapp/router');
