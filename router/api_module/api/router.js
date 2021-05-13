@@ -4,6 +4,7 @@ var router = express.Router(); // 이번 예제에서는 express를 사용합니
 //DB세팅
 var mysqlDB = require('../../../stationDB.js');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
+const { count } = require('console');
 //mysqlDB.connect();
 
 
@@ -176,7 +177,83 @@ router.get('/station/info', (req, res) => {
 
 //스테이션 관련 처리
 router.get('/station/usage', (req, res) => {
-    res.send("스테이션 라우터");
+    var api_key = req.query.key;
+    const page = req.query.page;
+    const period = req.query.period;
+
+    // const identifier = req.body.identifier;
+    // const token = req.body.token;
+
+    var company_id = checkAPI(api_key);
+    if(!company_id){
+        result = {
+            'result': false,
+            'code': 999,
+            'detail': '일치하는 API키가 없음',
+        } 
+        console.log(result);
+        res.json(result);
+    } else {
+
+    //스테이션 정보 확인
+    var query = "select station_usage_history.*, station.identifier as station_id, station.name as station_name, station_port.number as port_numb "+
+        "from station_usage_history "+
+        "inner join station on station_usage_history.station_id = station.id "+
+        "inner join station_port on station_usage_history.port_id = station_port.id "+
+        "where user_type = 2 and "+
+        "user_id = ?";
+    var value = [1];
+
+    var result;
+
+    mysqlDB.query(query,value, function (err, rows, fields) {
+        if (!err) {
+            if(rows.length<1){
+                result = null;
+                
+            } else{
+                var info = Array();
+
+                for(let i=0; i<rows.length; i++){
+                    var temp = {
+                        'id' : rows[i].id,
+                        'date' : rows[i].date,
+                        'start' : rows[i].start,
+                        'complete' : rows[i].complete,
+                        'end' : rows[i].end,
+                        'station' : {
+                            'id' : rows[i].station_id,
+                            'name' : rows[i].station_name,
+                            'port_numb' : rows[i].port_numb
+                        }
+                    }
+                    info.push(temp);
+                }
+                result = {
+                    'result': true,
+                    'code': 000,
+                    'total': count(rows),
+                    'total_page': (count(rows)/15)+1,
+                    'page': page,
+                    'info': info
+                } 
+            }
+            res.json(result);
+
+        } else {
+            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+
+            result = {
+                'result': false,
+                'code': 510,
+                'detail': 'DB 에러',
+            } 
+            res.json(result);
+            return false;
+        }
+        });
+    }
+
 });
 
 function checkAPI(key){
