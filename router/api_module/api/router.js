@@ -8,7 +8,7 @@ const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 
 //스테이션 
-var router_api_app = require('./router/api_module/api/app/router');
+var router_api_app = require('./router/api_module/api/app/router.js');
 var router_api_station = require('./router/api_module/api/station/router');
 
 
