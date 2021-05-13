@@ -116,7 +116,7 @@ router.get('/station/info', (req, res) => {
     }
 
     //스테이션 정보 확인
-    var query = "select station.identifier as station_id, station.name as station_name, station.latitude, station.longitude, station_port.code as port_code, station_port.number as port_numb, station_port.type as port_type"+
+    var query = "select station.identifier as station_id, station.name as station_name, station.latitude, station.longitude, station_port.code as port_code, station_port.number as port_numb, station_port.type as port_type "+
         "from station "+
         "inner join station_port on station.id = station_port.station_id "+
         "where identifier = ?";
