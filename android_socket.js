@@ -1106,7 +1106,7 @@ function checkType(WhoAmI){
 }
 
 function checkAPI(key){
-  if(key == "test") return true;
+  if(key == "shability") return true;
   else return false;
 }
 
