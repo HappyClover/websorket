@@ -56,7 +56,7 @@ const { rejects } = require('assert');
 mysqlDB.connect();
 
 //static 선언
-app.use('/static', express.static('./router/webapp/static/'));
+app.use('/request/static', express.static('./router/webapp/static/'));
 
 //어플리케이션 api
 // app.use(subdomain('station',router_app_station));
