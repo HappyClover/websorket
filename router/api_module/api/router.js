@@ -104,7 +104,7 @@ router.get('/station/info', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    if(checkAPI(api_key)){
+    if(!checkAPI(api_key)){
         result = {
             'result': false,
             'code': 999,
@@ -122,8 +122,6 @@ router.get('/station/info', (req, res) => {
     var value = [station_id];
 
     var result;
-    console.log("파라메터2 : "+api_key);
-
 
     mysqlDB.query(query,value, function (err, rows, fields) {
         if (!err) {
