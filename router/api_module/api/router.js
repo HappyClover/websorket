@@ -106,4 +106,9 @@ router.get('/station/usage', (req, res) => {
     res.send("스테이션 라우터");
 });
 
+function checkAPI(key){
+    if(key == "shability") return true;
+    else return false;
+  }
+
 module.exports = router;
