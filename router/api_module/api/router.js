@@ -123,16 +123,17 @@ router.get('/station/info', (req, res) => {
     var value = [station_id];
 
     var result;
+    console.log("파라메터2 : "+station_id);
 
 
     mysqlDB.query(query,value, function (err, rows, fields) {
     if (!err) {
         if(rows.length<1){
-        result = {
-            'result': false,
-            'code': 500,
-            'message': '일치하는 스테이션이 없습니다.'
-        } 
+            result = {
+                'result': false,
+                'code': 500,
+                'message': '일치하는 스테이션이 없습니다.'
+            } 
         } else{
             var port = Array();
 
@@ -143,7 +144,6 @@ router.get('/station/info', (req, res) => {
                     'type' : rows[i].port_type,
                     'status' : 0
                 }
-
                 port.push(result);
             }
         result = {
