@@ -120,7 +120,7 @@ router.get('/station/info', (req, res) => {
         "from station "+
         "inner join station_port on station.id = station_port.station_id "+
         "where identifier = ?";
-    var value = (station_id);
+    var value = [station_id];
 
     var result;
 
@@ -164,6 +164,14 @@ router.get('/station/info', (req, res) => {
 
     } else {
         console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+
+        result = {
+            'result': false,
+            'code': 510,
+            'detail': 'DB 에러',
+        } 
+        res.send(result);
+        return false;
     }
     });
 });
