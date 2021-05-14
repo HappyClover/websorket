@@ -266,38 +266,31 @@ router.get('/station/usage', (req, res) => {
 
 });
 
-function checkAPI(key, mysqlDB){
+async function checkAPI(key, mysqlDB){
+    var result;
+    var query = "select * from admin where api = ?";
+    var value = [key];
+
     var result;
 
-    var promise = new Promise(function(resolve, rejects){
-        var query = "select * from admin where api = ?";
-        var value = [key];
-    
-        var result;
-    
-        mysqlDB.query(query,value, function (err, rows, fields) {
-            if (!err) {
-                if(rows.length<1){
-                    console.log('checkAPI : false')
-                    resolve(false);
-                    
-                } else{
-                    console.log('checkAPI : '+rows[0].id)
-                    resolve(rows[0].id);
-                }
-    
-            } else {
-                console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
-                resolve(false)
+    await mysqlDB.query(query,value, function (err, rows, fields) {
+        if (!err) {
+            if(rows.length<1){
+                console.log('checkAPI : false')
+                result = false;
+                
+            } else{
+                console.log('checkAPI : '+rows[0].id)
+                result = rows[0].id;
             }
-        });
-      });
 
-    promise.then((data)=>{
-        result = data;
+        } else {
+            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+            result = false;
+        }
     });
 
-    console.log('promise return : '+result);
+    console.log('result : '+result);
 
     return result;
 }
