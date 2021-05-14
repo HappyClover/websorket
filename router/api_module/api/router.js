@@ -293,8 +293,8 @@ function checkAPI(key, mysqlDB){
         });
       });
 
-    result = promise.then();
-    
+    promise.then(result = data);
+
     console.log('promise return : '+result);
 
     return result;
