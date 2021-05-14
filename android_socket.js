@@ -159,7 +159,7 @@ io.on('connection',function (socket){
           var login_data = JSON.parse(data);
         }
 
-
+        socket_type = login_data.type;
 
         socket.join(`${socket_type}`)
 
@@ -229,9 +229,6 @@ io.on('connection',function (socket){
             break;
 
           case 'admin' :
-            nickname = login_data.name;
-            socket_type = login_data.type;
-            
             AdminIsOn.push(nickname) //
             socket.join(room['admin']);
             result = true;
