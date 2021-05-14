@@ -273,9 +273,11 @@ function checkAPI(key, mysqlDB){
     mysqlDB.query(query,value, function (err, rows, fields) {
         if (!err) {
             if(rows.length<1){
+                console.log('checkAPI : false')
                 return false;
                 
             } else{
+                console.log('checkAPI : '+rows[0].id)
                 return rows[0].id;
             }
 
