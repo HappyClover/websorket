@@ -11,86 +11,86 @@ router.get('/', (req, res) => {
 });
 
 
-router.get('/request/', (req, res) => {
-    res.render('./router/webapp/index_b.ejs');
-});
+// router.get('/request/', (req, res) => {
+//     res.render('./router/webapp/index_b.ejs');
+// });
   
-router.post('/request/', (req, res) => {
-    const api_key = req.body.key;
-    const port_code = req.body.code;
+// router.post('/request/', (req, res) => {
+//     const api_key = req.body.key;
+//     const port_code = req.body.code;
 
-    let result = false;
-    let err_code = 0;
-    let msg = '';
+//     let result = false;
+//     let err_code = 0;
+//     let msg = '';
 
-    let station_id = 0;
-    let station_name = "ㅇㅅㅇ";
-    let station_port = "알수없음";
+//     let station_id = 0;
+//     let station_name = "ㅇㅅㅇ";
+//     let station_port = "알수없음";
 
-    let company_name = "테스트";
+//     let company_name = "테스트";
 
-    console.log("key : " + api_key);
-    console.log("port : " + port_code);
+//     console.log("key : " + api_key);
+//     console.log("port : " + port_code);
     
 
-    var value = (api_key);
-    var query = "select * from admin where api = ?";
-    mysqlDB.query(query,value, function (err, rows, fields) {
-        console.log(rows);
+//     var value = (api_key);
+//     var query = "select * from admin where api = ?";
+//     mysqlDB.query(query,value, function (err, rows, fields) {
+//         console.log(rows);
 
-        if(!err){
-            if(rows.length < 1){
-                result = false;
-                err_code = 999;
-                msg = "api키 불일치";
-                res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});            
-            } else {
-                var query = "select station.code, station.name, station_port.number from station_port "
-                +"inner join station on station_port.station_id = station.id "
-                +"where station_port.code = ?";
-                var value = (port_code);
+//         if(!err){
+//             if(rows.length < 1){
+//                 result = false;
+//                 err_code = 999;
+//                 msg = "api키 불일치";
+//                 res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});            
+//             } else {
+//                 var query = "select station.code, station.name, station_port.number from station_port "
+//                 +"inner join station on station_port.station_id = station.id "
+//                 +"where station_port.code = ?";
+//                 var value = (port_code);
         
-                mysqlDB.query(query,value, function (err, rows, fields) {
+//                 mysqlDB.query(query,value, function (err, rows, fields) {
         
-                    if (!err) {
-                    if(rows.length<1){
-                        result = false;
-                        err_code = 989;
-                        msg = "qr코드 불일치";
+//                     if (!err) {
+//                     if(rows.length<1){
+//                         result = false;
+//                         err_code = 989;
+//                         msg = "qr코드 불일치";
         
-                        res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+//                         res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
         
-                    } else {
-                        result = true;
-                        err_code = 000;
-                        msg = "정상";
+//                     } else {
+//                         result = true;
+//                         err_code = 000;
+//                         msg = "정상";
         
-                        station_name = rows[0].name;
-                        station_id = rows[0].code;
-                        station_port = rows[0].number;
-                    }
-                    console.log({result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
-                    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+//                         station_name = rows[0].name;
+//                         station_id = rows[0].code;
+//                         station_port = rows[0].number;
+//                     }
+//                     console.log({result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+//                     res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
         
-                    } else {
-                    console.log(err);
+//                     } else {
+//                     console.log(err);
         
-                    result = false;
-                    err_code = 979;
-                    msg = "DB에러";
-                    res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+//                     result = false;
+//                     err_code = 979;
+//                     msg = "DB에러";
+//                     res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
         
-                    }
-                }); 
-            }
-        } else {
-            result = false;
-            err_code = 978;
-            msg = "DB에러";
-            res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
+//                     }
+//                 }); 
+//             }
+//         } else {
+//             result = false;
+//             err_code = 978;
+//             msg = "DB에러";
+//             res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
 
-        }
-    });
+//         }
+//     });
 
     
     
@@ -139,17 +139,17 @@ router.post('/request/', (req, res) => {
     // res.render('./router/webapp/request.ejs', {result, err_code, msg, station_name, station_port, company_name, api_key, port_code, station_id});
 
     // }
-    console.log(result);
+//     console.log(result);
 
 
-});
+// });
 
 
-router.get('/request/test/', (req, res) => {
+router.get('/request/', (req, res) => {
     res.render('./router/webapp/index_b.ejs');
 });
   
-router.post('/request/test/', (req, res) => {
+router.post('/request/', (req, res) => {
     const api_key = req.body.key;
     const port_code = req.body.code;
 
