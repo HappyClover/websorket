@@ -188,7 +188,7 @@ router.get('/station/usage', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    var company_id = checkAPI(api_key, mysqlDB);
+    var company_id = await checkAPI(api_key, mysqlDB);
     console.log('checkAPI : '+ company_id);
 
     if(!company_id){
@@ -266,33 +266,30 @@ router.get('/station/usage', (req, res) => {
 
 });
 
-async function checkAPI(key, mysqlDB){
-    var result;
-    var query = "select * from admin where api = ?";
-    var value = [key];
-
-    var result;
-
-    await mysqlDB.query(query,value, function (err, rows, fields) {
-        if (!err) {
-            if(rows.length<1){
-                console.log('checkAPI : false')
-                result = false;
-                
-            } else{
-                console.log('checkAPI : '+rows[0].id)
-                result = rows[0].id;
+function checkAPI(key, mysqlDB){
+    return new Promise(function(resolve, rejects){
+        var query = "select * from admin where api = ?";
+        var value = [key];
+    
+        var result;
+    
+        mysqlDB.query(query,value, function (err, rows, fields) {
+            if (!err) {
+                if(rows.length<1){
+                    console.log('checkAPI : false')
+                    resolve(false);
+                    
+                } else{
+                    console.log('checkAPI : '+rows[0].id)
+                    resolve(rows[0].id);
+                }
+    
+            } else {
+                console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+                resolve(false)
             }
-
-        } else {
-            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
-            result = false;
-        }
-    });
-
-    console.log('result : '+result);
-
-    return result;
+        });
+      });
 }
 
 
