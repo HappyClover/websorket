@@ -271,31 +271,26 @@ function checkAPI(key, mysqlDB){
     var query = "select * from admin where api = ?";
     var value = [key];
 
-    mysqlDB('GET', query, []).then(function(res) {
-       result = res.row 
-    });
-
-
-    // var result = mysqlDB.query(query,value, function (err, rows, fields) {
-    //     if (!err) {
-    //         if(rows.length<1){
-    //             console.log('checkAPI : false')
-    //             return false;
+    var result = mysqlDB.query(query,value, function (err, rows, fields) {
+        if (!err) {
+            if(rows.length<1){
+                console.log('checkAPI : false')
+                return false;
                 
-    //         } else{
-    //             console.log('checkAPI : '+rows[0].id)
-    //             return rows[0].id;
-    //         }
+            } else{
+                console.log('checkAPI : '+rows[0].id)
+                return rows[0].id;
+            }
 
-    //     } else {
-    //         console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
-    //         return false;
-    //     }
-    // });
+        } else {
+            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+            return false;
+        }
+    });
 
     console.log('promise return : '+result);
 
-    return false;
+    return result;
 }
 
 
