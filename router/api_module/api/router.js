@@ -267,6 +267,8 @@ router.get('/station/usage', (req, res) => {
 });
 
 function checkAPI(key, mysqlDB){
+    var result;
+
     var promise = new Promise(function(resolve, rejects){
         var query = "select * from admin where api = ?";
         var value = [key];
@@ -292,8 +294,10 @@ function checkAPI(key, mysqlDB){
       });
 
     promise.then(function(data){
-        return data;
+        result = data;
     });
+
+    return result;
 }
 
 
