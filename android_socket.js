@@ -53,7 +53,7 @@ var router_admin_main = require('./router/controll/detail.js');
 var mysqlDB = require('./stationDB.js');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 const { rejects } = require('assert');
-mysqlDB.connect();
+//mysqlDB.connect();
 
 //static 선언
 app.use('/static', express.static('./router/webapp/static/'));
