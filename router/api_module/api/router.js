@@ -266,31 +266,36 @@ router.get('/station/usage', (req, res) => {
 
 });
 
-async function checkAPI(key, mysqlDB){
+function checkAPI(key, mysqlDB){
     var result;
     var query = "select * from admin where api = ?";
     var value = [key];
 
-    var result = await mysqlDB.query(query,value, function (err, rows, fields) {
-        if (!err) {
-            if(rows.length<1){
-                console.log('checkAPI : false')
-                return false;
-                
-            } else{
-                console.log('checkAPI : '+rows[0].id)
-                return rows[0].id;
-            }
-
-        } else {
-            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
-            return false;
-        }
+    mysqlDB('GET', query, []).then(function(res) {
+       result = res.row 
     });
+
+
+    // var result = mysqlDB.query(query,value, function (err, rows, fields) {
+    //     if (!err) {
+    //         if(rows.length<1){
+    //             console.log('checkAPI : false')
+    //             return false;
+                
+    //         } else{
+    //             console.log('checkAPI : '+rows[0].id)
+    //             return rows[0].id;
+    //         }
+
+    //     } else {
+    //         console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+    //         return false;
+    //     }
+    // });
 
     console.log('promise return : '+result);
 
-    return result;
+    return false;
 }
 
 
