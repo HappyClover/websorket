@@ -159,13 +159,15 @@ io.on('connection',function (socket){
           var login_data = JSON.parse(data);
         }
 
-        nickname = login_data.name;
-        socket_type = login_data.type;
+
 
         socket.join(`${socket_type}`)
 
         switch(socket_type){
           case 'station' :
+            nickname = login_data.name;
+            socket_type = login_data.type;
+
             var id, name, result;
 
             //스테이션 정보 확인
@@ -227,6 +229,9 @@ io.on('connection',function (socket){
             break;
 
           case 'admin' :
+            nickname = login_data.name;
+            socket_type = login_data.type;
+            
             AdminIsOn.push(nickname) //
             socket.join(room['admin']);
             result = true;
