@@ -92,6 +92,8 @@ router.get('/station/list', (req, res) => {
         
             let result = {
             "result": true,
+            'code' : 000,
+            'detail': 'success',
             "station": station_result,
             }
         
@@ -132,7 +134,7 @@ router.get('/station/info', (req, res) => {
                 result = {
                     'result': false,
                     'code': 500,
-                    'message': '일치하는 스테이션이 없습니다.'
+                    'detail': '일치하는 스테이션이 없습니다.'
                 } 
             } else{
                 var port = Array();
@@ -149,7 +151,7 @@ router.get('/station/info', (req, res) => {
                 result = {
                     'result': true,
                     'code': 000,
-                    'message': 'success',
+                    'detail': 'success',
                     'station': {
                     'id': rows[0].station_id,
                     'name': rows[0].station_name,
@@ -237,6 +239,7 @@ router.get('/station/usage', (req, res) => {
                     result = {
                         'result': true,
                         'code': 000,
+                        'detail': 'success',
                         'total': rows.length,
                         'total_page': Math.floor(rows.length%15)+1,
                         'page': page,
