@@ -672,7 +672,7 @@ io.on('connection',function (socket){
 
           socket.to(user_info.socket_id).emit('charge_start');
           socket.to(user_info.socket_id).emit('result', response_data1);
-          
+
           socket.emit('result',response_data);
 
           io.to(room['admin']).emit('a_charge', response_data);
@@ -697,8 +697,6 @@ io.on('connection',function (socket){
             break;
           }
 
-          
-          
           response_data = {
             "data" : true,
             "code" : "charge_cancel",

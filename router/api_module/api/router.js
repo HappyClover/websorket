@@ -44,7 +44,7 @@ router.get('/station/list', (req, res) => {
 
 
     //api키 체크
-    if(!checkAPI(api_key)){
+    if(!checkAPI(api_key, mysqlDB)){
     result = {
         "result": false,
         "code": "999",
@@ -109,7 +109,7 @@ router.get('/station/info', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    if(!checkAPI(api_key)){
+    if(!checkAPI(api_key, mysqlDB)){
         result = {
             'result': false,
             'code': 999,
@@ -188,7 +188,7 @@ router.get('/station/usage', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    var company_id = checkAPI(api_key);
+    var company_id = checkAPI(api_key, mysqlDB);
     if(!company_id){
         result = {
             'result': false,
@@ -264,9 +264,26 @@ router.get('/station/usage', (req, res) => {
 
 });
 
-function checkAPI(key){
-    if(key == "shability") return true;
-    else return false;
+function checkAPI(key, mysqlDB){
+    var query = "select * from admin where api = ?";
+    var value = [key];
+
+    var result;
+
+    mysqlDB.query(query,value, function (err, rows, fields) {
+        if (!err) {
+            if(rows.length<1){
+                return false;
+                
+            } else{
+                return rows[0].id;
+            }
+
+        } else {
+            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+            return false;
+        }
+    });
   }
 
 module.exports = router;
