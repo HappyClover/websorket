@@ -189,6 +189,8 @@ router.get('/station/usage', (req, res) => {
     // const token = req.body.token;
 
     var company_id = checkAPI(api_key, mysqlDB);
+    console.log('checkAPI : '+ company_id);
+    
     if(!company_id){
         result = {
             'result': false,
