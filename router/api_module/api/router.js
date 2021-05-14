@@ -188,7 +188,7 @@ router.get('/station/usage', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    var company_id = await checkAPI(api_key, mysqlDB);
+    var company_id = checkAPI(api_key, mysqlDB);
     console.log('checkAPI : '+ company_id);
 
     if(!company_id){
@@ -267,7 +267,9 @@ router.get('/station/usage', (req, res) => {
 });
 
 function checkAPI(key, mysqlDB){
-    return new Promise(function(resolve, rejects){
+    var result;
+
+    var promise = new Promise(function(resolve, rejects){
         var query = "select * from admin where api = ?";
         var value = [key];
     
@@ -290,6 +292,14 @@ function checkAPI(key, mysqlDB){
             }
         });
       });
+
+    promise.then((data)=>{
+        result = data;
+    });
+
+    console.log('promise return : '+result);
+
+    return result;
 }
 
 
