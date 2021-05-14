@@ -617,6 +617,7 @@ io.on('connection',function (socket){
     socket.on('charge',function(data){
       var get_data = JSON.parse(data);
       var response_data;
+      var response_data1;
 
       code = get_data.code;
 
@@ -651,6 +652,12 @@ io.on('connection',function (socket){
             "port": Number(data.port)
           }
 
+          response_data1 = {
+            "data" : true,
+            "code" : "charge_start",
+            "port": Number(data.port)
+          }
+
           port_list[Number(data.port)-1].setStatus('charge_start',null, null, mysqlDB);
           var temp = port_list[Number(data.port)-1].getUser();
           var user_info;
@@ -664,6 +671,8 @@ io.on('connection',function (socket){
           console.log(user_info);
 
           socket.to(user_info.socket_id).emit('charge_start');
+          socket.to(user_info.socket_id).emit('result', response_data1);
+          
           socket.emit('result',response_data);
 
           io.to(room['admin']).emit('a_charge', response_data);
