@@ -4,7 +4,7 @@ var moment = require('moment');
 var router = express.Router(); // 이번 예제에서는 express를 사용합니다.
 
 //DB세팅
-//var mysqlDB = require('../../../stationDB.js');
+var mysqlDB = require('../../../stationDB.js');
 var pool = require('../../../stationPool.js');
 
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
@@ -217,11 +217,10 @@ router.get('/station/usage',async (req, res) => {
 
         var result;
 
-        pool.query(query,value, function (err, rows, fields) {
+        mysqlDB.query(query,value, function (err, rows, fields) {
             if (!err) {
                 if(rows.length<1){
                     result = null;
-                    
                 } else{
                     var info = Array();
 
