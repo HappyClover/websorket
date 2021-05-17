@@ -46,7 +46,7 @@ router.get('/station/list', (req, res) => {
 
 
     //api키 체크
-    if(!checkAPI(api_key, pool)){
+    if(!await checkAPI(api_key, pool)){
     result = {
         "result": false,
         "code": "999",
@@ -111,7 +111,7 @@ router.get('/station/info', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    if(!checkAPI(api_key, pool)){
+    if(!await checkAPI(api_key, pool)){
         result = {
             'result': false,
             'code': 999,
