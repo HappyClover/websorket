@@ -182,7 +182,7 @@ router.get('/station/info', (req, res) => {
 });
 
 //스테이션 관련 처리
-router.get('/station/usage', (req, res) => {
+router.get('/station/usage',async (req, res) => {
     var api_key = req.query.key;
     var page = req.query.page;
     var period = req.query.period;
@@ -217,7 +217,7 @@ router.get('/station/usage', (req, res) => {
 
         var result;
 
-        mysqlDB.query(query,value, function (err, rows, fields) {
+        await pool.query(query,value, function (err, rows, fields) {
             if (!err) {
                 if(rows.length<1){
                     result = null;
@@ -274,13 +274,13 @@ async function checkAPI(key, pool){
 
     const result = await pool.query(query,value);
 
-    console.log(result);
+    console.log(result[0].TextRow);
 
     return result.id;
 
     // var result = mysqlDB.query(query,value, function (err, rows, fields) {
     //     if (!err) {
-    //         if(rows.length<1){
+    //         if(rows.length<1){ 
     //             console.log('checkAPI : false')
     //             return false;
                 
