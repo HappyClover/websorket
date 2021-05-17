@@ -31,7 +31,7 @@ router.get('/station', (req, res) => {
 });
 
 //스테이션 관련 처리
-router.get('/station/list', (req, res) => {
+router.get('/station/list',async (req, res) => {
     const api_key = req.query.key;
     const min_lat = req.query.min_lat;
     const min_long = req.query.min_long;  
@@ -107,7 +107,7 @@ router.get('/station/list', (req, res) => {
 });
 
 //스테이션 관련 처리
-router.get('/station/info', (req, res) => {
+router.get('/station/info',async (req, res) => {
     var api_key = req.query.key;
     const station_id = req.query.id;
     // const identifier = req.body.identifier;
