@@ -274,8 +274,6 @@ async function checkAPI(key, pool){
 
     const result = await pool.query(query,value);
 
-    console.log(result);
-
     if (result[0].length > 0)
         return result[0][0]['id'];
     else
