@@ -274,7 +274,7 @@ async function checkAPI(key, pool){
 
     const result = await pool.query(query,value);
 
-    console.log(result.TextRow);
+    console.log(result[0]);
 
     return result.id;
 
