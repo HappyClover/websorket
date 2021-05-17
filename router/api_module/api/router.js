@@ -276,9 +276,12 @@ async function checkAPI(key, pool){
 
     console.log(result);
 
+    if (result[0].length > 0)
+        return result[0][0]['id'];
+    else
+        return false;
 
 
-    return result[0][0]['id'];
 
     // var result = mysqlDB.query(query,value, function (err, rows, fields) {
     //     if (!err) {
