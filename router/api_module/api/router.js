@@ -4,7 +4,9 @@ var moment = require('moment');
 var router = express.Router(); // 이번 예제에서는 express를 사용합니다.
 
 //DB세팅
-var mysqlDB = require('../../../stationDB.js');
+//var mysqlDB = require('../../../stationDB.js');
+var pool = require('../../../stationPool.js');
+
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 const { count } = require('console');
 //mysqlDB.connect();
@@ -44,7 +46,7 @@ router.get('/station/list', (req, res) => {
 
 
     //api키 체크
-    if(!checkAPI(api_key, mysqlDB)){
+    if(!checkAPI(api_key, pool)){
     result = {
         "result": false,
         "code": "999",
@@ -109,7 +111,7 @@ router.get('/station/info', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    if(!checkAPI(api_key, mysqlDB)){
+    if(!checkAPI(api_key, pool)){
         result = {
             'result': false,
             'code': 999,
@@ -188,7 +190,7 @@ router.get('/station/usage', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    var company_id = checkAPI(api_key, mysqlDB);
+    var company_id = checkAPI(api_key, pool);
     console.log('checkAPI : '+ company_id);
 
     if(!company_id){
@@ -266,31 +268,39 @@ router.get('/station/usage', (req, res) => {
 
 });
 
-function checkAPI(key, mysqlDB){
+function checkAPI(key, pool){
     var result;
+
+
     var query = "select * from admin where api = ?";
     var value = [key];
 
-    var result = mysqlDB.query(query,value, function (err, rows, fields) {
-        if (!err) {
-            if(rows.length<1){
-                console.log('checkAPI : false')
-                return false;
+    const result = await pool.query(query,value);
+
+    console.log(result);
+
+    return result.id;
+
+    // var result = mysqlDB.query(query,value, function (err, rows, fields) {
+    //     if (!err) {
+    //         if(rows.length<1){
+    //             console.log('checkAPI : false')
+    //             return false;
                 
-            } else{
-                console.log('checkAPI : '+rows[0].id)
-                return rows[0].id;
-            }
+    //         } else{
+    //             console.log('checkAPI : '+rows[0].id)
+    //             return rows[0].id;
+    //         }
 
-        } else {
-            console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
-            return false;
-        }
-    });
+    //     } else {
+    //         console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
+    //         return false;
+    //     }
+    // });
 
-    console.log('promise return : '+result);
+    // console.log('promise return : '+result);
 
-    return result;
+    // return result;
 }
 
 
