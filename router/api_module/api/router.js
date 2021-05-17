@@ -268,7 +268,7 @@ router.get('/station/usage', (req, res) => {
 
 });
 
-function checkAPI(key, pool){
+async function checkAPI(key, pool){
     var query = "select * from admin where api = ?";
     var value = [key];
 
