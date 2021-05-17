@@ -274,9 +274,9 @@ async function checkAPI(key, pool){
 
     const result = await pool.query(query,value);
 
-    console.log(result[0].id);
+    console.log(result[0].TextRow);
 
-    return result[0].id;
+    return result[0].TextRow;
 
     // var result = mysqlDB.query(query,value, function (err, rows, fields) {
     //     if (!err) {
