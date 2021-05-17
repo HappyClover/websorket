@@ -182,7 +182,7 @@ router.get('/station/info', (req, res) => {
 });
 
 //스테이션 관련 처리
-router.get('/station/usage', (req, res) => {
+router.get('/station/usage',async (req, res) => {
     var api_key = req.query.key;
     var page = req.query.page;
     var period = req.query.period;
@@ -190,7 +190,7 @@ router.get('/station/usage', (req, res) => {
     // const identifier = req.body.identifier;
     // const token = req.body.token;
 
-    var company_id = checkAPI(api_key, pool);
+    var company_id = await checkAPI(api_key, pool);
     console.log('checkAPI : '+ company_id);
 
     if(!company_id){
