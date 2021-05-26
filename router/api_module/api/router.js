@@ -49,12 +49,12 @@ router.get('/station/list',async (req, res) => {
     var company_id = await checkAPI(api_key, pool);
 
     if(!company_id){
-    result = {
-        "result": false,
-        "code": "999",
-        "detail": "API키 불일치"
-    }
-    res.send(result);
+        result = {
+            "result": false,
+            "code": "999",
+            "detail": "API키 불일치"
+        }
+        res.send(result);
 
     } else {
         //스테이션 리스트 가져오기
@@ -86,8 +86,8 @@ router.get('/station/list',async (req, res) => {
                     }
                 }
             } else {
-            console.log('query error : ' + err);
-            station_result = null;
+                console.log('query error : ' + err);
+                station_result = null;
             }
 
             console.log(station_result);
@@ -95,10 +95,10 @@ router.get('/station/list',async (req, res) => {
             //사용 여부
         
             let result = {
-            "result": true,
-            'code' : 000,
-            'detail': 'success',
-            "station": station_result,
+                "result": true,
+                'code' : 000,
+                'detail': 'success',
+                "station": station_result,
             }
         
             res.json(result);
@@ -216,7 +216,8 @@ router.get('/station/usage',async (req, res) => {
             "inner join station on station_usage_history.station_id = station.id "+
             "inner join station_port on station_usage_history.port_id = station_port.id "+
             "where user_type = 2 and "+
-            "user_id = ?";
+            "user_id = ?" +
+            "order by station_usage_history.id DESC";
         var value = [1];
 
         var result;
@@ -271,11 +272,18 @@ router.get('/station/usage',async (req, res) => {
 
 });
 
-async function checkAPI(key, pool){
+async function checkAPI(key, pool, req){
     var query = "select * from admin where api = ?";
     var value = [key];
 
     const result = await pool.query(query,value);
+
+
+    var query = "insert into api_result(admin_id)";
+    var value = [key];
+
+    const result = await pool.excute(query,value);
+
 
     if (result[0].length > 0)
         return result[0][0]['id'];
@@ -305,8 +313,6 @@ async function checkAPI(key, pool){
 
     // return result;
 }
-
-
 
 
 module.exports = router;

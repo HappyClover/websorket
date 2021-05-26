@@ -5,6 +5,8 @@ var socketio = require('socket.io');
 var fs = require('fs');
 var https = require('https');
 var http = require('http');
+const session = require('express-session')
+
 // var option = {
 //   pfx: fs.readFileSync('/Users/rlathdgus1/ssl/_wildcard_.wingstation.co.kr_202105030C96.pfx'),
 //   passphrase: '9bk5rs',
@@ -34,6 +36,12 @@ var bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'BaKuMan221',           //이때의 옵션은 세션에 세이브 정보를 저장할때 할때 파일을 만들꺼냐
+    //아니면 미리 만들어 놓을꺼냐 등에 대한 옵션들임
+  resave: true,
+  saveUninitialized:true
+}))
 
 //라우터 세팅
 //어플리케이션 api 라우터
@@ -242,7 +250,7 @@ io.on('connection',function (socket){
 
             var temp = (nickname);
             var user_query = 'select * from user where token = ?';
-            mysqlDB.query(user_query,temp, function (err, rows, fields) {
+            mysqlDB.query(user_query, temp, function (err, rows, fields) {
               if (!err) { 
                 console.log(rows);
 
@@ -268,46 +276,46 @@ io.on('connection',function (socket){
             break;
 
             //api를 이용하는 업체
-            case 'company' :
-              nickname = login_data.api;
-              socket_type = login_data.type;
-              console.log(nickname);
+          case 'company' :
+            nickname = login_data.api;
+            socket_type = login_data.type;
+            console.log(nickname);
 
-              var temp = (nickname);
+            var temp = (nickname);
 
-              console.log("API키 : "+temp);
+            console.log("API키 : "+temp);
 
-              var user_query = 'select * from admin where api = ?';
-              mysqlDB.query(user_query,temp, function (err, rows, fields) {
-                if (!err) { 
-                  console.log(rows);
-  
-                  if(rows.length>0){
-                    console.log(`${nickname} has entered ${socket_type} chatroom! ---------------------`)
-                    id = rows[0].id;
-                    identifier = rows[0].identifier;
-                    name = rows[0].name;
+            var user_query = 'select * from admin where api = ?';
+            mysqlDB.query(user_query,temp, function (err, rows, fields) {
+              if (!err) { 
+                console.log(rows);
 
-                    WhoAmI = new company_class(id, identifier, name, socket.id);
-                    companyIsOn[id] = WhoAmI //
-      
-                    shoot_result(socket, "login", true);
-                    
-                  } else { //조회결과가 없을때
-                    console.log("토큰 불일치")
-                    shoot_result(socket, "login", false);
-                    result = false;
-                  }
-                } else {
-                  console.log('query error : ' + err);
+                if(rows.length>0){
+                  console.log(`${nickname} has entered ${socket_type} chatroom! ---------------------`)
+                  id = rows[0].id;
+                  identifier = rows[0].identifier;
+                  name = rows[0].name;
+
+                  WhoAmI = new company_class(id, identifier, name, socket.id);
+                  companyIsOn[id] = WhoAmI //
+    
+                  shoot_result(socket, "login", true);
+                  
+                } else { //조회결과가 없을때
+                  console.log("토큰 불일치")
+                  shoot_result(socket, "login", false);
                   result = false;
                 }
-              });
-              break;
+              } else {
+                console.log('query error : ' + err);
+                result = false;
+              }
+            });
+            break;
 
-            default:
-              shoot_result(socket, "login", false,'알수없는 접속자 타입');
-              break;
+          default:
+            shoot_result(socket, "login", false,'알수없는 접속자 타입');
+            break;
           }
 
 
@@ -511,6 +519,14 @@ io.on('connection',function (socket){
           case 'user':
             //Delete user in the whoIsOn Arryay
             UserIsOn.splice(UserIsOn.indexOf(nickname),1);
+            var data = true;
+            shoot_result(socket,'result',data);
+            console.log(`${UserIsOn}`)
+            break;
+
+          case 'company':
+            //Delete user in the whoIsOn Arryay
+            companyIsOn.splice(UserIsOn.indexOf(nickname),1);
             var data = true;
             shoot_result(socket,'result',data);
             console.log(`${UserIsOn}`)
@@ -751,6 +767,12 @@ io.on('connection',function (socket){
             }
             socket.emit('result',response_data);
 
+            lock_data = {
+              'port': data.port,
+              'status': 1
+            }
+            socket.emit('lock_controll',lock_data);
+
             console.log(`${data.port} for ${code} result ${response_data.data}`);
 
             break;
@@ -794,6 +816,13 @@ io.on('connection',function (socket){
           }
           port_list[Number(data.port)-1].setStatus('short_circuit',null, null, mysqlDB);
           socket.emit('result',response_data);
+
+          lock_data = {
+            'port': data.port,
+            'status': 1
+          }
+          socket.emit('lock_controll',lock_data);
+
           io.to(room['admin']).emit('a_charge', response_data);
 
           console.log(`${data.port} for ${code} result ${response_data.data}`);

@@ -9,9 +9,7 @@ const dbsecret = {
 };
 
 const pool = mysql.createPool(
-
   dbsecret                                             //db.json이라는 파일에서 mysql 정보를 가져옵니다.
-
 );
 
 const promisePool = pool.promise();
