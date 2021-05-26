@@ -217,7 +217,7 @@ router.get('/station/usage',async (req, res) => {
             "inner join station_port on station_usage_history.port_id = station_port.id "+
             "where user_type = 2 and "+
             "user_id = ?" +
-            "order by station_usage_history.id DESC";
+            "order by id DESC";
         var value = [1];
 
         var result;
