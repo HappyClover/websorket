@@ -279,10 +279,10 @@ async function checkAPI(key, pool, req){
     const result = await pool.query(query,value);
 
 
-    var query = "insert into api_result(admin_id)";
-    var value = [key];
+    // var query = "insert into api_result(admin_id)";
+    // var value = [key];
 
-    const result = await pool.excute(query,value);
+    // const result1 = await pool.excute(query,value);
 
 
     if (result[0].length > 0)
