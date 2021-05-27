@@ -423,6 +423,7 @@ io.on('connection',function (socket){
 
         if(j_data.hasOwnProperty('pcb')){
           var station_query = 'insert into port_log(port_id, code, value, date) value(?,?,?,?)';
+          var stringDate = getTimeStamp();
 
           for(i=0; i<j_data.pcb.length; i++){
             var key = Object.getOwnPropertyNames(j_data.pcb[i]);
@@ -787,7 +788,6 @@ io.on('connection',function (socket){
             "port": Number(data.port)
           }
 
-          port_list[Number(data.port)-1].setStatus('charge_complete',null, null, mysqlDB);
           socket.emit('result',response_data);
           io.to(room['admin']).emit('a_charge', response_data);
 
@@ -884,7 +884,7 @@ io.on('connection',function (socket){
     //사용자 소켓 통신 부분
     socket.on('port_ready',function(data){
       if(checkType(WhoAmI) == 'user' || checkType(WhoAmI) == 'company'){
-      console.log(data);
+        console.log(data);
       if(data instanceof Object){}
       else{ data = JSON.parse(data); }
         
@@ -1075,6 +1075,21 @@ function sql_query(query, value){
       return false;
     }
   });
+}
+
+function add_log(code, msg){
+  const query = "insert into log(code, message), values(?,?)";
+  const value = (code, msg);
+
+  mysqlDB.query(query,value, function (err, rows, fields) {
+    if (!err) {
+      return true;
+    } else {
+      console.log('query error : ' + err);
+      return false;
+    }
+  });
+
 }
 
 function AddPortLog(port_id, status, value){

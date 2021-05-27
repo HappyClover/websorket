@@ -44,7 +44,7 @@ C_port.prototype.setValue = function (code, value){
 	}
 }
 
-C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
+C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB, kickboard){
 			let today = new Date();   
 
 			let year = today.getFullYear(); // 년도
@@ -68,8 +68,8 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 			code = 101;
 			var user_type_numb = transType(this.user_type);
 			
-			var parameter = [user_type_numb, user_id, this.station, this.id, code, stringDate, this.status];
-			var query = "insert into station_usage_history(user_type, user_id, station_id, port_id, code, date, status) values(?,?,?,?,?,?,?)"
+			var parameter = [user_type_numb, user_id, this.station, this.id, code, stringDate, this.status, kickboard];
+			var query = "insert into station_usage_history(user_type, user_id, station_id, port_id, code, date, status, kickboard) values(?,?,?,?,?,?,?,?)"
 
 			var usage_id;
 
@@ -140,7 +140,7 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB){
 
             break;     
 		case 'charge_complete':
-            this.status = 3;
+            this.status = 0;
 			code = 104;
 
 			var queryPromise = new Promise((resolve, reject) =>{
