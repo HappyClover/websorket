@@ -1,10 +1,10 @@
-var subdomain = require('vhost');
-var express = require('express')
-var app = express(); // 이번 예제에서는 express를 사용합니다.
-var socketio = require('socket.io');
-var fs = require('fs');
-var https = require('https');
-var http = require('http');
+const subdomain = require('vhost');
+const express = require('express')
+const app = express(); // 이번 예제에서는 express를 사용합니다.
+const socketio = require('socket.io');
+const fs = require('fs');
+const https = require('https');
+const http = require('http');
 const session = require('express-session')
 
 // var option = {
@@ -49,6 +49,7 @@ var router_app_login = require('./router/api_module/application/login');
 var router_app_join = require('./router/api_module/application/join');
 var router_app_station = require('./router/api_module/application/station');
 var router_api = require('./router/api_module/api/router');
+var router_app = require('./router/api_module/app/router');
 
 //협력업체 api 라우터
 var router_app_sharing = require('./router/webapp/router');
@@ -77,6 +78,10 @@ app.use(subdomain('webapp.wingstation.co.kr', router_app_sharing));
 
 //관제페이지
 app.use(subdomain('admin.wingstation.co.kr',router_admin_main));
+
+//앱으로 리다이랙트 처리 페이지
+app.use(subdomain("app.wingstation.co.kr", router_app));
+
 app.use(express.static('static'));
 
 app.get('/admin', (req, res) => {
@@ -84,7 +89,7 @@ app.get('/admin', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('wellcome to wingstation');
+  res.redirect("http://www.shability.io");
 });
 
 var server;
@@ -212,7 +217,7 @@ io.on('connection',function (socket){
                       //   }
                       // });
 
-                      port = new port_class(rows[i].port_id, rows[i].port_numb, id)
+                      var port = new port_class(rows[i].port_id, rows[i].port_numb, id)
                       port_list[Number(port.getPortNumb())-1] = port;
                       result = true;
                       io.to(room['admin']).emit('a_join_status', 1);
@@ -919,29 +924,31 @@ io.on('connection',function (socket){
                 if(checkType(WhoAmI) == 'user'){
                   var station_query = 'select id from user where token = ?';
                   mysqlDB.query(station_query,nickname, function (err, rows, fields) {
+                    let input_data;
+
                     if (!err) {
                       user_id = rows[0].id;
-            
+
                       console.log(WhoAmI);
-  
-                      port_list[Number(data.port_numb)-1].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI), mysqlDB);
-    
+
+                      port_list[Number(data.port_numb) - 1].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI), mysqlDB);
+
                       input_data = {
                         port: Number(data.port_numb),
                         admin: 0,
                         setting: {
-                          volt: 36,
+                          volt: 42,
                           ampere: 2.5
                         }
                       }
-    
-                      port_list[Number(data.port_numb)-1].setValue('status',1);
-  
+
+                      port_list[Number(data.port_numb) - 1].setValue('status', 1);
+
                       shoot_result(socket, "port_ready", true);
                       //console.log(StationIsOn[station_identifier].socket_id);
-    
+
                       io.to(room['admin']).emit('a_charge_ready', input_data);
-    
+
                     } else {
                       console.log('query error : ' + err);
                     }
@@ -955,7 +962,7 @@ io.on('connection',function (socket){
                     admin: 0,
                     setting: {
                       volt: 42,
-                      ampere: 2.5
+                      ampere: 3.0
                     }
                   }
   

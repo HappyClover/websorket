@@ -152,6 +152,8 @@ router.get('/request/', (req, res) => {
 router.post('/request/', (req, res) => {
     const api_key = req.body.key;
     const port_code = req.body.code;
+    const auto_close = req.body.auto_close;
+    const kickboard = req.body.kickboard;
 
     let result = false;
     let err_code = 0;
@@ -196,7 +198,7 @@ router.post('/request/', (req, res) => {
         
                     } else {
                         result = true;
-                        err_code = 000;
+                        err_code = 0o00;
                         msg = "정상";
         
                         station_name = rows[0].name;

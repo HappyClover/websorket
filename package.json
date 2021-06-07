@@ -24,6 +24,7 @@
     "socket.io": "^2.3.0",
     "soket.io": "0.0.1-security",
     "subdomain": "^1.2.0",
+    "url-scheme": "^1.0.5",
     "vhost": "^3.0.2",
     "ws": "^7.3.1"
   }
