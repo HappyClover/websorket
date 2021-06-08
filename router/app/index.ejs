@@ -110,8 +110,8 @@
     const code = "<%= code %>";
 
     var scheme = null;
-    const android_url = "https://google.com";
-    const ios_url = "https://apple.com";
+    const android_url = "market://details?id='com.shability.baekbang'";
+    const ios_url = "itms://itunes.apple.com/us/app/apple-store/1548249801";
 
     switch (route){
         case "qr":
@@ -152,7 +152,7 @@
         if(result_mo_chk!=="pc"){
             setTimeout( function() {
                 window.open(url_scheme);
-            }, 2000);
+            }, 5000);
             if(result_mo_chk === "ios"){
                 location.href = ios_url;
             } else {
