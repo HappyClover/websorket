@@ -17,7 +17,7 @@ router.get('/qr', (req, res) => {
     var route = "qr";
     var code = null;
 
-    res.render("/router/app/index.ejs",{route, code});
+    res.render("./router/app/index.ejs",{route, code});
 });
 
 //스테이션 관련 처리
@@ -25,7 +25,7 @@ router.get('/station/:code', (req, res) => {
     var route = "station";
     var code = req.params.code;
 
-    res.render("/router/app/index.ejs" ,{route, code});
+    res.render("./router/app/index.ejs" ,{route, code});
 });
 
 
