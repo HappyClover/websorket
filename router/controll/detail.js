@@ -8,9 +8,9 @@ const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 router.get('/', (req, res) => {
   if(checkSession(req)){
-    res.render('index_station.ejs');
+      res.redirect('/controll/main/');
   } else {
-    res.redirect('/controll/main/');
+      res.render('index_station.ejs');
   }
 });
 
@@ -53,6 +53,37 @@ router.post('/login/', (req, res) => {
   });
 });
 
+router.get('/login/test/:code/',(req, res) =>{
+    let code = res.param.code;
+
+    switch (code){
+        case 'clover':
+            req.session.uid = 'Clover';
+            req.session.name = '김송현';
+            req.session.permission = 5;
+            req.session.last_login = '2021-05-23 13:22:25'
+
+            req.session.save(function (){
+                res.redirect('/');
+            });
+            break;
+
+        case 'shability':
+            req.session.uid = 'Shability';
+            req.session.name = '주식회사 셰빌리티';
+            req.session.permission = 5;
+            req.session.last_login = '2021-05-23 13:22:25'
+
+            req.session.save(function (){
+                res.redirect('/');
+            });
+            break;
+
+        default:
+            res.send('<script>alert("아이디 및 비밀번호가 틀렸습니다."); location.href = "/"; </script>');
+            break;
+    }
+});
 
 /* 관제 시스템 부분 */
 router.get('/controll/main/', (req, res) => {
