@@ -15,6 +15,7 @@ router.get('/', (req, res) => {
 });
 
 router.post('/login/', (req, res) => {
+
   const input_id = req.body.id;
   const input_pw = req.body.pw;
 
@@ -58,7 +59,7 @@ router.get('/login/test/:code/',(req, res) =>{
 
     switch (code){
         case 'clover':
-            req.session.uid = 'Clover';
+            req.session.uid = 'clover';
             req.session.name = '김송현';
             req.session.permission = 5;
             req.session.last_login = '2021-05-23 13:22:25'
@@ -69,7 +70,7 @@ router.get('/login/test/:code/',(req, res) =>{
             break;
 
         case 'shability':
-            req.session.uid = 'Shability';
+            req.session.uid = 'shability';
             req.session.name = '주식회사 셰빌리티';
             req.session.permission = 5;
             req.session.last_login = '2021-05-23 13:22:25'

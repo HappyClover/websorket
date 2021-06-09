@@ -83,7 +83,21 @@ app.use(subdomain('admin.wingstation.co.kr',router_admin_main));
 //앱으로 리다이랙트 처리 페이지
 app.use(subdomain("app.wingstation.co.kr", router_app));
 
+
+
 app.use(express.static('static'));
+
+app.get("*", (req, res, next) => {
+  if(req.secure){
+    // --- https
+    next();
+  }else{
+    // -- http
+    let to = "https://" + req.headers.host + req.url;
+
+    return res.redirect("https://" + req.headers.host + req.url);
+  }
+});
 
 app.get('/admin', (req, res) => {
   res.render('index_station.ejs');
