@@ -76,6 +76,15 @@ mysqlDB.connect();
 //   }
 // });
 
+app.use(function(req, res, next){
+  if(!req.secure){
+    res.redirect("https://"+ 도메인 + req.url);
+  }else{
+    next();
+  }
+});
+
+
 //static 선언
 app.use('/static', express.static('./router/webapp/static/'));
 
