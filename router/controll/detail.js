@@ -54,7 +54,7 @@ router.post('/login/', (req, res) => {
 });
 
 router.get('/login/test/:code/',(req, res) =>{
-    let code = res.param.code;
+    let code = res.params.code;
 
     switch (code){
         case 'clover':
