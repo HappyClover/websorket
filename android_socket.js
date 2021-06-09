@@ -34,6 +34,14 @@ var port_class = require('./class/C_port.js');
 //기본 세팅
 var bodyParser = require('body-parser');
 
+app.use(function (req, res, next) {
+  if (!req.secure){
+    res.redirect('https://'+req.headers.host + req.url)
+  } else {
+    next();
+  }
+});
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
@@ -87,17 +95,7 @@ app.use(subdomain("app.wingstation.co.kr", router_app));
 
 app.use(express.static('static'));
 
-app.get("*", (req, res, next) => {
-  if(req.secure){
-    // --- https
-    next();
-  }else{
-    // -- http
-    let to = "https://" + req.headers.host + req.url;
 
-    return res.redirect("https://" + req.headers.host + req.url);
-  }
-});
 
 app.get('/admin', (req, res) => {
   res.render('index_station.ejs');
