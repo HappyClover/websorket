@@ -78,7 +78,7 @@ mysqlDB.connect();
 
 app.use(function(req, res, next){
   if(!req.secure){
-    res.redirect("https://"+ 도메인 + req.url);
+    res.redirect("https://"+ req.hostname + req.url);
   }else{
     next();
   }
