@@ -108,20 +108,24 @@ app.get('/', (req, res) => {
   res.redirect("http://www.shability.io");
 });
 
-var server;
+let server_https;
+let server_http;
 
 try {
-  server = https.createServer(option, app).listen(443,()=>{
+    server_https = https.createServer(option, app).listen(443,()=>{
     console.log('Listening at port number 443') //포트는 원하시는 번호로..
 })
+  server_http = http.createServer(app).listen(80,()=>{
+    console.log('Listening at port number 80') //포트는 원하시는 번호로..
+  })
 } catch (error) {
-    server = http.createServer(app).listen(80,()=>{
-      console.log('Listening at port number 80') //포트는 원하시는 번호로..
+  server_http = http.createServer(app).listen(80,()=>{
+    console.log('Listening at port number 80') //포트는 원하시는 번호로..
   })
 }
 
 //return socket.io server.
-var io = socketio.listen(server) // 이 과정을 통해 우리의 express 서버를 socket io 서버로 업그레이드를 시켜줍니다.
+var io = socketio.listen(server_https) // 이 과정을 통해 우리의 express 서버를 socket io 서버로 업그레이드를 시켜줍니다.
 
 //룸 종류 선언 (스테이션 접속 룸, 관리자 룸, 사용자 룸)
 let room = ['station','admin','user']
