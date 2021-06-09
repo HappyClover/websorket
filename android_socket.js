@@ -35,19 +35,16 @@ var port_class = require('./class/C_port.js');
 var bodyParser = require('body-parser');
 
 // redirect HTTP to HTTPS
-app.all('*', (req, res, next) => {
-  let protocol = req.headers['x-forwarded-proto'] || req.protocol;
+app.use(function(req, res, next) {
 
-  if (protocol == 'https') {
-    next();
-  } else {
-    let from = `${protocol}://${req.hostname}${req.url}`;
-    let to = `https://${req.hostname}${req.url}`;
-    // log and redirect
-    console.log(`[${req.method}]: ${from} -> ${to}`);
-    res.redirect(to);
-  } 
+  const xForwrded = req.get('X-Forwarded-Proto')   //로드밸런서경우, X-Forwarded-Proto 로, 어떤 요청으로 왔는지 알 수 있다.
+
+  if(!!xForwrded && xForwrded !== 'https') {
+    res.redirect('https://' + req.get('Host') + req.url);
+    return;
+  }
 });
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
