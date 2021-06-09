@@ -3,6 +3,8 @@ var express = require('express');
 var router = express.Router(); // 이번 예제에서는 express를 사용합니다.
 //DB세팅
 var mysqlDB = require('../../stationDB.js');
+var pool = require('../../stationPool.js');
+
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 
@@ -15,11 +17,10 @@ router.get('/', (req, res) => {
 });
 
 router.post('/login/', (req, res) => {
+    const input_id = req.body.id;
+    const input_pw = req.body.pw;
 
-  const input_id = req.body.id;
-  const input_pw = req.body.pw;
-
-  var value = (id);
+    var value = (id);
     var query = "select * from admin where identifier = ?";
     mysqlDB.query(query,value, function (err, rows, fields) {
       console.log(rows);
@@ -50,11 +51,12 @@ router.post('/login/', (req, res) => {
           res.send("<scipt>parent.login_fail("+msg+");</scipt>");
 
       }
-  res.render('index_station.ejs');
+
+      res.render('index_station.ejs');
   });
 });
 
-router.get('/login/test/:code/',(req, res) =>{
+router.get('/login/test/:code/',async (req, res) =>{
     let code = req.params.code;
 
     switch (code){
@@ -87,11 +89,23 @@ router.get('/login/test/:code/',(req, res) =>{
 });
 
 /* 관제 시스템 부분 */
-router.get('/controll/main/', (req, res) => {
+router.get('/controll/main/', async (req, res) => {
+    checklogin(checkSession(req), res);
+
     //관리자 정보
     //이름, 마지막 접속 일자
     let admin = {
         'name':"김송현",
+        'last':'2021-05-31'
+    };
+
+    var query = "select * from admin where identifier = ?"
+    var value = [req.session.uid];
+    const admin_result = await pool.query(query,value);
+    const admin_array = admin_result[0];
+
+    admin = {
+        'name':admin_array[0]['manager_name'],
         'last':'2021-05-31'
     };
 
@@ -146,7 +160,9 @@ router.get('/controll/main/', (req, res) => {
 });
 
 //관제시스템 -> 스테이션 현황
-router.get('/controll/status/', (req, res) => {
+router.get('/controll/status/', async (req, res) => {
+    checklogin(checkSession(req), res);
+
     //관리자 정보
     //이름, 마지막 접속 일자
     let admin = {
@@ -169,22 +185,22 @@ router.get('/controll/status/', (req, res) => {
                 'code': '셰2103C0001',
                 'name': '윙스테이션 경북대 1호기',
                 'address': '대구 북구 대현로3길 5-21',
-                'port': 1,
-                'status':4
+                'port': 4,
+                'status':1
             },
             {
                 'code': '셰2103C0002',
                 'name': '윙스테이션 알파시티 1호기',
                 'address': '대구 수성구 알파시티 DIP 앞',
-                'port': 1,
-                'status':4
+                'port': 4,
+                'status':1
             },
             {
                 'code': '셰2103C0003',
                 'name': '윙스테이션 알파시티 2호기',
                 'address': '대구 수성구 알파시티 DIP 앞',
-                'port': 1,
-                'status':2
+                'port': 2,
+                'status':1
             },
         ]
 
@@ -194,7 +210,9 @@ router.get('/controll/status/', (req, res) => {
 });
 
 //관제시스템 -> 충전로그
-router.get('/controll/charge/', (req, res) => {
+router.get('/controll/charge/', async (req, res) => {
+    checklogin(checkSession(req), res);
+
     let admin = {
         'name':"김송현",
         'last':'2021-05-31'
@@ -221,7 +239,8 @@ router.get('/controll/charge/', (req, res) => {
                 "start": "2021-06-01 12:30",
                 "end": "2021-06-01 14:30",
                 "value": 0
-            },            {
+            },
+            {
                 "id": 3,
                 "code": "셰2003A0001",
                 "numb": 1,
@@ -254,12 +273,14 @@ router.get('/controll/charge/', (req, res) => {
         ]
     }
 
-    res.render('index_station.ejs', {admin, month, today, usage});
+    res.render('./router/controll/charge_list.ejs', {admin, month, today, usage});
 });
 
 /* 스테이션 관리
 * 스테이션 리스트 */
-router.get('/station/list/', (req, res) => {
+router.get('/station/list/', async (req, res) => {
+    checklogin(checkSession(req), res);
+
     let admin = {
         'name':"김송현",
         'last':'2021-05-31'
@@ -307,4 +328,9 @@ function checkSession(req) {
   }
 }
 
+function checklogin(isSesstion, res) {
+    if(!isSesstion){
+        res.redirect('/');
+    }
+}
 module.exports = router;

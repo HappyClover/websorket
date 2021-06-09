@@ -96,7 +96,7 @@ router.get('/station/list',async (req, res) => {
         
             let result = {
                 "result": true,
-                'code' : 000,
+                'code' : 0o00,
                 'detail': 'success',
                 "station": station_result,
             }
@@ -246,7 +246,7 @@ router.get('/station/usage',async (req, res) => {
                     }
                     result = {
                         'result': true,
-                        'code': 000,
+                        'code': 0o00,
                         'detail': 'success',
                         'total': rows.length,
                         'total_page': Math.floor(rows.length%15)+1,

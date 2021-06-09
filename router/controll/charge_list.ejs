@@ -1,0 +1,49 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div>
+    <h1>충전 로그</h1>
+</div>
+<div>
+<h3>관리자 정보</h3>
+    이름 : <%=admin.name %> </br>
+    마지막 로그인 : <%= admin.last %>
+</div>
+<div>
+    <h3>월간 정보</h3>
+    지난달 : <%= month.last %> </br>
+    이번달 : <%= month.this%>
+</div>
+<div>
+    <h3>일간 정보</h3>
+    어제 : <%= today.last %> </br>
+    오늘 : <%= today.this %>
+</div>
+
+<div>
+    <h3>충전 사용 정보</h3>
+    <table>
+
+        <% for(i=0; i>Object.keys(usage.usage).length; i++){ %>
+        <tr>
+            <td>
+                충전 아이디 : <%= usage.usage[i].id %> <br>
+                스테이션 코드 : <%= usage.usage[i].code %> <br>
+                스테이션 넘버링 : <%= usage.usage[i].numb %> <br>
+                포트 번호 : <%= usage.usage[i].port %> <br>
+                사용자 명 : <%= usage.usage[i].user %> <br>
+                시작 시간 : <%= usage.usage[i].start %> <br>
+                종료 시간 : <%= usage.usage[i].end %> <br>
+                사용량 : <%= usage.usage[i].value %> <br>
+            </td>
+        </tr>
+        <% } %>
+
+    </table>
+
+</div>
+
+</body>
+</html>
