@@ -66,15 +66,15 @@ const { rejects } = require('assert');
 mysqlDB.connect();
 
 // redirect HTTP to HTTPS
-app.use(function(req, res, next) {
-
-  const xForwrded = req.get('X-Forwarded-Proto')   //로드밸런서경우, X-Forwarded-Proto 로, 어떤 요청으로 왔는지 알 수 있다.
-
-  if(!!xForwrded && xForwrded !== 'https') {
-    res.redirect('https://' + req.get('Host') + req.url);
-    return;
-  }
-});
+// app.use(function(req, res, next) {
+//
+//   const xForwrded = req.get('X-Forwarded-Proto')   //로드밸런서경우, X-Forwarded-Proto 로, 어떤 요청으로 왔는지 알 수 있다.
+//
+//   if(!!xForwrded && xForwrded !== 'https') {
+//     res.redirect('https://' + req.get('Host') + req.url);
+//     return;
+//   }
+// });
 
 //static 선언
 app.use('/static', express.static('./router/webapp/static/'));
