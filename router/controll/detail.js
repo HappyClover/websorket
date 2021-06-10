@@ -162,7 +162,9 @@ router.get('/control/main/', async (req, res) => {
 
 //관제시스템 -> 스테이션 현황
 router.get('/control/status/', async (req, res) => {
-    checklogin(checkSession(req), res);
+    if (!checkSession(req)){
+        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
+    }
 
     //관리자 정보
     //이름, 마지막 접속 일자
