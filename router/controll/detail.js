@@ -91,8 +91,9 @@ router.get('/login/test/:code/',async (req, res) =>{
 
 /* 관제 시스템 부분 */
 router.get('/control/main/', async (req, res) => {
-    checklogin(checkSession(req), res);
-
+    if (!checkSession(req)){
+        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
+    }
     //관리자 정보
     //이름, 마지막 접속 일자
     let admin = {
@@ -214,8 +215,9 @@ router.get('/control/status/', async (req, res) => {
 
 //관제시스템 -> 충전로그
 router.get('/control/charge/', async (req, res) => {
-    checklogin(checkSession(req), res);
-
+    if (!checkSession(req)){
+        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
+    }
     let admin = {
         'name':"김송현",
         'last':'2021-05-31'
@@ -284,8 +286,9 @@ router.get('/control/charge/', async (req, res) => {
 /* 스테이션 관리
 * 스테이션 리스트 */
 router.get('/station/list/', async (req, res) => {
-    checklogin(checkSession(req), res);
-
+    if (!checkSession(req)){
+        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
+    }
     let admin = {
         'name':"김송현",
         'last':'2021-05-31'
