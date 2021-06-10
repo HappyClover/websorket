@@ -333,7 +333,7 @@ router.get('/station/list/', async (req, res) => {
 router.post('/admin/update/password', (req, res) => {
     let key = req.body.key;
     let password = req.body.password;
-    let identifier = req.body.password;
+    let identifier = req.body.identifier;
 
     if (key != 'shability') {
         res.send("<script>alert('비밀번호 변경에 실패했습니다.'); location.href='/';</script>");
