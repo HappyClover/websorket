@@ -105,7 +105,7 @@ router.get('/controll/main/', async (req, res) => {
     const admin_array = admin_result[0];
 
     admin = {
-        'name':admin_array[0]['manager_name'],
+        'name':"김송현",
         'last':'2021-05-31'
     };
 
