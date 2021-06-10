@@ -56,7 +56,7 @@ var router_app = require('./router/app/router');
 var router_app_sharing = require('./router/webapp/router');
 
 //관제페이지 라우터
-var router_admin_main = require('./router/controll/detail.js');
+var router_admin_main = require('./router/control/detail.js');
 
 
 //DB세팅
