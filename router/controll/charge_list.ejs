@@ -28,7 +28,7 @@
 
         <%= JSON.stringify(usage); %>
 
-        <% for(var i=0; i>Object.keys(usage.usage).length; i++){ %>
+        <% for(var i=0; i>usage.usage.length; i++){ %>
         <tr>
             <td>
                 충전 아이디 : <%= usage.usage[i].id %> <br>
