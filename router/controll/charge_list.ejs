@@ -25,11 +25,8 @@
 <div>
     <h3>충전 사용 정보</h3>
     <table>
-
-        <%= JSON.stringify(usage); %>
-
         <% for(var i=0; i<usage.usage.length; i++){ %>
-        <tr>
+        <tr style="border: solid 1px #000000">
             <td>
                 충전 아이디 : <%= usage.usage[i].id %> <br>
                 스테이션 코드 : <%= usage.usage[i].code %> <br>
@@ -42,7 +39,6 @@
             </td>
         </tr>
         <% } %>
-
     </table>
 
 </div>
