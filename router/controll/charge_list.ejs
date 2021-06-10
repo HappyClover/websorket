@@ -25,9 +25,10 @@
 <div>
     <h3>충전 사용 정보</h3>
     <table>
-        <%= usage %>
 
-        <% for(i=0; i>Object.keys(usage.usage).length; i++){ %>
+        <%= usage.stringify()%>
+
+        <% for(var i=0; i>Object.keys(usage.usage).length; i++){ %>
         <tr>
             <td>
                 충전 아이디 : <%= usage.usage[i].id %> <br>
