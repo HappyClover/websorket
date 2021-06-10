@@ -1,16 +1,17 @@
-var express = require('express');
+const express = require('express');
+const crypto = require('crypto');
 
-var router = express.Router(); // 이번 예제에서는 express를 사용합니다.
+const router = express.Router(); // 이번 예제에서는 express를 사용합니다.
 //DB세팅
-var mysqlDB = require('../../stationDB.js');
-var pool = require('../../stationPool.js');
+const mysqlDB = require('../../stationDB.js');
+const pool = require('../../stationPool.js');
 
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 
 router.get('/', (req, res) => {
   if(checkSession(req)){
-      res.redirect('/controll/main/');
+      res.redirect('/control/main/');
   } else {
       res.render('index_station.ejs');
   }
@@ -61,7 +62,7 @@ router.get('/login/test/:code/',async (req, res) =>{
 
     switch (code){
         case 'clover':
-            req.session.uid = 'clover';
+            req.session.uid = 'shability';
             req.session.name = '김송현';
             req.session.permission = 5;
             req.session.last_login = '2021-05-23 13:22:25'
@@ -89,7 +90,7 @@ router.get('/login/test/:code/',async (req, res) =>{
 });
 
 /* 관제 시스템 부분 */
-router.get('/controll/main/', async (req, res) => {
+router.get('/control/main/', async (req, res) => {
     checklogin(checkSession(req), res);
 
     //관리자 정보
@@ -160,7 +161,7 @@ router.get('/controll/main/', async (req, res) => {
 });
 
 //관제시스템 -> 스테이션 현황
-router.get('/controll/status/', async (req, res) => {
+router.get('/control/status/', async (req, res) => {
     checklogin(checkSession(req), res);
 
     //관리자 정보
@@ -210,7 +211,7 @@ router.get('/controll/status/', async (req, res) => {
 });
 
 //관제시스템 -> 충전로그
-router.get('/controll/charge/', async (req, res) => {
+router.get('/control/charge/', async (req, res) => {
     checklogin(checkSession(req), res);
 
     let admin = {
@@ -219,11 +220,13 @@ router.get('/controll/charge/', async (req, res) => {
     };
 
     let month = {
+        '2last': 13,
         'last': 13,
         'this': 15
     }
 
     let today = {
+        '2last': 1,
         'last': 1,
         'this': 3,
     }
@@ -273,7 +276,7 @@ router.get('/controll/charge/', async (req, res) => {
         ]
     }
 
-    res.render('./router/controll/charge_list.ejs', {admin, month, today, usage});
+    res.render('./router/control/charge_list.ejs', {admin, month, today, usage});
 });
 
 /* 스테이션 관리
@@ -320,17 +323,38 @@ router.get('/station/list/', async (req, res) => {
     res.render('index_station.ejs',{admin, station});
 });
 
+/* 스테이션 관리
+* 스테이션 리스트 */
+router.post('/admin/update/password', (req, res) => {
+    let key = req.body.key;
+    let password = req.body.password;
+    let identifier = req.body.password;
+
+    if (key != 'shability') {
+        res.send("<script>alert('비밀번호 변경에 실패했습니다.'); location.href='/';</script>");
+    } else {
+        var crypto_password = crypto.createHash('sha512').update(password).digest('base64');
+
+        var query = "update admin set password = ? where identifier = ?"
+        var value = [crypto_password, identifier];
+        mysqlDB.query(query,value, function (err, rows, fields) {
+            if(!err){
+                res.send("<scipt>alert('변경이 완료되었습니다.');</scipt>");
+            } else {
+                var msg = "DB에러";
+                res.send("<scipt>alert("+msg+");</scipt>");
+            }
+        });
+    }
+});
+
+
+
 function checkSession(req) {
   if(req.session.uid!==undefined){
     return true;
   } else {
     return false;
   }
-}
-
-function checklogin(isSesstion, res) {
-    if(!isSesstion){
-        res.redirect('/');
-    }
 }
 module.exports = router;
