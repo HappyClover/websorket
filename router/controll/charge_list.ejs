@@ -26,7 +26,7 @@
     <h3>충전 사용 정보</h3>
     <table>
 
-        <%= usage.parse()%>
+        <%= JSON.stringify(usage); %>
 
         <% for(var i=0; i>Object.keys(usage.usage).length; i++){ %>
         <tr>
