@@ -21,7 +21,7 @@ router.post('/login/', (req, res) => {
     const input_id = req.body.id;
     const input_pw = req.body.pw;
 
-    var value = (id);
+    var value = (input_id);
     var query = "select * from admin where identifier = ?";
     mysqlDB.query(query,value, function (err, rows, fields) {
       console.log(rows);
