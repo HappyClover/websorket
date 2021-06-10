@@ -33,7 +33,9 @@ router.post('/login/', (req, res) => {
         } else {
             const pw = rows[0].password;
 
-            if (pw == input_pw){
+            const crypto_pw = crypto.createHash('sha512').update(input_pw).digest('base64');
+
+            if (pw == crypto_pw){
                 req.session.uid = rows[0].identifier;
                 req.session.name = rows[0].manager_name;
                 req.session.permission = rows[0].permission;
