@@ -9,6 +9,8 @@ const pool = require('../../stationPool.js');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 
+router.use('/static', express.static('./router/control/static/'));
+
 router.get('/', (req, res) => {
   if(checkSession(req)){
       res.redirect('/control/main/');
@@ -160,7 +162,7 @@ router.get('/control/main/', async (req, res) => {
         ]
     };
 
-    res.render('index_station.ejs', {admin, station, error, usage});
+    res.render('./router/control/index.ejs', {admin, station, error, usage});
 });
 
 //관제시스템 -> 스테이션 현황
@@ -225,6 +227,8 @@ router.get('/control/charge/', async (req, res) => {
         'last':'2021-05-31'
     };
 
+    let using = 12000;
+
     let month = {
         '2last': 13,
         'last': 13,
@@ -282,7 +286,7 @@ router.get('/control/charge/', async (req, res) => {
         ]
     }
 
-    res.render('./router/control/charge_list.ejs', {admin, month, today, usage});
+    res.render('./router/control/charge_list.ejs', {admin, using, month, today, usage});
 });
 
 /* 스테이션 관리
