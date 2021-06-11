@@ -162,7 +162,7 @@ router.get('/control/main/', async (req, res) => {
         ]
     };
 
-    res.render('./router/control/index.ejs', {admin, station, error, usage});
+    res.render('index_station.ejs', {admin, station, error, usage});
 });
 
 //관제시스템 -> 스테이션 현황
@@ -286,7 +286,7 @@ router.get('/control/charge/', async (req, res) => {
         ]
     }
 
-    res.render('./router/control/charge_list.ejs', {admin, using, month, today, usage});
+    res.render('./router/control/index.ejs', {admin, using, month, today, usage});
 });
 
 /* 스테이션 관리
