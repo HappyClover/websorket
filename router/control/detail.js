@@ -341,7 +341,8 @@ router.get('/station/list/', async (req, res) => {
     const admin_result = await pool.query(query,value);
     const admin_array = admin_result[0];
 
-    station = {station: null};
+    let query_result = [];
+
     for(var i = 0; i<admin_array.length; i++){
         let data = {
             "code" : admin_array[i].code,
@@ -353,8 +354,14 @@ router.get('/station/list/', async (req, res) => {
             "status" : 1,
         };
 
-        station.station.push(data);
+        query_result.push(data);
     }
+
+    station = {
+        'station' : query_result
+    }
+
+
 
     console.log(JSON.stringify(station));
     res.render('index_station.ejs',{admin, station});
