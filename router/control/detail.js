@@ -331,6 +331,32 @@ router.get('/station/list/', async (req, res) => {
             },
         ]
     };
+
+    var query = "select station.*, count(*) as port " +
+        "from station " +
+        "right join station_port on station.id = station_port.station_id " +
+        "group by id" ;
+                //+""
+    var value = [req.session.uid];
+    const admin_result = await pool.query(query,value);
+    const admin_array = admin_result[0];
+
+    station = {station: null};
+    for(var i = 0; i>admin_array.length; i++){
+        let data = {
+            "code" : admin_array[i].code,
+            "name" : admin_array[i].name,
+            "address" : admin_array[i].adress,
+            "port" : admin_array[i].port,
+            "type" : 1,
+            "admin" : "셰빌리티",
+            "status" : 1,
+        };
+
+        station.station.push(data);
+    }
+
+    console.log(JSON.stringify(station));
     res.render('index_station.ejs',{admin, station});
 });
 
