@@ -342,7 +342,7 @@ router.get('/station/list/', async (req, res) => {
     const admin_array = admin_result[0];
 
     station = {station: null};
-    for(var i = 0; i>admin_array.length; i++){
+    for(var i = 0; i<admin_array.length; i++){
         let data = {
             "code" : admin_array[i].code,
             "name" : admin_array[i].name,
