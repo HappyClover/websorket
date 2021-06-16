@@ -138,7 +138,7 @@ router.get('/control/main/', async (req, res) => {
         "group by date_format(date, '%H');"
     var value = [req.session.uid];
     const usage_result = await pool.query(query,value);
-    const usage_array = count_result[0];
+    const usage_array = usage_result[0];
 
     //시간대별 이용
     //일반 배열
