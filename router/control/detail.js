@@ -105,10 +105,11 @@ router.get('/control/main/', async (req, res) => {
         'last':'2021-05-31'
     };
 
-    var query = "select * from admin where identifier = ?"
+    var query = "select station.station, station_port.port " +
+        "from (select count(*) station from station) station, (select count(*) port from station_port) station_port;"
     var value = [req.session.uid];
-    const admin_result = await pool.query(query,value);
-    const admin_array = admin_result[0];
+    const count_result = await pool.query(query,value);
+    const count_array = count_result[0];
 
     admin = {
         'name':"김송현",
@@ -118,8 +119,8 @@ router.get('/control/main/', async (req, res) => {
     //스테이션 정보
     //전체 설치대수, 전체 포트 수, 현재 사용중인 포트
     let station={
-        'all':4,
-        'port':16,
+        'all':count_array[0].station,
+        'port':count_array[0].port,
         'isUse': 8
     };
 
@@ -131,36 +132,49 @@ router.get('/control/main/', async (req, res) => {
         'unresolve': 1
     };
 
+    var query = "select count(*) as cnt, date_format(date,'%H') as time " +
+        "from station_usage_history " +
+        "where date between date_format(curdate(),'%y-%m-%d') and date_format(date_add(curdate(), interval 1 day), '%y-%m-%d') " +
+        "group by date_format(date, '%H');"
+    var value = [req.session.uid];
+    const usage_result = await pool.query(query,value);
+    const usage_array = count_result[0];
+
     //시간대별 이용
     //일반 배열
     let usage={
-        'usage': [
-            {
-                'value': 12
-            },
-            {
-                'value': 8
-            },
-            {
-                'value': 15
-            },
-            {
-                'value': 19
-            },
-            {
-                'value': 22
-            },
-            {
-                'value': 10
-            },
-            {
-                'value': 15
-            },
-            {
-                'value': 30
-            }
-        ]
+        0:0,
+        1:0,
+        2:0,
+        3:0,
+        4:0,
+        5:0,
+        6:0,
+        7:0,
+        8:0,
+        9:0,
+        10:0,
+        11:0,
+        12:0,
+        13:0,
+        14:0,
+        15:0,
+        16:0,
+        17:0,
+        18:0,
+        19:0,
+        20:0,
+        21:0,
+        22:0,
+        23:0
+
     };
+
+    for (let i =0; i<usage_array.length; i++){
+        usage["${usage_array[i].time}"]=usage_array[i].cnt;
+    }
+
+    console.log(usage);
 
     res.render('index_station.ejs', {admin, station, error, usage});
 });
