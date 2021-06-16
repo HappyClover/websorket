@@ -297,13 +297,11 @@ router.get('/control/charge/', async (req, res) => {
 
     let query_result = [];
 
-    for(var i = 0; i<usage_array.length; i++){
-
-
+    for(let i = 0; i<usage_array.length; i++){
         let data = {
             "id": usage_array[i].id,
             "code" : usage_array[i].station_code,
-            "numb" : usage_array[i].identifier,
+            "numb" : usage_array[i].id,
             "port" : usage_array[i].number,
             "user": "주식회사 셰빌리티",
             "start": usage_array[i].start,
