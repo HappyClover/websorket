@@ -311,8 +311,8 @@ router.get('/control/charge/', async (req, res) => {
         query_result.push(data);
     }
 
-    station = {
-        'station' : query_result
+    usage = {
+        'usage' : query_result
     }
 
     res.render('./router/control/index.ejs', {admin, using, month, today, usage});
