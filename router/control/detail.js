@@ -286,7 +286,7 @@ router.get('/control/charge/', async (req, res) => {
         ]
     }
 
-    var query = "select station_usage_history.*, station.name, station.identifier, station.code as station_code,station_port.number " +
+    var query = "select station_usage_history.*, station.name, station.identifier, station.code as station_code, station_port.number " +
         "from station_usage_history " +
         "left join station_port on station_usage_history.port_id = station_port.id "+
         "left join station on station_usage_history.station_id = station.id "    ;
@@ -298,14 +298,17 @@ router.get('/control/charge/', async (req, res) => {
     let query_result = [];
 
     for(var i = 0; i<usage_array.length; i++){
+
+
         let data = {
             "id": usage_array[i].id,
             "code" : usage_array[i].station_code,
             "numb" : usage_array[i].identifier,
             "port" : usage_array[i].number,
-            "type" : 1,
-            "admin" : "셰빌리티",
-            "status" : 1,
+            "user": "주식회사 셰빌리티",
+            "start": usage_array[i].start,
+            "end": usage_array[i].end,
+            "value": 0
         };
 
         query_result.push(data);
