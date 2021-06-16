@@ -286,6 +286,35 @@ router.get('/control/charge/', async (req, res) => {
         ]
     }
 
+    var query = "select station.*, count(*) as port " +
+        "from station " +
+        "right join station_port on station.id = station_port.station_id " +
+        "group by id" ;
+    //+""
+    var value = [req.session.uid];
+    const admin_result = await pool.query(query,value);
+    const admin_array = admin_result[0];
+
+    let query_result = [];
+
+    for(var i = 0; i<admin_array.length; i++){
+        let data = {
+            "code" : admin_array[i].code,
+            "name" : admin_array[i].name,
+            "address" : admin_array[i].adress,
+            "port" : admin_array[i].port,
+            "type" : 1,
+            "admin" : "셰빌리티",
+            "status" : 1,
+        };
+
+        query_result.push(data);
+    }
+
+    station = {
+        'station' : query_result
+    }
+
     res.render('./router/control/index.ejs', {admin, using, month, today, usage});
 });
 
@@ -298,38 +327,6 @@ router.get('/station/list/', async (req, res) => {
     let admin = {
         'name':"김송현",
         'last':'2021-05-31'
-    };
-    let station = {
-        station:[
-            {
-                'code': '셰2106C0001',
-                'name': '윙스테이션 테스트 1호기',
-                'address': '테스트 주소',
-                'type': 1,
-                'admin':'셰빌리티'
-            },
-            {
-                'code': '셰2103C0001',
-                'name': '윙스테이션 경북대 1호기',
-                'address': '대구 북구 대현로3길 5-21',
-                'type': 1,
-                'admin':'셰빌리티'
-            },
-            {
-                'code': '셰2103C0002',
-                'name': '윙스테이션 알파시티 1호기',
-                'address': '대구 수성구 알파시티 DIP 앞',
-                'type': 1,
-                'admin':'셰빌리티'
-            },
-            {
-                'code': '셰2103C0003',
-                'name': '윙스테이션 알파시티 2호기',
-                'address': '대구 수성구 알파시티 DIP 앞',
-                'type': 1,
-                'admin':'셰빌리티'
-            },
-        ]
     };
 
     var query = "select station.*, count(*) as port " +
@@ -361,9 +358,6 @@ router.get('/station/list/', async (req, res) => {
         'station' : query_result
     }
 
-
-
-    console.log(JSON.stringify(station));
     res.render('index_station.ejs',{admin, station});
 });
 
