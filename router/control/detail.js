@@ -286,23 +286,23 @@ router.get('/control/charge/', async (req, res) => {
         ]
     }
 
-    var query = "select station.*, count(*) as port " +
-        "from station " +
-        "right join station_port on station.id = station_port.station_id " +
-        "group by id" ;
+    var query = "select station_usage_history.*, station.name, station.identifier, station.code as station_code,station_port.number " +
+        "from station_usage_history " +
+        "left join station_port on station_usage_history.port_id = station_port.id "+
+        "left join station on station_usage_history.station_id = station.id "    ;
     //+""
     var value = [req.session.uid];
-    const admin_result = await pool.query(query,value);
-    const admin_array = admin_result[0];
+    const usage_result = await pool.query(query,value);
+    const usage_array = usage_result[0];
 
     let query_result = [];
 
-    for(var i = 0; i<admin_array.length; i++){
+    for(var i = 0; i<usage_array.length; i++){
         let data = {
-            "code" : admin_array[i].code,
-            "name" : admin_array[i].name,
-            "address" : admin_array[i].adress,
-            "port" : admin_array[i].port,
+            "id": usage_array[i].id,
+            "code" : usage_array[i].station_code,
+            "numb" : usage_array[i].identifier,
+            "port" : usage_array[i].number,
             "type" : 1,
             "admin" : "셰빌리티",
             "status" : 1,
