@@ -171,7 +171,7 @@ router.get('/control/main/', async (req, res) => {
     };
 
     for (let i =0; i<usage_array.length; i++){
-        usage["${usage_array[i].time}"]=usage_array[i].cnt;
+        usage[usage_array[i].time] = usage_array[i].cnt;
     }
 
     console.log(usage);
