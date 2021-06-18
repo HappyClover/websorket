@@ -745,7 +745,7 @@ io.on('connection',function (socket){
           if(temp.type == 'user'){
             user_info = UserIsOn[temp.id].socket_id;
           } else if (temp.type == 'company'){
-            user_info = companyIsOn[temp.id].getInfo();
+            user_info = temp.socketId;
           }
 
           console.log(user_info);
