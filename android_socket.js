@@ -697,8 +697,8 @@ io.on('connection',function (socket){
 
           console.log(user_info);
 
-          socket.to(user_info.socket_id).emit('charge_start');
-          socket.to(user_info.socket_id).emit('result', response_data1);
+          socket.to(user_info).emit('charge_start');
+          socket.to(user_info).emit('result', response_data1);
 
           socket.emit('result',response_data);
 
@@ -754,7 +754,7 @@ io.on('connection',function (socket){
 
           };
 
-          socket.to(user_info.socket_id).emit('charge_cancel');
+          socket.to(user_info).emit('charge_cancel');
 
           socket.emit('result',response_data);
           io.to(room['admin']).emit('a_charge', response_data);
