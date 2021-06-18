@@ -18,6 +18,7 @@ function C_port(id, numb, station_id){
 
     this.status = 0;
     this.user_id = null;
+    this.socketId = null;
 	this.user_type = null;
 
 }
@@ -44,7 +45,7 @@ C_port.prototype.setValue = function (code, value){
 	}
 }
 
-C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB, kickboard){
+C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB, kickboard, socketId){
 			let today = new Date();   
 
 			let year = today.getFullYear(); // 년도
@@ -65,7 +66,9 @@ C_port.prototype.setStatus = function (code, user_id, user_type, mysqlDB, kickbo
 			this.status = 1;
 			this.user_id = user_id;
 			this.user_type = user_type;
+			this.socketId = socketId;
 			code = 101;
+
 			var user_type_numb = transType(this.user_type);
 			
 			var parameter = [user_type_numb, user_id, this.station, this.id, code, stringDate, this.status, kickboard];
@@ -224,7 +227,7 @@ C_port.prototype.getUser = function(){
 
 	json.id = this.user_id;
 	json.type = this.user_type;
-
+	json.socketId = this.socketId;
 	// var result = JSON.stringify(json);
 
 	return json;

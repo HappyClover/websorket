@@ -127,9 +127,9 @@ router.get('/control/main/', async (req, res) => {
     //에러정보
     //오늘, 최근1주일, 미해결건
     let error={
-        'today':5,
-        'week':10,
-        'unresolve': 1
+        'today':0,
+        'week':0,
+        'unresolve': 0
     };
 
     var query = "select count(*) as cnt, date_format(date,'%H') as time " +
@@ -173,8 +173,6 @@ router.get('/control/main/', async (req, res) => {
     for (let i =0; i<usage_array.length; i++){
         usage[usage_array[i].time] = usage_array[i].cnt;
     }
-
-    console.log(usage);
 
     res.render('index_station.ejs', {admin, station, error, usage});
 });
@@ -243,61 +241,19 @@ router.get('/control/charge/', async (req, res) => {
 
     let using = 12000;
 
-    let month = {
-        '2last': 13,
-        'last': 13,
-        'this': 15
-    }
+    var query = "select count(*) as cnt, date_format(date,'%m-%d') as time " +
+        "from station_usage_history " +
+        "where date between date_format(date_add(curdate(), interval -2 day),'%y-%m-%d') and date_format(date_add(curdate(), interval 1 day), '%y-%m-%d') " +
+        "group by date_format(date, '%m-%d');"
+    const month_result = await pool.query(query,value);
+    const month_array = month_result[0];
+
 
     let today = {
-        '2last': 1,
-        'last': 1,
-        'this': 3,
     }
 
-    let usage = {
-        "usage" :[
-            {
-                "id": 4,
-                "code": "셰2003A0001",
-                "numb": 1,
-                "port": 1,
-                "user": "주식회사 셰빌리티",
-                "start": "2021-06-01 12:30",
-                "end": "2021-06-01 14:30",
-                "value": 0
-            },
-            {
-                "id": 3,
-                "code": "셰2003A0001",
-                "numb": 1,
-                "port": 1,
-                "user": "주식회사 셰빌리티",
-                "start": "2021-06-01 12:30",
-                "end": "2021-06-01 14:30",
-                "value": 0
-            },
-            {
-                "id": 2,
-                "code": "셰2003A0001",
-                "numb": 1,
-                "port": 1,
-                "user": "주식회사 셰빌리티",
-                "start": "2021-06-01 12:30",
-                "end": "2021-06-01 14:30",
-                "value": 0
-            },
-            {
-                "id": 1,
-                "code": "셰2003A0001",
-                "numb": 1,
-                "port": 1,
-                "user": "주식회사 셰빌리티",
-                "start": "2021-06-01 12:30",
-                "end": "2021-06-01 14:30",
-                "value": 0
-            }
-        ]
+    for (let i; i<month_array.length; i++){
+        today[month_array[i].time] = month_array[i].cnt;
     }
 
     var query = "select station_usage_history.*, station.name, station.identifier, station.code as station_code, station_port.number " +

@@ -222,30 +222,6 @@ io.on('connection',function (socket){
                     id = rows[0].id;
 
                     for(i=0; i<rows.length; i++){
-                      // //기존 서버 데이터 확인 후 배열 세팅
-                      // var station_query = 'select * from connect_station where id = ?';
-                      // mysqlDB.query(station_query,station_rows[i].port_id, function (err, connect_port_rows, fields) {
-                      //   if (!err) { 
-                      //     if(connect_port_rows.length>0){
-                      //       var temp_numb = connect_port_rows.numb;
-                      //       var temp_usage_id = connect_port_rows.usage_id;
-                      //       var temp_status = connect_port_rows.status;
-                      //       var temp_user_id = connect_port_rows.user_id;
-                      //       var temp_user_type = connect_port_rows.user_type;
-
-                      //       var temp_port = new port_class(rows[i].port_id, rows[i].port_numb, id)
-
-
-                      //     } else { //조회결과가 없을때
-                      //       console.log("접속 기록이 없음")
-                            
-                      //     }
-                      //   } else {
-                      //     console.log('query error : ' + err);
-                      //     result = false;
-                      //   }
-                      // });
-
                       var port = new port_class(rows[i].port_id, rows[i].port_numb, id)
                       port_list[Number(port.getPortNumb())-1] = port;
                       result = true;
@@ -331,7 +307,7 @@ io.on('connection',function (socket){
                   name = rows[0].name;
 
                   WhoAmI = new company_class(id, identifier, name, socket.id);
-                  companyIsOn[id] = WhoAmI //
+                  companyIsOn[socket.id] = WhoAmI //
     
                   shoot_result(socket, "login", true);
                   
@@ -716,7 +692,7 @@ io.on('connection',function (socket){
           if(temp.type == 'user'){
             user_info = UserIsOn[temp.id].socket_id;
           } else if (temp.type == 'company'){
-            user_info = companyIsOn[temp.id].getInfo();
+            user_info = temp.socketId();
           }
 
           console.log(user_info);
@@ -960,7 +936,7 @@ io.on('connection',function (socket){
 
                       console.log(WhoAmI);
 
-                      port_list[Number(data.port_numb) - 1].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI), mysqlDB);
+                      port_list[Number(data.port_numb) - 1].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI), mysqlDB,null,null);
 
                       input_data = {
                         port: Number(data.port_numb),
@@ -984,7 +960,7 @@ io.on('connection',function (socket){
                   });
                 } else if (checkType(WhoAmI) == 'company') {
                   
-                  port_list[Number(data.port_numb)-1].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI), mysqlDB);
+                  port_list[Number(data.port_numb)-1].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI), mysqlDB,null, WhoAmI.getInfo().socket_id);
     
                   input_data = {
                     port: Number(data.port_numb),
@@ -1005,67 +981,6 @@ io.on('connection',function (socket){
   
                 }
               }
-              
-              
-              // idlePort = getIdlePort(port_list);
-  
-              // if(typeof(idlePort)=='boolean' && !idlePort){
-              //   shoot_result(socket, "port_ready", false, '비어있는 포트가 없음');
-              // } else {
-  
-              //   if(checkType(WhoAmI) == 'user'){
-              //     var station_query = 'select id from user where token = ?';
-              //     mysqlDB.query(station_query,nickname, function (err, rows, fields) {
-              //       if (!err) {
-              //         user_id = rows[0].id;
-            
-              //         console.log(WhoAmI);
-  
-              //         port_list[idlePort].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI));
-    
-              //         input_data = {
-              //           port: idlePort+1,
-              //           admin: 0,
-              //           setting: {
-              //             volt: 36,
-              //             ampere: 2.5
-              //           }
-              //         }
-    
-              //         port_list[idlePort].setValue('status',1);
-  
-              //         shoot_result(socket, "port_ready", true);
-              //         //console.log(StationIsOn[station_identifier].socket_id);
-    
-              //         io.to(room['admin']).emit('a_charge_ready', input_data);
-    
-              //       } else {
-              //         console.log('query error : ' + err);
-              //       }
-              //     });
-              //   } else if (checkType(WhoAmI) == 'company') {
-                  
-              //     port_list[idlePort].setStatus("charge_ready", WhoAmI.id, checkType(WhoAmI));
-    
-              //     input_data = {
-              //       port: idlePort+1,
-              //       admin: 0,
-              //       setting: {
-              //         volt: 42,
-              //         ampere: 2.5
-              //       }
-              //     }
-  
-              //     port_list[idlePort].setValue('status',1);
-        
-              //     shoot_result(socket, "port_ready", true);
-              //     console.log(StationIsOn[station_identifier]);
-  
-              //     socket.to(StationIsOn[station_identifier].socket_id).emit('port_ready',input_data);
-              //     io.to(room['admin']).emit('a_charge_ready', input_data);
-  
-              //   }
-              // }
             }
           }
 
