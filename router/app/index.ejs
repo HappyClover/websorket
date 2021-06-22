@@ -119,7 +119,7 @@
     let iosAppScheme = 'wingstation://qr';
     let iosAppStoreUrl = "http://itunes.apple.com/kr/app/id1548249801";
 
-    if (userAgent.match(".*Android.*")) {
+    if (userAgent.match(/chrome/)) {
         // Android
         if (browser === 'Chrome') {
             $('#appLinkButton').on('click', () => {
