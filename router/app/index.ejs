@@ -113,9 +113,11 @@
     const code = "<%= code %>";
     const userAgent =navigator.userAgent.toLowerCase();
 
-    let androidIntentUrl = "intent://wingstation.co.kr"
+    let androidIntentUrl = "intent://wingstation"
         +"#Intent;scheme=wingstation;"
-        +"package=com.shability.wingstation; end";
+        +"package=com.shability.wingstation; "
+        +"S.browser_fallback_url=https%3A%2F%2Fwingstation.co.kr;"
+        +"end";
     let androidPlayStoreUrl = 'https://wingstation.co.kr';
     let iosAppScheme = 'wingstation://qr';
     let iosAppStoreUrl = "http://itunes.apple.com/kr/app/id1548249801";
