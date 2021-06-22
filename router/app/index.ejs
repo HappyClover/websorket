@@ -106,127 +106,61 @@
 </div>
 
 <script>
+    const browser = isBrowserCheck();
+
     const route = "<%= route %>";
     const code = "<%= code %>";
 
-    (function() {
+    let androidIntentUrl = "intent://wingstation.co.kr"
+        +"#Intent;scheme=wingstation;"
+        +"package=com.shability.wingstation; end";
+    let androidPlayStoreUrl = 'https://wingstation.co.kr';
+    let iosAppScheme = 'wingstation://qr';
+    let iosAppStoreUrl = "http://itunes.apple.com/kr/app/id1548249801";
 
-        /**
-         * 사이트 네임스페이스 초기화
-         */
-        var initNamespace = function() {
-            if (typeof window.lddi === 'undefined') {
-                window.lddi = {
-                    util: {},
-                    siteCode: {}
-                };
+    if (userAgent.match(".*Android.*")) {
+        // Android
+        if (browser === 'Chrome') {
+            $('#appLinkButton').on('click', () => {
+                location.href = androidIntentUrl;
+            });
+        } else {
+            location.href = androidPlayStoreUrl;
+        }
+    } else {
+        // iOS
+        location.href = iosAppScheme;
+        setTimeout(function(){
+            location.href = iosAppStoreUrl;
+        }, 3000); // 너무 빨리 앱스토어를 실행할 경우, 사파리에서 앱 실행 확인 컨펌을 하기 전에 실행되어 앱스토어와 앱이 동시에 실행된다. 그래서 사용자 입장에서는 앱스토어만 열린 것처럼 보인다.
+    }
+
+
+    function isBrowserCheck(){
+        const agt = navigator.userAgent.toLowerCase();
+        if (agt.indexOf("chrome") != -1) return 'Chrome';
+        if (agt.indexOf("opera") != -1) return 'Opera';
+        if (agt.indexOf("staroffice") != -1) return 'Star Office';
+        if (agt.indexOf("webtv") != -1) return 'WebTV';
+        if (agt.indexOf("beonex") != -1) return 'Beonex';
+        if (agt.indexOf("chimera") != -1) return 'Chimera';
+        if (agt.indexOf("netpositive") != -1) return 'NetPositive';
+        if (agt.indexOf("phoenix") != -1) return 'Phoenix';
+        if (agt.indexOf("firefox") != -1) return 'Firefox';
+        if (agt.indexOf("safari") != -1) return 'Safari';
+        if (agt.indexOf("skipstone") != -1) return 'SkipStone';
+        if (agt.indexOf("netscape") != -1) return 'Netscape';
+        if (agt.indexOf("mozilla/5.0") != -1) return 'Mozilla';
+        if (agt.indexOf("msie") != -1) {
+            let rv = -1;
+            if (navigator.appName == 'Microsoft Internet Explorer') {
+                let ua = navigator.userAgent; var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+                if (re.exec(ua) != null)
+                    rv = parseFloat(RegExp.$1);
             }
-        };
-
-
-        var AppLink = {
-            aosUrl: 'intent://scan/#Intent;scheme=wingstation;package=com.shability.wingstation;end',
-            iosUrl: 'http://itunes.apple.com/app/id',
-            customSchemeMain: 'wingstation://qr',
-            googlePlayUrl: 'https://play.google.com/store/apps/details?id=com.shability.wingstation',
-            isIPHONE: (navigator.userAgent.match('iPhone') != null || navigator.userAgent.match('iPod') != null),
-            isIPAD: (navigator.userAgent.match('iPad') != null),
-            isANDROID: (navigator.userAgent.match('Android') != null),
-            isMobile: function () {
-                if (AppLink.isANDROID || AppLink.isIPHONE || AppLink.isIPAD) {
-                    return true;
-                } else {
-                    alert('모바일 환경에서만 동작합니다.');
-                    return false;
-                }
-            },
-            installApp: function () {
-                if (AppLink.isIPHONE || AppLink.isIPAD) {
-                    // 2019-03-22 timer
-                    AppLink.iosLink();
-                } else if (AppLink.isANDROID) {
-                    AppLink.androidIntent(AppLink.aosUrl);
-                }
-            },
-            executeApp: function (url) {
-                if (AppLink.isIPHONE || AppLink.isIPAD) {
-                    window.location.href = url;
-                } else if (AppLink.isANDROID) {
-                    AppLink.androidCustomScheme(url);
-                }
-            },
-            ios: function () {
-                AppLink.iosLink();
-
-                window.location.href = AppLink.customSchemeMain; //앱이동
-            },
-            /**
-             * ios 마켓 링크 이동
-             */
-            iosLink: function () {
-                var clickedAt = +new Date;
-                setTimeout(function () {
-                    if (+new Date - clickedAt < 2000) {
-                        window.location.href = AppLink.iosUrl;
-                    }
-                }, 1500);
-            },
-            androidIntent: function (url) {
-                var b = new Date();
-                setTimeout(function () {
-                    if (new Date() - b < 1500) {
-                        window.location.href = url;
-                    }
-                }, 500);
-            },
-            /**
-             * android 커스텀스킴 이동
-             */
-            androidCustomScheme: function (customScheme) {
-                setTimeout(function () {
-                    var iframe = document.createElement('iframe');
-                    iframe.style.visibility = 'hidden';
-                    iframe.src = customScheme;
-                    document.body.appendChild(iframe);
-                    document.body.removeChild(iframe); // back 호출시 캐싱될 수 있으므로 제거
-                }, 1000);
-            },
-            android: function () {
-                if (AppLink.isANDROID || AppLink.isIPHONE || AppLink.isIPAD) {
-                    AppLink.androidIntent(AppLink.aosUrl);
-                    AppLink.androidCustomScheme(AppLink.customSchemeMain);
-                } else {
-                    window.location.href = AppLink.googlePlayUrl;
-                }
-            },
-            appMove: function (customScheme, isAppMove) {
-                if (!customScheme) {
-                    //main 이동
-                    customScheme = AppLink.customSchemeMain;
-                }
-
-                // 바로 앱 이동일 경우
-                if (isAppMove) {
-                    if (AppLink.isANDROID) {
-                        AppLink.androidIntent(AppLink.aosUrl);
-                    }
-
-                    AppLink.executeApp(customScheme);
-                } else {
-                    if (!AppLink.isMobile()) return;
-                    AppLink.installApp(); //app move
-                    AppLink.executeApp(customScheme);
-                }
-            }
-        };
-
-        (function () {
-            initNamespace();
-            lddi.AppLink = AppLink;
-        })();
-
-        return lddi;
-    })();
+            return 'Internet Explorer '+rv;
+        }
+    }
 </script>
 </body>
 </html>
