@@ -109,60 +109,124 @@
     const route = "<%= route %>";
     const code = "<%= code %>";
 
-    var scheme = null;
-    const android_url = "intent://scan/#Intent;scheme=wingstation;package=com.shability.wingstation;end";
-    const ios_url = "itms://itunes.apple.com/us/app/apple-store/1548249801";
+    (function() {
 
-    switch (route){
-        case "qr":
-            scheme = "wingstation://qr";
-            action_app(scheme, ios_url, android_url);
-            break;
-
-        case "station":
-            scheme = "wingstation://station?code="+code;
-            action_app(scheme, ios_url, android_url);
-            break;
-
-        default:
-            alert("잘못된 경로입니다.");
-            window.close();
-    }
-
-    function mo_chk(){
-        var os;
-        var mobile = (/iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase()));
-        if (mobile) {
-            var userAgent = navigator.userAgent.toLowerCase();
-            if (userAgent.search("android") > -1){
-                return os = "android";
-            }else if ((userAgent.search("iphone") > -1) || (userAgent.search("ipod") > -1) || (userAgent.search("ipad") > -1)){
-                return os = "ios";
-            }else{
-                return os = "otehr";
+        /**
+         * 사이트 네임스페이스 초기화
+         */
+        var initNamespace = function() {
+            if (typeof window.lddi === 'undefined') {
+                window.lddi = {
+                    util: {},
+                    siteCode: {}
+                };
             }
-        } else {
-            return os = "pc";
-        }
-    }
+        };
 
-    function action_app(url_scheme, ios_url, android_url){
-        var result_mo_chk = mo_chk();
 
-        if(result_mo_chk!=="pc"){
-            setTimeout( function() {
-                window.open(url_scheme);
-            }, 5000);
-            if(result_mo_chk === "ios"){
-                location.href = ios_url;
-            } else {
-                location.href = android_url
+        var AppLink = {
+            aosUrl: 'intent://scan/#Intent;scheme=wingstation;package=com.shability.wingstation;end',
+            iosUrl: 'http://itunes.apple.com/app/id',
+            customSchemeMain: 'wingstation://qr',
+            googlePlayUrl: 'https://play.google.com/store/apps/details?id=com.shability.wingstation',
+            isIPHONE: (navigator.userAgent.match('iPhone') != null || navigator.userAgent.match('iPod') != null),
+            isIPAD: (navigator.userAgent.match('iPad') != null),
+            isANDROID: (navigator.userAgent.match('Android') != null),
+            isMobile: function () {
+                if (AppLink.isANDROID || AppLink.isIPHONE || AppLink.isIPAD) {
+                    return true;
+                } else {
+                    alert('모바일 환경에서만 동작합니다.');
+                    return false;
+                }
+            },
+            installApp: function () {
+                if (AppLink.isIPHONE || AppLink.isIPAD) {
+                    // 2019-03-22 timer
+                    AppLink.iosLink();
+                } else if (AppLink.isANDROID) {
+                    AppLink.androidIntent(AppLink.aosUrl);
+                }
+            },
+            executeApp: function (url) {
+                if (AppLink.isIPHONE || AppLink.isIPAD) {
+                    window.location.href = url;
+                } else if (AppLink.isANDROID) {
+                    AppLink.androidCustomScheme(url);
+                }
+            },
+            ios: function () {
+                AppLink.iosLink();
+
+                window.location.href = AppLink.customSchemeMain; //앱이동
+            },
+            /**
+             * ios 마켓 링크 이동
+             */
+            iosLink: function () {
+                var clickedAt = +new Date;
+                setTimeout(function () {
+                    if (+new Date - clickedAt < 2000) {
+                        window.location.href = AppLink.iosUrl;
+                    }
+                }, 1500);
+            },
+            androidIntent: function (url) {
+                var b = new Date();
+                setTimeout(function () {
+                    if (new Date() - b < 1500) {
+                        window.location.href = url;
+                    }
+                }, 500);
+            },
+            /**
+             * android 커스텀스킴 이동
+             */
+            androidCustomScheme: function (customScheme) {
+                setTimeout(function () {
+                    var iframe = document.createElement('iframe');
+                    iframe.style.visibility = 'hidden';
+                    iframe.src = customScheme;
+                    document.body.appendChild(iframe);
+                    document.body.removeChild(iframe); // back 호출시 캐싱될 수 있으므로 제거
+                }, 1000);
+            },
+            android: function () {
+                if (AppLink.isANDROID || AppLink.isIPHONE || AppLink.isIPAD) {
+                    AppLink.androidIntent(AppLink.aosUrl);
+                    AppLink.androidCustomScheme(AppLink.customSchemeMain);
+                } else {
+                    window.location.href = AppLink.googlePlayUrl;
+                }
+            },
+            appMove: function (customScheme, isAppMove) {
+                if (!customScheme) {
+                    //main 이동
+                    customScheme = AppLink.customSchemeMain;
+                }
+
+                // 바로 앱 이동일 경우
+                if (isAppMove) {
+                    if (AppLink.isANDROID) {
+                        AppLink.androidIntent(AppLink.aosUrl);
+                    }
+
+                    AppLink.executeApp(customScheme);
+                } else {
+                    if (!AppLink.isMobile()) return;
+                    AppLink.installApp(); //app move
+                    AppLink.executeApp(customScheme);
+                }
             }
-        } else {
-            alert("PC는 지원하지 않습니다.");
-            window.close();
-        }
-    }
+        };
+
+        (function () {
+            initNamespace();
+            lddi.AppLink = AppLink;
+        })();
+
+        return lddi;
+    })();
 </script>
 </body>
 </html>

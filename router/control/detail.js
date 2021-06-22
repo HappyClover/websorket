@@ -253,10 +253,18 @@ router.get('/control/charge/', async (req, res) => {
     }
 
     //스테이션 사용로그
-    var query = "select station_usage_history.*, station.name, station.identifier, station.code as station_code, station_port.number " +
+    var query = "select station_usage_history.id, station_usage_history.start, " +
+        "ifnull(station_usage_history.charge_complete, station_usage_history.end) as end, "+
+        "case station.user_type " +
+        "   when 1 then user.first_name " +
+        "   when 2 then admin.name" +
+        "   else null end as user_name,"+
+        "station.name, station.identifier, station.code as station_code, station_port.number " +
         "from station_usage_history " +
         "left join station_port on station_usage_history.port_id = station_port.id "+
-        "left join station on station_usage_history.station_id = station.id "    ;
+        "left join station on station_usage_history.station_id = station.id "
+        "left join admin on station_usage_history.user_id = admin.id "
+        "left join user on station_usage_history.user_id = user.id ";
     //+""
     var value = [req.session.uid];
     const usage_result = await pool.query(query,value);
@@ -270,7 +278,7 @@ router.get('/control/charge/', async (req, res) => {
             "code" : usage_array[i].station_code,
             "numb" : usage_array[i].id,
             "port" : usage_array[i].number,
-            "user": "주식회사 셰빌리티",
+            "user":  usage_array[i].user_name,
             "start": usage_array[i].start,
             "end": usage_array[i].end,
             "value": 0
