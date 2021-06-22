@@ -124,11 +124,16 @@
 
     if (userAgent.match(/android/)) {
         // Android
+        alert('안드로이드');
         if (browser === 'Chrome') {
+            alert('크롬');
+
             $('#appLinkButton').on('click', () => {
                 location.href = androidIntentUrl;
             });
         } else {
+            alert('크롬 아님');
+
             location.href = androidPlayStoreUrl;
         }
     } else {
