@@ -689,13 +689,13 @@ io.on('connection',function (socket){
           var temp = port_list[Number(data.port)-1].getUser();
           var user_info;
 
-          if(temp.type == 'user'){
-            user_info = UserIsOn[temp.id].socket_id;
-          } else if (temp.type == 'company'){
-            user_info = temp.socketId();
-          }
+            if(temp.type == 'user'){
+                user_info = UserIsOn[temp.id].socket_id;
+            } else if (temp.type == 'company'){
+                user_info = temp.socketId;
+            }
 
-          console.log(user_info);
+          console.log("charge start : "+user_info);
 
           socket.to(user_info).emit('charge_start');
           socket.to(user_info).emit('result', response_data1);
@@ -735,12 +735,6 @@ io.on('connection',function (socket){
 
           var temp = port_list[Number(data.port)-1].getUser();
           var user_info;
-
-          console.log("취소 값 "+temp);
-
-          for (var key in temp) {
-            console.log("Attributes : " + key + ", value : " + temp[key]);
-            }
 
           if(temp.type == 'user'){
             user_info = UserIsOn[temp.id].socket_id;

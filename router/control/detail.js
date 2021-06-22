@@ -26,7 +26,8 @@ router.post('/login/', (req, res) => {
     var value = (input_id);
     var query = "select * from admin where identifier = ?";
     mysqlDB.query(query,value, function (err, rows, fields) {
-      console.log(rows);
+        rows[0].manager_name = undefined;
+        console.log(rows);
 
       if(!err){
         if(rows.length < 1){
@@ -190,41 +191,34 @@ router.get('/control/status/', async (req, res) => {
         'last':'2021-05-31'
     };
 
+    var query = "select station.*, count(*) as port " +
+        "from station " +
+        "right join station_port on station.id = station_port.station_id " +
+        "group by id" ;
+    //+""
+    var value = [req.session.uid];
+    const station_result = await pool.query(query,value);
+    const station_array = station_result[0];
+
+    let query_result = [];
+
+    for(var i = 0; i<station_array.length; i++){
+        let data = {
+            "code" : station_array[i].code,
+            "name" : station_array[i].name,
+            "address" : station_array[i].adress,
+            "port" : station_array[i].port,
+            "status" : 1,
+        };
+
+        query_result.push(data);
+    }
+
     //스테이션 정보
     //스테이션 번호, 이름, 주소, 포트 수, 상태
     let station = {
-        'station':[
-            {
-                'code': '셰2106C0001',
-                'name': '윙스테이션 테스트 1호기',
-                'address': '테스트 주소',
-                'port': 1,
-                'status':1
-            },
-            {
-                'code': '셰2103C0001',
-                'name': '윙스테이션 경북대 1호기',
-                'address': '대구 북구 대현로3길 5-21',
-                'port': 4,
-                'status':1
-            },
-            {
-                'code': '셰2103C0002',
-                'name': '윙스테이션 알파시티 1호기',
-                'address': '대구 수성구 알파시티 DIP 앞',
-                'port': 4,
-                'status':1
-            },
-            {
-                'code': '셰2103C0003',
-                'name': '윙스테이션 알파시티 2호기',
-                'address': '대구 수성구 알파시티 DIP 앞',
-                'port': 2,
-                'status':1
-            },
-        ]
-
-    };
+        'station': query_result
+    }
 
     res.render('index_station.ejs',{admin, station});
 });
@@ -241,6 +235,8 @@ router.get('/control/charge/', async (req, res) => {
 
     let using = 12000;
 
+
+    //오늘일자
     var query = "select count(*) as cnt, date_format(date,'%m-%d') as time " +
         "from station_usage_history " +
         "where date between date_format(date_add(curdate(), interval -2 day),'%y-%m-%d') and date_format(date_add(curdate(), interval 1 day), '%y-%m-%d') " +
@@ -256,6 +252,7 @@ router.get('/control/charge/', async (req, res) => {
         today[month_array[i].time] = month_array[i].cnt;
     }
 
+    //스테이션 사용로그
     var query = "select station_usage_history.*, station.name, station.identifier, station.code as station_code, station_port.number " +
         "from station_usage_history " +
         "left join station_port on station_usage_history.port_id = station_port.id "+
@@ -286,7 +283,7 @@ router.get('/control/charge/', async (req, res) => {
         'usage' : query_result
     }
 
-    res.render('./router/control/index.ejs', {admin, using, month, today, usage});
+    res.render('./router/control/index.ejs', {admin, using, today, usage});
 });
 
 /* 스테이션 관리
@@ -305,6 +302,81 @@ router.get('/station/list/', async (req, res) => {
         "right join station_port on station.id = station_port.station_id " +
         "group by id" ;
                 //+""
+    var value = [req.session.uid];
+    const admin_result = await pool.query(query,value);
+    const admin_array = admin_result[0];
+
+    let query_result = [];
+
+    for(var i = 0; i<admin_array.length; i++){
+        let data = {
+            "code" : admin_array[i].code,
+            "name" : admin_array[i].name,
+            "address" : admin_array[i].adress,
+            "port" : admin_array[i].port,
+            "type" : 1,
+            "admin" : "셰빌리티",
+            "status" : 1,
+        };
+
+        query_result.push(data);
+    }
+
+    station = {
+        'station' : query_result
+    }
+
+    res.render('index_station.ejs',{admin, station});
+});
+
+router.get('/station/list/update/', async (req, res) => {
+    let query_set = "";
+
+    if (!checkSession(req)){
+        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
+    }
+
+    let station_id = req.body.station_id,
+        station_code = req.body.station_code,
+        station_name = req.body.station_name,
+        station_address = req.body.station_address,
+        station_install_date = req.body.install_date,
+        station_pic = req.body.station_pic,
+        station_admin = req.body.station_admin,
+        station_status = req.body.station_status,
+        station_type =req.body.station_type,
+        station_smps = req.body.smps;
+
+    let data_array = [];
+    let colum_name = ['code', 'name', 'adress','date','picture','admin_id','status','type','smps'];
+    data_array.push(station_code);
+    data_array.push(station_name);
+    data_array.push(station_address);
+    data_array.push(station_install_date);
+    data_array.push(station_pic);
+    data_array.push(station_admin);
+    data_array.push(station_status);
+    data_array.push(station_type);
+    data_array.push(station_smps);
+
+
+    if (station_id == undefined){
+        res.send('<sciprt>alert("필수 정보가 없습니다.")</sciprt>');
+    } else {
+        for (let i = 0; i<data_array.length; i++){
+            if (query_set === ''){
+                query_set = `SET ${colum_name[i]} = ${data_array[i]} `;
+            } else {
+                query_set = query_set+`, ${colum_name[i]} = ${data_array[i]} `;
+            }
+        }
+    }
+
+    var query = "UPDATE station" +
+        `SET code = ${station_code}, ` +
+        "right join station_port on station.id = station_port.station_id " +
+        "group by id" ;
+    //+""
     var value = [req.session.uid];
     const admin_result = await pool.query(query,value);
     const admin_array = admin_result[0];
