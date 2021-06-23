@@ -107,7 +107,9 @@
             앱이 실행 되지 않을시 터치 해주세요</a></span>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<div id="div_app"></div>
+<div id="div_app" style="display: none">
+    <iframe id="forAnd"></iframe>
+</div>
 <script>
     const route = "<%= route %>";
     const code = "<%= code %>";
@@ -115,6 +117,7 @@
 
     const urlscheme = 'wingstation://qr';
     const intent = 'intent://scan/#Intent;scheme=zxing;package=com.google.zxing.client.android;end';
+    const playStore = 'market://details?id=com.shability.baekbang';
 
     $( document ).ready(function() {
         var userAgent = navigator.userAgent.toLowerCase();
@@ -123,9 +126,9 @@
         }else if(userAgent.match('android')) {    //안드로이드 기기
             if(browser == 'Chrome'){
                 //크롬일시
-                is_installed_app_and(intent,"market://details?id=com.shability.baekbang");
+                //is_installed_app_and(intent,playStore);
             } else {
-                is_installed_app_and(urlscheme,"market://details?id=com.shability.baekbang");
+                is_installed_app_and(urlscheme,playStore);
 
             }
 
@@ -159,6 +162,10 @@
                 return;
             }
         }
+
+        document.getElementById('forAnd').addEventListener('click',function (){
+            is_installed_app_and(intent,"market://details?id=com.shability.baekbang");
+        });
     });
 
     function isBrowserCheck(){
