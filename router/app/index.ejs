@@ -103,7 +103,7 @@
             <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
         </div></div><br>
     <span id="appLinkButton">윙스테이션 어플리케이션으로<br>이동중입니다.<br>
-        <a href="intent://default?version=1#Intent;scheme=naversearchapp://search?qmenu=qrcode&version=1;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.search;end">
+        <a href="intent://#Intent;scheme=wingstation;package=com.shability.wingshare">
             앱이 실행 되지 않을시 터치 해주세요</a></span>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -114,7 +114,8 @@
     const browser = isBrowserCheck();
 
     const urlscheme = 'wingstation://qr';
-    const intent = 'intent:#Intent;scheme=wingstation://qr;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.shability.wingshare;end';
+    const intent = 'intent://#Intent;scheme=wingstation;package=com.shability.wingshare';
+
     $( document ).ready(function() {
         var userAgent = navigator.userAgent.toLowerCase();
         if(userAgent.match('iphone') || userAgent.match('ipad') || userAgent.match('ipod')) {    //아이폰
