@@ -114,7 +114,7 @@
     const browser = isBrowserCheck();
 
     const urlscheme = 'wingstation://qr';
-    const intent = 'intent://#Intent;scheme=wingstation://qr;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.shability.wingshare;end';
+    const intent = 'intent:#Intent;scheme=wingstation://qr;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.shability.wingshare;end';
     $( document ).ready(function() {
         var userAgent = navigator.userAgent.toLowerCase();
         if(userAgent.match('iphone') || userAgent.match('ipad') || userAgent.match('ipod')) {    //아이폰
