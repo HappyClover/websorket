@@ -102,9 +102,7 @@
     <div class="loadingio-spinner-spinner-07weve0tl0nd"><div class="ldio-oqfi9xzfcmr">
             <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
         </div></div><br>
-    <span id="appLinkButton">윙스테이션 어플리케이션으로<br>이동중입니다.<br>
-        <a href="intent://#Intent;scheme=wingstation;package=com.shability.wingshare">
-            앱이 실행 되지 않을시 터치 해주세요</a></span>
+    <span id="appLinkButton">윙스테이션 어플리케이션으로<br>이동중입니다.<br>앱이 실행 되지 않을시 터치 해주세요</span>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <div id="div_app" style="display: none">
@@ -163,8 +161,8 @@
             }
         }
 
-        document.getElementById('forAnd').addEventListener('click',function (){
-            is_installed_app_and(intent,"market://details?id=com.shability.baekbang");
+        document.getElementById('appLinkButton').addEventListener('click',function (){
+            document.getElementById('forAnd').src=intent;
         });
     });
 
