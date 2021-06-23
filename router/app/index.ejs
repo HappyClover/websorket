@@ -141,7 +141,9 @@
         function is_installed_app_and(url,marketUrl){
             //and_GoStore(marketUrl);
             if(confirm("앱을 실행 하시겠습니까?") == true){
-                top.location.href = "intent://default?version=1#Intent;scheme=wingstation://qr;action=android.intent.action.VIEW;category=android.intent.category.DEFAULT;package=com.shability.wingshare;end";
+                // top.location.href = "intent://default?version=1#Intent;scheme=wingstation://qr;action=android.intent.action.VIEW;category=android.intent.category.DEFAULT;package=com.shability.wingshare;end";
+                top.location.href = "wingstation://qr";
+
             }else{   //취소
                 return;
             }
