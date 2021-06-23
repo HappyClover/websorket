@@ -140,14 +140,20 @@
 
         function is_installed_app_and(url,marketUrl){
             //and_GoStore(marketUrl);
-            $("#div_app").html("<iframe id='frm' src='intent://default?version=1#Intent;scheme=naversearchapp://search?qmenu=qrcode&version=1;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.search;end' width=0 height=0 frameborder=0></iframe>");
-            setTimeout(function(){
-                var div = $("#div_app");
-                var iframe = $("#frm");
-                if(iframe.length > 0){
-                    iframe.remove();
-                }
-            },1000);
+            if(confirm("앱을 실행 하시겠습니까?") == true){
+                top.location.href = "intent://default?version=1#Intent;scheme=naversearchapp://search?qmenu=qrcode&version=1;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.search;end";
+            }else{   //취소
+                return;
+            }
+            
+            // $("#div_app").html("<iframe id='frm' src='intent://default?version=1#Intent;scheme=naversearchapp://search?qmenu=qrcode&version=1;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.search;end' width=0 height=0 frameborder=0></iframe>");
+            // setTimeout(function(){
+            //     var div = $("#div_app");
+            //     var iframe = $("#frm");
+            //     if(iframe.length > 0){
+            //         iframe.remove();
+            //     }
+            // },1000);
         }
 
         function and_GoStore(appstoreUrl) {
@@ -159,6 +165,8 @@
             }, 500);
         }
     });
+
+
 
 </script>
 </body>
