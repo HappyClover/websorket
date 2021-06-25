@@ -197,8 +197,8 @@
 
     var isIos = userAgent.match('iphone') || userAgent.match('ipad') || userAgent.match('ipod');
     var isFacebookWebView = !!~navigator.userAgent.toLowerCase().indexOf('fban') || !!~navigator.userAgent.toLowerCase().indexOf('fbav');
-    // var chrome = "intent://qr/#Intent;scheme=wingstation;package=com.shability.wingshare;end";
-    var chrome = ' intent://home/shopDetail?shopDetail_shopNo=13247346&shopDetail_categoryTypeCode=1&bm_rfr=SHARE&shopDetail_campaignId=-1&shopDetail_referrer=22#Intent;scheme=baemin;package=com.sampleapp;end';
+    var chrome = "intent://qr/#Intent;scheme=wingstation;package=com.shability.wingshare;end";
+    // var chrome = ' intent://home/shopDetail?shopDetail_shopNo=13247346&shopDetail_categoryTypeCode=1&bm_rfr=SHARE&shopDetail_campaignId=-1&shopDetail_referrer=22#Intent;scheme=baemin;package=com.sampleapp;end';
     var url_scheme = "wingstation://qr";
     var hiddenDiv = document.getElementById("div_app");
     var iframe = document.createElement('iframe');
