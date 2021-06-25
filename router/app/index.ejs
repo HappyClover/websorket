@@ -117,54 +117,54 @@
     const intent = 'intent://qr/#Intent;scheme=wingstation;package=com.shability.wingshare;end';
     const playStore = 'market://details?id=com.shability.baekbang';
 
-    $( document ).ready(function() {
-        var userAgent = navigator.userAgent.toLowerCase();
-        if(userAgent.match('iphone') || userAgent.match('ipad') || userAgent.match('ipod')) {    //아이폰
-            is_installed_app_ios(urlscheme,"1548249801");
-        }else if(userAgent.match('android')) {    //안드로이드 기기
-            if(browser == 'Chrome'){
-                //크롬일시
-                //is_installed_app_and(intent,playStore);
-            } else {
-                is_installed_app_and(urlscheme,playStore);
-
-            }
-
-        } else {    //그 외
-            alert("userAgent : " + userAgent);
-        }
-
-        function is_installed_app_ios(bundleId,appstoreId) {
-            var appstoreUrl = "http://itunes.apple.com/kr/app/id"+appstoreId+"?mt=8";
-            var url = bundleId + "://";
-            var clickedAt = +new Date;
-
-            AppCheckTimer = setTimeout(function() {
-                if (+new Date - clickedAt < 2000) {
-                    location.href = appstoreUrl;
-                }
-            }, 1500);
-            location.href = url;
-        }
-
-        function is_installed_app_and(url,marketUrl){
-
-            if(confirm("윙스테이션 앱을 실행 하시겠습니까?") == true){
-                top.location.href = url;
-
-                setTimeout(function(){
-                    top.location.href = marketUrl;
-                },1000);
-            }else{   //취소
-                return;
-            }
-        }
-
-        document.getElementById('appLinkButton').addEventListener('click',function (){
-            document.getElementById('forAnd').src=intent;
-        });
-    });
-
+    // $( document ).ready(function() {
+    //     var userAgent = navigator.userAgent.toLowerCase();
+    //     if(userAgent.match('iphone') || userAgent.match('ipad') || userAgent.match('ipod')) {    //아이폰
+    //         is_installed_app_ios(urlscheme,"1548249801");
+    //     }else if(userAgent.match('android')) {    //안드로이드 기기
+    //         if(browser == 'Chrome'){
+    //             //크롬일시
+    //             //is_installed_app_and(intent,playStore);
+    //         } else {
+    //             is_installed_app_and(urlscheme,playStore);
+    //
+    //         }
+    //
+    //     } else {    //그 외
+    //         alert("userAgent : " + userAgent);
+    //     }
+    //
+    //     function is_installed_app_ios(bundleId,appstoreId) {
+    //         var appstoreUrl = "http://itunes.apple.com/kr/app/id"+appstoreId+"?mt=8";
+    //         var url = bundleId + "://";
+    //         var clickedAt = +new Date;
+    //
+    //         AppCheckTimer = setTimeout(function() {
+    //             if (+new Date - clickedAt < 2000) {
+    //                 location.href = appstoreUrl;
+    //             }
+    //         }, 1500);
+    //         location.href = url;
+    //     }
+    //
+    //     function is_installed_app_and(url,marketUrl){
+    //
+    //         if(confirm("윙스테이션 앱을 실행 하시겠습니까?") == true){
+    //             top.location.href = url;
+    //
+    //             setTimeout(function(){
+    //                 top.location.href = marketUrl;
+    //             },1000);
+    //         }else{   //취소
+    //             return;
+    //         }
+    //     }
+    //
+    //     document.getElementById('appLinkButton').addEventListener('click',function (){
+    //         document.getElementById('forAnd').src=intent;
+    //     });
+    // });
+    //
     function isBrowserCheck(){
         const agt = navigator.userAgent.toLowerCase();
         if (agt.indexOf("chrome") != -1) return 'Chrome';
@@ -190,6 +190,57 @@
             return 'Internet Explorer '+rv;
         }
     }
+
+
+    var userAgent = navigator.userAgent.toLowerCase();
+
+    var isIos = userAgent.match('iphone') || userAgent.match('ipad') || userAgent.match('ipod');
+    var isFacebookWebView = !!~navigator.userAgent.toLowerCase().indexOf('fban') || !!~navigator.userAgent.toLowerCase().indexOf('fbav');
+    var chrome = "intent://qr/#Intent;scheme=wingstation;package=com.shability.wingshare;end";
+    var url_scheme = "wingstation://qr";
+    var hiddenDiv = document.getElementById("div_app");
+    var iframe = document.createElement('iframe');
+
+    iframe.id = 'uri-iframe';
+
+    if (isIos) iframe.src = url_scheme;
+    else{
+        switch (isBrowserCheck()){
+            case 'Chrome':
+                iframe.src = intent;
+                break;
+
+            default:
+                iframe.src = url_scheme;
+
+        }
+    }
+
+    function locationChangeToDeepLink() {
+        if (isIos) {
+            if (isFacebookWebView) {
+                window.location.replace(urlscheme)
+            } else {
+                location.href = urlscheme
+            }
+        } else {
+            hiddenDiv.appendChild(iframe)
+        }
+    }
+
+    function moveToLink() {
+        locationChangeToDeepLink();
+
+        setTimeout(function () {
+            location.href = "http://itunes.apple.com/kr/app/id1548249801?mt=8"
+        }, 300);
+    }
+
+    document.querySelector('#appLinkButton').addEventListener('click', function () {
+        moveToLink();
+    });
+
+    moveToLink();
 
 
 </script>
