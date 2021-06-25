@@ -219,9 +219,9 @@
     function locationChangeToDeepLink() {
         if (isIos) {
             if (isFacebookWebView) {
-                window.location.replace(urlscheme)
+                window.location.replace(urlscheme);
             } else {
-                location.href = urlscheme
+                location.href = urlscheme;
             }
         } else {
             hiddenDiv.appendChild(iframe)
@@ -231,9 +231,9 @@
     function moveToLink() {
         locationChangeToDeepLink();
 
-        setTimeout(function () {
-            location.href = "http://itunes.apple.com/kr/app/id1548249801?mt=8"
-        }, 300);
+        // setTimeout(function () {
+        //     location.href = "http://itunes.apple.com/kr/app/id1548249801?mt=8"
+        // }, 300);
     }
 
     document.querySelector('#appLinkButton').addEventListener('click', function () {
