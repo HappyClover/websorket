@@ -291,7 +291,9 @@ router.get('/control/charge/', async (req, res) => {
         'usage' : query_result
     }
 
-    res.render('./router/control/index.ejs', {admin, using, today, usage});
+    let month = usage;
+
+    res.render('./router/control/index.ejs', {admin, using, today, month,usage});
 });
 
 /* 스테이션 관리
