@@ -259,12 +259,13 @@ router.get('/control/charge/', async (req, res) => {
         "   when 1 then user.last_name " +
         "   when 2 then admin.name" +
         "   else null end as user_name, "+
-        "station.name, station.identifier, station.code as station_code, station_port.number " +
+        "station.id as station_id, station.name, station.identifier, station.code as station_code, station_port.number " +
         "from station_usage_history " +
         "left join station_port on station_usage_history.port_id = station_port.id "+
         "left join station on station_usage_history.station_id = station.id "+
         "left join admin on station_usage_history.user_id = admin.id "+
-        "left join user on station_usage_history.user_id = user.id ";
+        "left join user on station_usage_history.user_id = user.id "+
+        "order by id DESC";
     //+""
     var value = [req.session.uid];
     const usage_result = await pool.query(query,value);
@@ -276,7 +277,7 @@ router.get('/control/charge/', async (req, res) => {
         let data = {
             "id": usage_array[i].id,
             "code" : usage_array[i].station_code,
-            "numb" : usage_array[i].id,
+            "numb" : usage_array[i].station_id,
             "port" : usage_array[i].number,
             "user":  usage_array[i].user_name,
             "start": usage_array[i].start,
