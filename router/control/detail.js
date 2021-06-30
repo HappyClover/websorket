@@ -256,7 +256,7 @@ router.get('/control/charge/', async (req, res) => {
     var query = "select station_usage_history.id, station_usage_history.start, " +
         "ifnull(station_usage_history.charge_complete, station_usage_history.end) as end, "+
         "case station_usage_history.user_type " +
-        "   when 1 then user.first_name " +
+        "   when 1 then user.last_name " +
         "   when 2 then admin.name" +
         "   else null end as user_name, "+
         "station.name, station.identifier, station.code as station_code, station_port.number " +
