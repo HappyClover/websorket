@@ -258,7 +258,7 @@ router.get('/control/charge/', async (req, res) => {
         "case station_usage_history.user_type " +
         "   when 1 then user.first_name " +
         "   when 2 then admin.name" +
-        "   else null end as user_name,"+
+        "   else null end as user_name, "+
         "station.name, station.identifier, station.code as station_code, station_port.number " +
         "from station_usage_history " +
         "left join station_port on station_usage_history.port_id = station_port.id "+
