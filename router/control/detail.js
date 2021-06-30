@@ -253,8 +253,8 @@ router.get('/control/charge/', async (req, res) => {
     }
 
     //스테이션 사용로그
-    var query = "select station_usage_history.id, date_format(station_usage_history.start, '%y-%m-%d %H:%i:%s') as start, " +
-        "ifnull(station_usage_history.charge_complete, station_usage_history.end) as end, "+
+    var query = "select station_usage_history.id, date_format(station_usage_history.start, '%Y-%m-%d %H:%i:%s') as start, " +
+        "ifnull(date_format(station_usage_history.charge_complete, '%Y-%m-%d %H:%i:%s'), date_format(station_usage_history.end, '%Y-%m-%d %H:%i:%s')) as end, "+
         "case station_usage_history.user_type " +
         "   when 1 then user.last_name " +
         "   when 2 then admin.name" +
