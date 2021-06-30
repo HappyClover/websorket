@@ -291,7 +291,15 @@ router.get('/control/charge/', async (req, res) => {
         'usage' : query_result
     }
 
-    let month = usage;
+    let month = {
+        "last": 10,
+        'this': 10
+    };
+
+    today = {
+        "last": 10,
+        'this': 10
+    };
 
     res.render('./router/control/index.ejs', {admin, using, today, month,usage});
 });
