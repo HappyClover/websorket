@@ -10,6 +10,7 @@ const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 
 router.use('/static', express.static('./router/control/static/'));
+router.use('/static', express.static('./router/control/main/static/'));
 
 router.get('/', (req, res) => {
   if(checkSession(req)){
@@ -181,7 +182,7 @@ router.get('/control/main/', async (req, res) => {
         usage[usage_array[i].time] = usage_array[i].cnt;
     }
 
-    res.render('index_station.ejs', {admin, station, error, usage});
+    res.render('./main/index.ejs', {admin, station, error, usage});
 });
 
 //관제시스템 -> 스테이션 현황
