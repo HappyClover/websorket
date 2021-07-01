@@ -104,7 +104,10 @@ app.use(subdomain('admin.wingstation.co.kr',router_admin_main));
 app.use(subdomain("app.wingstation.co.kr", router_app));
 
 
-
+//에러 핸들링
+app.use((req, res, next) => {
+  res.status(404).send('<script>alert("잘못된 경로입니다."); history.go(-1); </script>');
+})
 app.use(express.static('static'));
 
 

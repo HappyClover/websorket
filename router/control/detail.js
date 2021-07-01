@@ -108,14 +108,20 @@ router.get('/control/main/', async (req, res) => {
 
     var query = "select station.station, station_port.port " +
         "from (select count(*) station from station) station, (select count(*) port from station_port) station_port;"
+
+    switch (req.session.permission){
+        case 1:
+            break;
+
+        case 2:
+            break;
+
+        case 3:
+            break;
+    }
     var value = [req.session.uid];
     const count_result = await pool.query(query,value);
     const count_array = count_result[0];
-
-    admin = {
-        'name':"김송현",
-        'last':'2021-05-31'
-    };
 
     //스테이션 정보
     //전체 설치대수, 전체 포트 수, 현재 사용중인 포트
