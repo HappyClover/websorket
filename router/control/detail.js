@@ -182,7 +182,7 @@ router.get('/control/main/', async (req, res) => {
         usage[usage_array[i].time] = usage_array[i].cnt;
     }
 
-    res.render('./main/index.ejs', {admin, station, error, usage});
+    res.render('/router/control/main/index.ejs', {admin, station, error, usage});
 });
 
 //관제시스템 -> 스테이션 현황
