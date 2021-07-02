@@ -11,6 +11,7 @@ const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 
 router.use('/static', express.static('./router/control/static/'));
 router.use('/static', express.static('./router/control/main/static/'));
+router.use('/static', express.static('./router/control/stationList/static/'));
 
 router.get('/', (req, res) => {
   if(checkSession(req)){
@@ -351,7 +352,7 @@ router.get('/station/list/', async (req, res) => {
         'station' : query_result
     }
 
-    res.render('index_station.ejs',{admin, station});
+    res.render('./router/control/stationList/index.ejs',{admin, station});
 });
 
 router.get('/station/list/update/', async (req, res) => {
