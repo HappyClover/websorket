@@ -227,7 +227,7 @@ router.get('/control/status/', async (req, res) => {
         'station': query_result
     }
 
-    res.render('index_station.ejs',{admin, station});
+    res.render('./router/control/stationList/index.ejs',{admin, station});
 });
 
 //관제시스템 -> 충전로그
