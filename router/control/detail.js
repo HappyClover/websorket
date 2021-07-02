@@ -56,7 +56,6 @@ router.post('/login/', (req, res) => {
       } else {
           var msg = "DB에러";
           res.send("<scipt>parent.login_fail("+msg+");</scipt>");
-
       }
 
       res.render('index_station.ejs');
@@ -129,7 +128,7 @@ router.get('/control/main/', async (req, res) => {
     let station={
         'all':count_array[0].station,
         'port':count_array[0].port,
-        'isUse': 8
+        'isUse': 0
     };
 
     //에러정보
@@ -140,10 +139,10 @@ router.get('/control/main/', async (req, res) => {
         'unresolve': 0
     };
 
-    var query = "select count(*) as cnt, date_format(date,'%H') as time " +
+    var query = "select count(*) as cnt, date_format(date,'%l') as time " +
         "from station_usage_history " +
         "where date between date_format(curdate(),'%y-%m-%d') and date_format(date_add(curdate(), interval 1 day), '%y-%m-%d') " +
-        "group by date_format(date, '%H');"
+        "group by date_format(date, '%l');"
     var value = [req.session.uid];
     const usage_result = await pool.query(query,value);
     const usage_array = usage_result[0];
@@ -152,10 +151,10 @@ router.get('/control/main/', async (req, res) => {
     //일반 배열
     let usage={
         "0":0,
-        "1":10,
-        "2":20,
-        "3":15,
-        "4":40,
+        "1":0,
+        "2":0,
+        "3":0,
+        "4":0,
         "5":0,
         "6":0,
         "7":0,
@@ -163,11 +162,11 @@ router.get('/control/main/', async (req, res) => {
         "9":0,
         "10":0,
         "11":0,
-        "12":120,
+        "12":0,
         "13":0,
-        "14":40,
-        "15":30,
-        "16":60,
+        "14":0,
+        "15":0,
+        "16":0,
         "17":0,
         "18":0,
         "19":0,
