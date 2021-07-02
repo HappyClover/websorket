@@ -139,7 +139,7 @@ router.get('/control/main/', async (req, res) => {
         'unresolve': 0
     };
 
-    var query = "select count(*) as cnt, date_format(date,'%H') as time " +
+    var query = "select count(*) as cnt, date_format(date,'%l') as time " +
         "from station_usage_history " +
         "where date between date_format(curdate(),'%y-%m-%d') and date_format(date_add(curdate(), interval 1 day), '%y-%m-%d') " +
         "group by date_format(date, '%l');"
