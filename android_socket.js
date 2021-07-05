@@ -512,14 +512,16 @@ io.on('connection',function (socket){
       console.log(`${nickname} is disconnect this chatroom ------------------------  `)
 
       switch(socket_type){
-          case 'station' :
+        case 'station' :
             //Delete user in the whoIsOn Arryay
             StationIsOn.splice(nickname,1);
             var data = {
                 disconnected : nickname
             }
-            socket.emit('logout',data)
-            console.log(`${StationIsOn}`)
+
+            add_station_log(WhoAmI.id, 2, 'disconnected', nickname+' disconnected')
+            socket.emit('logout',data);
+            console.log(`${StationIsOn}`);
             io.to(room['admin']).emit('a_station_status', false);
 
             break;
@@ -639,7 +641,7 @@ io.on('connection',function (socket){
 
             port_list[idlePort].setValue('status',1);
   
-            socket.emit('charge_ready',input_data);;
+            socket.emit('charge_ready',input_data);
             io.to(room['admin']).emit('a_charge_ready', input_data);
 
           } else {

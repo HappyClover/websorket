@@ -56,6 +56,8 @@ router.get('/station/list',async (req, res) => {
         }
         res.send(result);
 
+        add_api_log(null, req.url, '990',"API키 불일치 : "+api_key, getTimeStamp());
+
     } else {
         //스테이션 리스트 가져오기
         var query = "select id, latitude, longitude, adress, identifier, name from station where (latitude > ? and longitude > ? ) and (latitude < ? and longitude < ? )";
@@ -86,6 +88,7 @@ router.get('/station/list',async (req, res) => {
                     }
                 }
             } else {
+                add_api_log(null,req.url, '999',"DB에러 : "+err, getTimeStamp());
                 console.log('query error : ' + err);
                 station_result = null;
             }
@@ -100,9 +103,12 @@ router.get('/station/list',async (req, res) => {
                 'detail': 'success',
                 "station": station_result,
             }
-        
+            add_api_log(company_id, req.url, '200',"success");
+
             res.json(result);
-        });  
+        });
+        add_api_log(company_id ,req.url, '200',"success", getTimeStamp());
+
     }
 });
 
@@ -118,10 +124,10 @@ router.get('/station/info',async (req, res) => {
     if(!company_id){
         result = {
             'result': false,
-            'code': 999,
+            'code': 990,
             'detail': '일치하는 API키가 없음',
-        } 
-        console.log(result);
+        }
+        add_api_log(null, req.url, '990',"API키 불일치 : "+api_key, getTimeStamp());
         res.json(result);
     } else {
 
@@ -156,7 +162,7 @@ router.get('/station/info',async (req, res) => {
                 }
                 result = {
                     'result': true,
-                    'code': 000,
+                    'code': 0o00,
                     'detail': 'success',
                     'station': {
                     'id': rows[0].station_id,
@@ -167,9 +173,12 @@ router.get('/station/info',async (req, res) => {
                     }
                 } 
             }
+            add_api_log(company_id, req.url, '200',"success", getTimeStamp());
+
             res.json(result);
 
         } else {
+            add_api_log(company_id,req.url, '999',"DB에러 : "+err, getTimeStamp());
             console.log('1. query error : ' + err + '\nquery : ' + query +'\n');
 
             result = {
@@ -204,6 +213,8 @@ router.get('/station/usage',async (req, res) => {
             'detail': '일치하는 API키가 없음',
         } 
         console.log(result);
+        add_api_log(null, req.url, '990',"API키 불일치 : "+api_key, getTimeStamp());
+
         res.json(result);
     } else {
 
@@ -254,6 +265,8 @@ router.get('/station/usage',async (req, res) => {
                         'info': info
                     } 
                 }
+                add_api_log(company_id, req.url, '200',"success",getTimeStamp());
+
                 res.json(result);
 
             } else {
@@ -263,7 +276,9 @@ router.get('/station/usage',async (req, res) => {
                     'result': false,
                     'code': 510,
                     'detail': 'DB 에러',
-                } 
+                }
+                add_api_log(company_id,req.url, '999',"DB에러 : "+err, getTimeStamp());
+
                 res.json(result);
                 return false;
             }
@@ -314,5 +329,31 @@ async function checkAPI(key, pool, req){
     // return result;
 }
 
+function add_api_log(admin_id, url, result, msg, date){
+    const query = "insert into log_api(admin_id, url, result, message, date) values(?,?,?,?,?)";
+    const value = [admin_id, url, result, msg, date];
 
+    mysqlDB.query(query,value, function (err, rows, fields) {
+        if (!err) {
+            return true;
+        } else {
+            console.log('query error : ' + err);
+            return false;
+        }
+    });
+}
+
+function getTimeStamp() {
+    var d = new Date();
+    var s =
+        leadingZeros(d.getFullYear(), 4) + '-' +
+        leadingZeros(d.getMonth() + 1, 2) + '-' +
+        leadingZeros(d.getDate(), 2) + ' ' +
+
+        leadingZeros(d.getHours(), 2) + ':' +
+        leadingZeros(d.getMinutes(), 2) + ':' +
+        leadingZeros(d.getSeconds(), 2);
+
+    return s;
+}
 module.exports = router;
