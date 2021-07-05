@@ -1032,7 +1032,7 @@ function sql_query(query, value){
 }
 
 function add_station_log(station_id, code, result, msg, date){
-  const query = "insert into log(station_id, code, result, message, date), values(?,?,?,?,?)";
+  const query = "insert into log(station_id, code, result, message, date) values(?,?,?,?,?)";
   const value = [station_id, code, result, msg, date];
 
   mysqlDB.query(query,value, function (err, rows, fields) {
