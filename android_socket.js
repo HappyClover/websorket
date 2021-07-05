@@ -189,6 +189,7 @@ io.on('connection',function (socket){
     var station_rows;
     var socketID = '';
     var WhoAmI;
+    var ip = '';
 
     var port_list = new Array();
 
@@ -212,6 +213,7 @@ io.on('connection',function (socket){
           case 'station' :
             nickname = login_data.name;
             socket_type = login_data.type;
+            ip = login_data.ip;
 
             var id, name, result;
 
@@ -234,15 +236,19 @@ io.on('connection',function (socket){
                     }
                     WhoAmI = new station_class(id, nickname, socket.id, port_list);
                     StationIsOn[nickname] = WhoAmI //
-  
+
+                    add_station_log(id, 1, "200", "login success", getTimeStamp());
                     shoot_result(socket, "login", true);
   
                   } else { //조회결과가 없을때
                     shoot_result(socket, "login", false);
+                    add_station_log(id, 1, "301", "login fail : "+nickname, getTimeStamp());
                     result = false;
                   }
                 } else {
                   console.log('query error : ' + err);
+                  add_station_log(id, 1, "399", "login fail : "+err, getTimeStamp());
+
                   result = false;
                 }
               });
@@ -1025,24 +1031,10 @@ function sql_query(query, value){
   });
 }
 
-function add_log(code, msg){
-  const query = "insert into log(code, message), values(?,?)";
-  const value = (code, msg);
+function add_station_log(station_id, code, result, msg, date){
+  const query = "insert into log(station_id, code, result, message, date), values(?,?,?,?,?)";
+  const value = [station_id, code, result, msg, date];
 
-  mysqlDB.query(query,value, function (err, rows, fields) {
-    if (!err) {
-      return true;
-    } else {
-      console.log('query error : ' + err);
-      return false;
-    }
-  });
-
-}
-
-function AddPortLog(port_id, status, value){
-  var query = "insert into port_log(port_id, code, value, date) values(?,?,?,?)";
-  var param = (port_id, status)
   mysqlDB.query(query,value, function (err, rows, fields) {
     if (!err) {
       return true;
