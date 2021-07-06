@@ -28,7 +28,7 @@ router.post('/login/', (req, res) => {
     const input_pw = req.body.pw;
 
     var value = (input_id);
-    var query = "select admin.*, log_admin.date from admin " +
+    var query = "select admin.*, date_format(log_admin.date, '%Y-%m-%d %H:%i:%s') from admin " +
         "inner join log_admin on log_admin.admin_id = admin.id "+
         "where identifier = ? " +
         "limit 1 ";
@@ -46,7 +46,8 @@ router.post('/login/', (req, res) => {
 
             if (pw == crypto_pw){
                 req.session.uid = rows[0].identifier;
-                req.session.name = rows[0].manager_name;
+                if (rows[0].manager_name === null) req.session.name = rows[0].name;
+                else req.session.name = rows[0].manager_name;
                 req.session.permission = rows[0].permission;
                 req.session.last_login = rows[0].date;
 
