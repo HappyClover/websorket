@@ -28,9 +28,9 @@ router.post('/login/', (req, res) => {
 
     var value = (input_id);
     var query = "select admin.*, log_admin.date from admin " +
-        "inner join log_admin on log_admin.admin_id = admin.id"+
-        "where identifier = ?" +
-        "limit 1";
+        "inner join log_admin on log_admin.admin_id = admin.id "+
+        "where identifier = ? " +
+        "limit 1 ";
     mysqlDB.query(query,value, function (err, rows, fields) {
       if(!err){
           console.log(rows.length);
@@ -62,7 +62,7 @@ router.post('/login/', (req, res) => {
         }
       } else {
           var msg = "DB에러";
-          add_admin_log(rows[0].id,1,999,'DB 에러 : '+err, getTimeStamp());
+          add_admin_log(null,1,999,'DB 에러 : '+err, getTimeStamp());
           res.send("<scipt>parent.login_fail("+msg+");</scipt>");
       }
     });
