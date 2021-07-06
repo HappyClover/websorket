@@ -330,7 +330,7 @@ router.get('/station/list/', async (req, res) => {
     var query = "select station.*, count(*) as port, admin.name as admin_name " +
         "from station " +
         "right join station_port on station.id = station_port.station_id " +
-        "inner join admin on station.admin_id = admin.id" +
+        "inner join admin on station.admin_id = admin.id " +
         "group by id" ;
     var value = [req.session.uid];
     const admin_result = await pool.query(query,value);
