@@ -219,7 +219,7 @@ router.get('/control/status/', async (req, res) => {
             "name" : station_array[i].name,
             "address" : station_array[i].adress,
             "port" : station_array[i].port,
-            "status" : 1,
+            "status" : station_array[i].status,
         };
 
         query_result.push(data);
@@ -327,11 +327,11 @@ router.get('/station/list/', async (req, res) => {
         'last':req.session.last_login
     };
 
-    var query = "select station.*, count(*) as port " +
+    var query = "select station.*, count(*) as port, admin.name as admin_name " +
         "from station " +
         "right join station_port on station.id = station_port.station_id " +
+        "inner join admin on station.admin_id = admin.id" +
         "group by id" ;
-                //+""
     var value = [req.session.uid];
     const admin_result = await pool.query(query,value);
     const admin_array = admin_result[0];
@@ -344,9 +344,9 @@ router.get('/station/list/', async (req, res) => {
             "name" : admin_array[i].name,
             "address" : admin_array[i].adress,
             "port" : admin_array[i].port,
-            "type" : 1,
-            "admin" : "셰빌리티",
-            "status" : 1,
+            "type" : admin_array[i].type,
+            "admin" : admin_array[i].admin_name,
+            "status" : admin_array[i].install,
         };
 
         query_result.push(data);
