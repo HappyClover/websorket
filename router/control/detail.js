@@ -32,17 +32,15 @@ router.post('/login/', (req, res) => {
         "where identifier = ?" +
         "limit 1";
     mysqlDB.query(query,value, function (err, rows, fields) {
-        rows[0].manager_name = undefined;
-        console.log(rows);
-
       if(!err){
           console.log(rows.length);
-
+          console.log(rows);
         if(rows.length < 1){
             var msg = "아이디 및 비밀번호가 틀렸습니다.";
             add_admin_log(null,1,500,'아이디 불일치',getTimeStamp());
             res.send("<scipt>parent.login_fail("+msg+");</scipt>");
         } else {
+            rows[0].manager_name = undefined;
             const pw = rows[0].password;
             const crypto_pw = crypto.createHash('sha512').update(input_pw).digest('base64');
 
