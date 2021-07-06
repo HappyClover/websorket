@@ -54,9 +54,7 @@ router.post('/login/', (req, res) => {
             } else {
                 var msg = "아이디 및 비밀번호가 틀렸습니다.";
                 add_admin_log(rows[0].id,1,501,'비밀번호 불일치',getTimeStamp());
-                res.send(msg);
-
-                // res.send("<scipt>parent.login_fail("+msg+");</scipt>");
+                res.send("<scipt>parent.login_fail("+msg+");</scipt>");
             }
         }
       } else {
