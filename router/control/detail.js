@@ -40,7 +40,6 @@ router.post('/login/', (req, res) => {
             add_admin_log(null,1,500,'아이디 불일치',getTimeStamp());
             res.send("<scipt>parent.login_fail("+msg+");</scipt>");
         } else {
-            rows[0].manager_name = undefined;
             const pw = rows[0].password;
             const crypto_pw = crypto.createHash('sha512').update(input_pw).digest('base64');
 
@@ -108,8 +107,8 @@ router.get('/control/main/', async (req, res) => {
     //관리자 정보
     //이름, 마지막 접속 일자
     let admin = {
-        'name':"김송현",
-        'last':'2021-05-31'
+        'name':req.session.name,
+        'last':req.session.last_login
     };
 
     var query = "select station.station, station_port.port " +
@@ -199,8 +198,8 @@ router.get('/control/status/', async (req, res) => {
     //관리자 정보
     //이름, 마지막 접속 일자
     let admin = {
-        'name':"김송현",
-        'last':'2021-05-31'
+        'name':req.session.name,
+        'last':req.session.last_login
     };
 
     var query = "select station.*, count(*) as port " +
@@ -241,8 +240,8 @@ router.get('/control/charge/', async (req, res) => {
         res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
     }
     let admin = {
-        'name':"김송현",
-        'last':'2021-05-31'
+        'name':req.session.name,
+        'last':req.session.last_login
     };
 
     let using = 12000;
@@ -324,8 +323,8 @@ router.get('/station/list/', async (req, res) => {
         res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
     }
     let admin = {
-        'name':"김송현",
-        'last':'2021-05-31'
+        'name':req.session.name,
+        'last':req.session.last_login
     };
 
     var query = "select station.*, count(*) as port " +
