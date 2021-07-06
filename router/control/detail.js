@@ -54,7 +54,9 @@ router.post('/login/', (req, res) => {
             } else {
                 var msg = "아이디 및 비밀번호가 틀렸습니다.";
                 add_admin_log(rows[0].id,1,501,'비밀번호 불일치',getTimeStamp());
-                res.send("<scipt>parent.login_fail("+msg+");</scipt>");
+                res.send(msg);
+
+                // res.send("<scipt>parent.login_fail("+msg+");</scipt>");
             }
         }
       } else {
@@ -470,7 +472,7 @@ function checkSession(req) {
 }
 
 function add_admin_log(admin_id, code, result, msg, date){
-    const query = "insert into log_admin(admin_id, url, result, message, date) values(?,?,?,?,?)";
+    const query = "insert into log_admin(admin_id, code, result, msg, date) values(?,?,?,?,?)";
     const value = [admin_id, code, result, msg, date];
 
     mysqlDB.query(query,value, function (err, rows, fields) {
