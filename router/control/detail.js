@@ -35,10 +35,10 @@ router.post('/login/', (req, res) => {
       if(!err){
         if(rows.length < 1){
             var msg = "아이디 및 비밀번호가 틀렸습니다.";
+            add_admin_log(null,1,500,'아이디 불일치',getTimeStamp());
             res.send("<scipt>parent.login_fail("+msg+");</scipt>");
         } else {
             const pw = rows[0].password;
-
             const crypto_pw = crypto.createHash('sha512').update(input_pw).digest('base64');
 
             if (pw == crypto_pw){
@@ -47,16 +47,19 @@ router.post('/login/', (req, res) => {
                 req.session.permission = rows[0].permission;
                 req.session.last_login = rows[0].last
 
+                add_admin_log(rows[0].id,1,200,'로그인 성공', getTimeStamp());
                 req.session.save(function (){
                     res.redirect('/');
                 });
             } else {
                 var msg = "아이디 및 비밀번호가 틀렸습니다.";
+                add_admin_log(rows[0].id,1,501,'비밀번호 불일치',getTimeStamp());
                 res.send("<scipt>parent.login_fail("+msg+");</scipt>");
             }
         }
       } else {
           var msg = "DB에러";
+          add_admin_log(rows[0].id,1,999,'DB 에러 : '+err, getTimeStamp());
           res.send("<scipt>parent.login_fail("+msg+");</scipt>");
       }
 
@@ -465,4 +468,45 @@ function checkSession(req) {
     return false;
   }
 }
+
+function add_admin_log(admin_id, code, result, msg, date){
+    const query = "insert into log_admin(admin_id, url, result, message, date) values(?,?,?,?,?)";
+    const value = [admin_id, code, result, msg, date];
+
+    mysqlDB.query(query,value, function (err, rows, fields) {
+        if (!err) {
+            return true;
+        } else {
+            console.log('query error : ' + err);
+            return false;
+        }
+    });
+}
+
+function getTimeStamp() {
+    var d = new Date();
+    var s =
+        leadingZeros(d.getFullYear(), 4) + '-' +
+        leadingZeros(d.getMonth() + 1, 2) + '-' +
+        leadingZeros(d.getDate(), 2) + ' ' +
+
+        leadingZeros(d.getHours(), 2) + ':' +
+        leadingZeros(d.getMinutes(), 2) + ':' +
+        leadingZeros(d.getSeconds(), 2);
+
+    return s;
+}
+
+function leadingZeros(n, digits) {
+    var zero = '';
+    n = n.toString();
+
+    if (n.length < digits) {
+        for (i = 0; i < digits - n.length; i++)
+            zero += '0';
+    }
+    return zero + n;
+}
+
+
 module.exports = router;
