@@ -64,9 +64,7 @@ router.post('/login/', (req, res) => {
           add_admin_log(rows[0].id,1,999,'DB 에러 : '+err, getTimeStamp());
           res.send("<scipt>parent.login_fail("+msg+");</scipt>");
       }
-
-      res.render('index_station.ejs');
-  });
+    });
 });
 
 router.get('/login/test/:code/',async (req, res) =>{
