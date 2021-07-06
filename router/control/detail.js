@@ -13,12 +13,13 @@ router.use('/static', express.static('./router/control/static/'));
 router.use('/static', express.static('./router/control/main/static/'));
 router.use('/static', express.static('./router/control/stationList/static/'));
 router.use('/static', express.static('./router/control/station/list/static/'));
+router.use('/static', express.static('./router/control/login/static/'));
 
 router.get('/', (req, res) => {
   if(checkSession(req)){
       res.redirect('/control/main/');
   } else {
-      res.render('index_station.ejs');
+      res.render('./router/control/login/');
   }
 });
 
