@@ -38,7 +38,7 @@ router.post('/login/', (req, res) => {
         if(rows.length < 1){
             var msg = "아이디 및 비밀번호가 틀렸습니다.";
             add_admin_log(null,1,500,'아이디 불일치',getTimeStamp());
-            res.send("<script>parent.login_fail("+msg+");</script>");
+            res.send("<script>parent.login_fail();</script>");
         } else {
             const pw = rows[0].password;
             const crypto_pw = crypto.createHash('sha512').update(input_pw).digest('base64');
@@ -51,18 +51,18 @@ router.post('/login/', (req, res) => {
 
                 add_admin_log(rows[0].id,1,200,'로그인 성공', getTimeStamp());
                 req.session.save(function (){
-                    res.redirect('/');
+                    res.send("<script>parent.location.href='/';</script>");
                 });
             } else {
                 var msg = "아이디 및 비밀번호가 틀렸습니다.";
                 add_admin_log(rows[0].id,1,501,'비밀번호 불일치',getTimeStamp());
-                res.send("<script>parent.login_fail("+msg+");</script>");
+                res.send("<script>parent.login_fail();</script>");
             }
         }
       } else {
           var msg = "로그인 처리중 에러가 발생했습니다.";
           add_admin_log(null,1,999,'DB 에러 : '+err, getTimeStamp());
-          res.send("<script>parent.login_fail("+msg+");</script>");
+          res.send("<script>parent.login_fail();</script>");
       }
     });
 });
