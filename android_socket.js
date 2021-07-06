@@ -25,11 +25,13 @@ const cryKey = "WINGSTATION";
 var station_current;
 
 //스테이션 클래스 배치
-var station_class = require('./class/C_station.js');
-var user_class = require('./class/C_user.js');
-var admin_class = require('./class/C_admin.js');
-var company_class = require('./class/C_company.js');
-var port_class = require('./class/C_port.js');
+const station_class = require('./class/C_station.js');
+const user_class = require('./class/C_user.js');
+const admin_class = require('./class/C_admin.js');
+const company_class = require('./class/C_company.js');
+const port_class = require('./class/C_port.js');
+
+const pool = require('./stationPool.js');
 
 //기본 세팅
 var bodyParser = require('body-parser');
@@ -238,6 +240,7 @@ io.on('connection',function (socket){
                     StationIsOn[nickname] = WhoAmI //
 
                     add_station_log(id, 1, "200", "login success", getTimeStamp());
+                    sql_query("update station set status=1 where id="+id, []);
                     shoot_result(socket, "login", true);
   
                   } else { //조회결과가 없을때
@@ -1001,6 +1004,17 @@ io.on('connection',function (socket){
           });
           
 })
+
+//서버 뒤지기 전에 정리작업
+process.on('SIGINT', async function(){
+  //DB내 스테이션 연결 상태 초기화
+  var query = "UPDATE station SET status = 0 ";
+  var value =[];
+  await pool.query(query,value);
+
+  //
+  process.exit();
+});
 
 function shoot_result(soket, code, data, msg){
 if(msg == undefined || msg == null){
