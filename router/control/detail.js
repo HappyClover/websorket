@@ -27,12 +27,17 @@ router.post('/login/', (req, res) => {
     const input_pw = req.body.pw;
 
     var value = (input_id);
-    var query = "select * from admin where identifier = ?";
+    var query = "select admin.*, log_admin.date from admin " +
+        "inner join log_admin on log_admin.admin_id = admin.id"+
+        "where identifier = ?" +
+        "limit 1";
     mysqlDB.query(query,value, function (err, rows, fields) {
         rows[0].manager_name = undefined;
         console.log(rows);
 
       if(!err){
+          console.log(rows.length);
+
         if(rows.length < 1){
             var msg = "아이디 및 비밀번호가 틀렸습니다.";
             add_admin_log(null,1,500,'아이디 불일치',getTimeStamp());
@@ -45,7 +50,7 @@ router.post('/login/', (req, res) => {
                 req.session.uid = rows[0].identifier;
                 req.session.name = rows[0].manager_name;
                 req.session.permission = rows[0].permission;
-                req.session.last_login = rows[0].last
+                req.session.last_login = rows[0].date;
 
                 add_admin_log(rows[0].id,1,200,'로그인 성공', getTimeStamp());
                 req.session.save(function (){
