@@ -240,7 +240,7 @@ io.on('connection',function (socket){
                     StationIsOn[nickname] = WhoAmI //
 
                     add_station_log(id, 1, "200", "login success", getTimeStamp());
-                    sql_query("update station set status=1 where id="+id, []);
+                    sql_query("update station set status=1, ip=?, socket_id=? where id=?", [ip, socket.id, id]);
                     shoot_result(socket, "login", true);
   
                   } else { //조회결과가 없을때
@@ -516,50 +516,54 @@ io.on('connection',function (socket){
 
       switch(socket_type){
         case 'station' :
-            //Delete user in the whoIsOn Arryay
-            StationIsOn.splice(nickname,1);
-            var data = {
-                disconnected : nickname
-            }
+          //Delete user in the whoIsOn Arryay
+          StationIsOn.splice(nickname,1);
+          var data = {
+              disconnected : nickname
+          }
+          //db상 연결 끊김 알림
+          sql_query("update station set status=0, ip=null, socket_id=null where id=?", [id]);
+          //로그 남기기
+          add_station_log(WhoAmI.id, 2, 'disconnected', nickname+' disconnected');
 
-            add_station_log(WhoAmI.id, 2, 'disconnected', nickname+' disconnected')
-            socket.emit('logout',data);
-            console.log(`${StationIsOn}`);
-            io.to(room['admin']).emit('a_station_status', false);
+          //서버 전체에 연결 끊김 알림
+          socket.emit('logout',data);
+          console.log(`${StationIsOn}`);
+          io.to(room['admin']).emit('a_station_status', false);
 
-            break;
+          break;
             
-          case 'admin':
-            //Delete user in the whoIsOn Arryay
-            AdminIsOn.splice(AdminIsOn.indexOf(nickname),1);
-            // var data = {
-            //     whoIsOn: whoIsOn,
-            //     disconnected : nickname
-            // }
-            socket.emit('logout',data)
-            console.log(`${AdminIsOn}`)
+        case 'admin':
+          //Delete user in the whoIsOn Arryay
+          AdminIsOn.splice(AdminIsOn.indexOf(nickname),1);
+          // var data = {
+          //     whoIsOn: whoIsOn,
+          //     disconnected : nickname
+          // }
+          socket.emit('logout',data)
+          console.log(`${AdminIsOn}`)
 
-            break;
+          break;
 
-          case 'user':
-            //Delete user in the whoIsOn Arryay
-            UserIsOn.splice(UserIsOn.indexOf(nickname),1);
-            var data = true;
-            shoot_result(socket,'result',data);
-            console.log(`${UserIsOn}`)
-            break;
+        case 'user':
+          //Delete user in the whoIsOn Arryay
+          UserIsOn.splice(UserIsOn.indexOf(nickname),1);
+          var data = true;
+          shoot_result(socket,'result',data);
+          console.log(`${UserIsOn}`)
+          break;
 
-          case 'company':
-            //Delete user in the whoIsOn Arryay
-            companyIsOn.splice(UserIsOn.indexOf(nickname),1);
-            var data = true;
-            shoot_result(socket,'result',data);
-            console.log(`${UserIsOn}`)
-            break;
-            
-          default:
-            console.log(`${socket_type} is unknown type`);
-        }
+        case 'company':
+          //Delete user in the whoIsOn Arryay
+          companyIsOn.splice(UserIsOn.indexOf(nickname),1);
+          var data = true;
+          shoot_result(socket,'result',data);
+          console.log(`${UserIsOn}`)
+          break;
+
+        default:
+          console.log(`${socket_type} is unknown type`);
+      }
     })
 
     socket.on('logout',function(){
