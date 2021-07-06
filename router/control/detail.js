@@ -30,7 +30,7 @@ router.post('/login/', (req, res) => {
     var value = (input_id);
     var query = "select admin.*, date_format(log_admin.date, '%Y-%m-%d %H:%i:%s') as date from admin " +
         "inner join log_admin on log_admin.admin_id = admin.id "+
-        "where identifier = ? and login_admin.result = 200 " +
+        "where identifier = ? and log_admin.result = 200 " +
         "order by log_admin.id DESC " +
         "limit 1 ";
     mysqlDB.query(query,value, function (err, rows, fields) {
