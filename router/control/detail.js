@@ -293,8 +293,9 @@ router.get('/control/charge/', async (req, res) => {
         }
     }
 
-
-
+    console.log("cnt : "+cnt);
+    console.log("cnt_time : "+cnt_time);
+    
     let today = {
         "this": 150,
         "last":100
