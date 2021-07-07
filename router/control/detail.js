@@ -271,30 +271,32 @@ router.get('/control/charge/', async (req, res) => {
     };
 
     for (let i =0; i<month_array.length; i++){
-        let today = getToday(-i);
+        let dateList = [getToday(0), getToday(-1), getToday(-2)];
 
         console.log(today +" === "+ month_array[i].time);
-        if (month_array[i].time == today){
-            switch (i){
-                case 0:
-                    cnt.this = month_array[i].cnt;
-                    cnt_time.this = month_array[i].cnt_time;
-                    console.log("this change");
-                    break;
+        for(let j= 0; i<dateList.length; j++) {
+            if (dateList[j] == month_array[i].time) {
+                switch (j) {
+                    case 0:
+                        cnt.this = month_array[i].cnt;
+                        cnt_time.this = month_array[i].cnt_time;
+                        console.log("this change");
+                        break;
 
-                case 1:
-                    cnt.last = month_array[i].cnt;
-                    cnt_time.last = month_array[i].cnt_time;
-                    console.log("last change");
+                    case 1:
+                        cnt.last = month_array[i].cnt;
+                        cnt_time.last = month_array[i].cnt_time;
+                        console.log("last change");
 
-                    break;
+                        break;
 
-                case 2:
-                    cnt["2last"] = month_array[i].cnt;
-                    cnt_time["2last"] = month_array[i].cnt_time;
-                    console.log("2last change");
+                    case 2:
+                        cnt["2last"] = month_array[i].cnt;
+                        cnt_time["2last"] = month_array[i].cnt_time;
+                        console.log("2last change");
 
-                    break;
+                        break;
+                }
             }
         }
     }
