@@ -542,8 +542,7 @@ function getTimeStamp() {
 
 function getToday(time) {
     var d = new Date();
-    d = d.setDate(d.getDate()+time);
-    console.log(d+" // "+typeof(d));
+    d = new Date(d.setDate(d.getDate()+time));
 
     var s =
         leadingZeros(d.getMonth() + 1, 2) + '-' +
