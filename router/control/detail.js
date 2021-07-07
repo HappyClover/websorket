@@ -252,7 +252,7 @@ router.get('/control/charge/', async (req, res) => {
 
     //오늘일자
     var query = "select count(*) as cnt, date_format(date,'%m-%d') as time, " +
-        "if(start is null, 0, timediff(ifnull(charge_complete,end), start)) as cnt_time" +
+        "if(start is null, 0, timediff(ifnull(charge_complete,end), start)) as cnt_time " +
         "from station_usage_history " +
         "where date between date_format(date_add(curdate(), interval -2 day),'%y-%m-%d') and date_format(date_add(curdate(), interval 1 day), '%y-%m-%d') " +
         "group by date_format(date, '%m-%d')"
