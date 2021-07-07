@@ -274,7 +274,7 @@ router.get('/control/charge/', async (req, res) => {
         let today = getToday(-i);
 
         console.log(today +" === "+ month_array[i].time);
-        if (month_array[i].time === today){
+        if (month_array[i].time == today){
             switch (i){
                 case 0:
                     cnt.this = month_array[i].cnt;
