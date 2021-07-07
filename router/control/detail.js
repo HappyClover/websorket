@@ -356,7 +356,7 @@ router.get('/control/charge/', async (req, res) => {
 
 
 
-    res.render('./router/control/index.ejs', {admin, using, count_date, count_time,usage, today, });
+    res.render('./router/control/index.ejs', {admin, using, cnt, count_time,usage, today, month});
 });
 
 /* 스테이션 관리
