@@ -247,21 +247,62 @@ router.get('/control/charge/', async (req, res) => {
         'last':req.session.last_login
     };
 
-    let using = 12000;
+    let using = 0;
 
 
     //오늘일자
-    var query = "select count(*) as cnt, date_format(date,'%m-%d') as time " +
+    var query = "select count(*) as cnt, date_format(date,'%m-%d') as time, " +
+        "if(start is null, 0, timediff(ifnull(charge_complete,end), start)) as cnt_time" +
         "from station_usage_history " +
         "where date between date_format(date_add(curdate(), interval -2 day),'%y-%m-%d') and date_format(date_add(curdate(), interval 1 day), '%y-%m-%d') " +
-        "group by date_format(date, '%m-%d');"
+        "group by date_format(date, '%m-%d')"
     const month_result = await pool.query(query,value);
     const month_array = month_result[0];
 
+    let cnt = {
+        "2last": 0,
+        "last": 0,
+        'this': 0
+    };
+    let cnt_time = {
+        "2last": 0,
+        "last": 0,
+        'this': 0
+    };
 
-    let today = {
+    for (let i =0; i<month_array.length; i++){
+        let today = getToday(-i);
+
+        if (month_array[i].time === today){
+            switch (i){
+                case 0:
+                    cnt.this = month_array[i].cnt;
+                    cnt_time.this = month_array[i].cnt_time;
+                    break;
+
+                case 1:
+                    cnt.last = month_array[i].cnt;
+                    cnt_time.last = month_array[i].cnt_time;
+                    break;
+
+                case 2:
+                    cnt["2last"] = month_array[i].cnt;
+                    cnt_time["2last"] = month_array[i].cnt_time;
+                    break;
+            }
+        }
     }
 
+
+
+    let today = {
+        "today": 150,
+        "last":100
+    }
+    let month = {
+        "today": 400,
+        "last":400
+    }
     for (let i; i<month_array.length; i++){
         today[month_array[i].time] = month_array[i].cnt;
     }
@@ -306,17 +347,16 @@ router.get('/control/charge/', async (req, res) => {
         'usage' : query_result
     }
 
-    let month = {
-        "last": 10,
-        'this': 10
+
+    let count_time = {
+        "2last": 0,
+        "last": 0,
+        'this': 0
     };
 
-    today = {
-        "last": 10,
-        'this': 10
-    };
 
-    res.render('./router/control/index.ejs', {admin, using, today, month,usage});
+
+    res.render('./router/control/index.ejs', {admin, using, count_date, count_time,usage, today, });
 });
 
 /* 스테이션 관리
@@ -497,6 +537,16 @@ function getTimeStamp() {
         leadingZeros(d.getMinutes(), 2) + ':' +
         leadingZeros(d.getSeconds(), 2);
 
+    return s;
+}
+
+function getToday(time) {
+    var d = new Date();
+    d = d.setDate(d.getDate()+time);
+
+    var s =
+        leadingZeros(d.getMonth() + 1, 2) + '-' +
+        leadingZeros(d.getDate(), 2);
     return s;
 }
 
