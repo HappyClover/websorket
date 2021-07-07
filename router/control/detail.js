@@ -296,11 +296,11 @@ router.get('/control/charge/', async (req, res) => {
 
 
     let today = {
-        "today": 150,
+        "this": 150,
         "last":100
     }
     let month = {
-        "today": 400,
+        "this": 400,
         "last":400
     }
     for (let i; i<month_array.length; i++){
