@@ -273,7 +273,7 @@ router.get('/control/charge/', async (req, res) => {
     for (let i =0; i<month_array.length; i++){
         let dateList = [getToday(0), getToday(-1), getToday(-2)];
 
-        for(let j= 0; i<dateList.length; j++) {
+        for(let j= 0; j<dateList.length; j++) {
             if (dateList[j] == month_array[i].time) {
                 switch (j) {
                     case 0:
@@ -286,14 +286,12 @@ router.get('/control/charge/', async (req, res) => {
                         cnt.last = month_array[i].cnt;
                         cnt_time.last = month_array[i].cnt_time;
                         console.log("last change");
-
                         break;
 
                     case 2:
                         cnt["2last"] = month_array[i].cnt;
                         cnt_time["2last"] = month_array[i].cnt_time;
                         console.log("2last change");
-
                         break;
                 }
             }
