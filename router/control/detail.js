@@ -103,7 +103,7 @@ router.get('/login/test/:code/',async (req, res) =>{
 });
 
 /* 관제 시스템 부분 */
-router.get('/control/main/', async (req, res) => {
+router.get('/control/', async (req, res) => {
     if (!checkSession(req)){
         res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
     }
@@ -359,7 +359,7 @@ router.get('/control/charge/', async (req, res) => {
 
 /* 스테이션 관리
 * 스테이션 리스트 */
-router.get('/station/list/', async (req, res) => {
+router.get('/station/', async (req, res) => {
     if (!checkSession(req)){
         res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
     }
