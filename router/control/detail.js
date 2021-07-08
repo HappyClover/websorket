@@ -17,7 +17,7 @@ router.use('/static', express.static('./router/control/login/static/'));
 
 router.get('/', (req, res) => {
   if(checkSession(req)){
-      res.redirect('/control/main/');
+      res.redirect('/control/');
   } else {
       res.render('./router/control/login/');
   }
