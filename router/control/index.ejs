@@ -1,10 +1,10 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/notosanskr.css"><title>React App</title><link href="/static/css/main.682d111e.chunk.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div><script>
   window.admin_name="<%= admin.name %>";
   window.admin_last_login="<%= admin.last %>";
-  window.cnt_2last=<%=cnt.2last %>;
+  window.cnt_2last=<%=cnt["2last"]; %>;
   window.cnt_last=<%=cnt.last %>;
   window.cnt_this=<%=cnt.this %>;
-  window.cntTime_2last=<%=cnt_time.2last%>;
+  window.cntTime_2last=<%=cnt_time["2last"]; %>;
   window.cntTime_last=<%=cnt_time.last%>;
   window.cntTime_this=<%=cnt_time.this%>;
   window.id =[]; 
