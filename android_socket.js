@@ -522,7 +522,7 @@ io.on('connection',function (socket){
               disconnected : nickname
           }
           //db상 연결 끊김 알림
-          sql_query("update station set status=0, ip=null, socket_id=null where id=?", [id]);
+          sql_query("update station set status=0, ip=null, socket_id=null where id=?", [WhoAmI.id]);
           //로그 남기기
           add_station_log(WhoAmI.id, 2, 'disconnected', nickname+' disconnected');
 
