@@ -955,7 +955,7 @@ io.on('connection',function (socket){
                         admin: 0,
                         setting: {
                           volt: 42,
-                          ampere: 2.5
+                          ampere: 4.0
                         }
                       }
 
