@@ -45,7 +45,7 @@ router.post('/login/', (req, res) => {
             const pw = rows[0].password;
             const crypto_pw = crypto.createHash('sha512').update(input_pw).digest('base64');
 
-            if (pw == crypto_pw){
+            if (pw === crypto_pw){
                 req.session.uid = rows[0].identifier;
                 if (rows[0].manager_name === null) req.session.name = rows[0].name;
                 else req.session.name = rows[0].manager_name;
@@ -279,27 +279,21 @@ router.get('/control/charge/', async (req, res) => {
                     case 0:
                         cnt.this = month_array[i].cnt;
                         cnt_time.this = month_array[i].cnt_time;
-                        console.log("this change");
                         break;
 
                     case 1:
                         cnt.last = month_array[i].cnt;
                         cnt_time.last = month_array[i].cnt_time;
-                        console.log("last change");
                         break;
 
                     case 2:
                         cnt["2last"] = month_array[i].cnt;
                         cnt_time["2last"] = month_array[i].cnt_time;
-                        console.log("2last change");
                         break;
                 }
             }
         }
     }
-
-    console.log("cnt : "+JSON.stringify(cnt));
-    console.log("cnt_time : "+JSON.stringify(cnt_time));
 
     let today = {
         "this": 150,
@@ -309,9 +303,7 @@ router.get('/control/charge/', async (req, res) => {
         "this": 400,
         "last":400
     }
-    for (let i; i<month_array.length; i++){
-        today[month_array[i].time] = month_array[i].cnt;
-    }
+
 
     //스테이션 사용로그
     var query = "select station_usage_history.id, date_format(station_usage_history.start, '%Y-%m-%d %H:%i:%s') as start, " +
@@ -409,78 +401,64 @@ router.get('/station/list/', async (req, res) => {
 });
 
 router.get('/station/list/update/', async (req, res) => {
-    let query_set = "";
+    const name = req.body.name;
+    const install_date = req.body.install_date;
+    const address = req.body.address;
+    const picture = req.body.picture;
+    const admin = req.body.admin;
+    const type = req.body.type;
+    const smps = isBlank(req.body.smps) ? null : req.body.smps ;
+    const port = req.body.port;
+    const identifier = isBlank(req.body.identifier) ? null : req.body.identifier;
 
-    if (!checkSession(req)){
-        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
-    }
-
-    let station_id = req.body.station_id,
-        station_code = req.body.station_code,
-        station_name = req.body.station_name,
-        station_address = req.body.station_address,
-        station_install_date = req.body.install_date,
-        station_pic = req.body.station_pic,
-        station_admin = req.body.station_admin,
-        station_status = req.body.station_status,
-        station_type =req.body.station_type,
-        station_smps = req.body.smps;
-
-    let data_array = [];
-    let colum_name = ['code', 'name', 'adress','date','picture','admin_id','status','type','smps'];
-    data_array.push(station_code);
-    data_array.push(station_name);
-    data_array.push(station_address);
-    data_array.push(station_install_date);
-    data_array.push(station_pic);
-    data_array.push(station_admin);
-    data_array.push(station_status);
-    data_array.push(station_type);
-    data_array.push(station_smps);
-
-
-    if (station_id == undefined){
-        res.send('<sciprt>alert("필수 정보가 없습니다.")</sciprt>');
+    if (checkPermission(req) !== 1){
+        res.send("<script>alert('권한이 없습니다.'); window.close(); </script>");
     } else {
-        for (let i = 0; i<data_array.length; i++){
-            if (query_set === ''){
-                query_set = `SET ${colum_name[i]} = ${data_array[i]} `;
-            } else {
-                query_set = query_set+`, ${colum_name[i]} = ${data_array[i]} `;
-            }
+        if (isBlank(name) || isBlank(install_date) || isBlank(address) || isBlank(picture) || isBlank(admin) || isBlank(type) || isBlank(port)){
+            res.send("<script>alert('입력값을 확인 해주세요'); history.go(-1); </script>");
+        } else {
+            var query = "INSERT INTO station(name, install_date, adress, picture. admin, type, smps, port, identifier) value(?,?,?,?,?,?,?,?,?)";
+            const admin_result = await pool.query(query, value);
+
+            res.send("<script>alert('등록되었습니다.'); window.close(); </script>");
         }
     }
+});
 
-    var query = "UPDATE station" +
-        `SET code = ${station_code}, ` +
-        "right join station_port on station.id = station_port.station_id " +
-        "group by id" ;
-    //+""
-    var value = [req.session.uid];
-    const admin_result = await pool.query(query,value);
-    const admin_array = admin_result[0];
-
-    let query_result = [];
-
-    for(var i = 0; i<admin_array.length; i++){
-        let data = {
-            "code" : admin_array[i].code,
-            "name" : admin_array[i].name,
-            "address" : admin_array[i].adress,
-            "port" : admin_array[i].port,
-            "type" : 1,
-            "admin" : "셰빌리티",
-            "status" : 1,
-        };
-
-        query_result.push(data);
+//스테이션 등록
+router.get('/station/list/register/', async (req, res) => {
+    if (checkPermission(req) !== 1){
+        res.send("<script>alert('권한이 없습니다.'); window.close(); </script>");
+    } else {
+        res.render('index_station.ejs',{admin, station});
     }
+});
 
-    station = {
-        'station' : query_result
+router.post('/station/list/register/', async (req, res) => {
+    const name = req.body.name;
+    const install_date = req.body.install_date;
+    const address = req.body.address;
+    const picture = req.body.picture;
+    const admin = req.body.admin;
+    const type = req.body.type;
+    const smps = isBlank(req.body.smps) ? null : req.body.smps ;
+    const port = req.body.port;
+    const identifier = isBlank(req.body.identifier) ? null : req.body.identifier;
+
+    if (checkPermission(req) !== 1){
+        res.send("<script>alert('권한이 없습니다.'); window.close(); </script>");
+    } else {
+
+        if (isBlank(name) || isBlank(install_date) || isBlank(address) || isBlank(picture) || isBlank(admin) || isBlank(type) || isBlank(port)){
+            res.send("<script>alert('입력값을 확인 해주세요'); history.go(-1); </script>");
+        } else {
+            var query = "INSERT INTO station(name, install_date, adress, picture. admin, type, smps, port, identifier) value(?,?,?,?,?,?,?,?,?)";
+            let value = [name, install_date, address, picture, admin, type, smps, port, identifier]
+            const admin_result = await pool.query(query, value);
+
+            res.send("<script>alert('등록되었습니다.'); window.close(); </script>");
+        }
     }
-
-    res.render('index_station.ejs',{admin, station});
 });
 
 /* 스테이션 관리
@@ -516,6 +494,14 @@ function checkSession(req) {
   } else {
     return false;
   }
+}
+
+function checkPermission(req) {
+    return req.session.permission;
+}
+
+function isBlank(value) {
+    return value === null || value === undefined || value === '';
 }
 
 function add_admin_log(admin_id, code, result, msg, date){
