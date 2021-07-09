@@ -223,6 +223,8 @@ router.get('/control/status/', async (req, res) => {
             "address" : station_array[i].adress,
             "port" : station_array[i].port,
             "status" : station_array[i].status,
+            "latitude" : station_array[i].latitude,
+            "longitude" : station_array[i].longitude
         };
 
         query_result.push(data);
@@ -235,6 +237,44 @@ router.get('/control/status/', async (req, res) => {
     }
 
     res.render('./router/control/stationList/index.ejs',{admin, station});
+});
+
+//관제시스템 -> 스테이션 현황
+router.get('/control/status/:station_code/', async (req, res) => {
+    if (!checkSession(req)){
+        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
+    } else {
+        var query = "select station.*, count(*) as port " +
+            "from station " +
+            "right join station_port on station.id = station_port.station_id " +
+            "group by id" ;
+        //+""
+        var value = [req.session.uid];
+        const station_result = await pool.query(query,value);
+        const station_array = station_result[0];
+
+        let query_result = [];
+
+        for(var i = 0; i<station_array.length; i++){
+            let data = {
+                "code" : station_array[i].code,
+                "name" : station_array[i].name,
+                "address" : station_array[i].adress,
+                "port" : station_array[i].port,
+                "status" : station_array[i].status,
+            };
+
+            query_result.push(data);
+        }
+
+        //스테이션 정보
+        //스테이션 번호, 이름, 주소, 포트 수, 상태
+        let station = {
+            'station': query_result
+        }
+
+        res.render('./router/control/stationList/index.ejs',{admin, station});
+    }
 });
 
 //관제시스템 -> 충전로그
@@ -388,6 +428,8 @@ router.get('/station/', async (req, res) => {
             "type" : admin_array[i].type,
             "admin" : admin_array[i].admin_name,
             "status" : admin_array[i].install,
+            "latitude" : station_array[i].latitude,
+            "longitude" : station_array[i].longitude
         };
 
         query_result.push(data);
@@ -400,7 +442,44 @@ router.get('/station/', async (req, res) => {
     res.render('./router/control/station/list/index.ejs',{admin, station});
 });
 
-router.get('/station/list/update/', async (req, res) => {
+router.get('/station/:station_code/', async (req, res) => {
+    const station_code = req.body.station_code;
+
+    if (!checkSession(req)){
+        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
+    } else {
+        let station_array;
+
+        let query = "select * from station where code = ?";
+        let value = [station_code];
+        const station_result = await pool.query(query, value);
+        station_array = station_result[0];
+
+        if (station_array.length < 1 ) {
+            add_admin_log(station_array[0].admin_id,311,490,'존재하지 않는 코드', getTimeStamp());
+            let station_code = station_array[0].station_name
+            res.send("<script>alert('잘못된 스테이션 아이디 입니다.'); window.close();</script>");
+        } else {
+            let query = "SELECT station.*, admin.identifier FROM station INNER JOIN admin ON station.admin_id = admin.id WHERE admin.identifier = ?";
+            let value = [req.session.uid];
+            station_array = station_result[0];
+
+            if (station_array[0].admin_id === req.session.uid) {
+                res.render("./index.ejs");
+            } else {
+                if (checkPermission(req)===1){
+                    res.render("./index.ejs");
+                } else {
+                    add_admin_log(station_array[0].admin_id,311,491,'미소속 스테이션 접근', getTimeStamp())
+                    res.send("<script>alert('잘못된 스테이션 아이디 입니다.'); window.close();</script>");
+
+                }
+            }
+        }
+    }
+});
+
+router.post('/station/list/update/', async (req, res) => {
     const name = req.body.name;
     const install_date = req.body.install_date;
     const address = req.body.address;
