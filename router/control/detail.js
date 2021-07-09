@@ -223,8 +223,8 @@ router.get('/control/status/', async (req, res) => {
             "address" : station_array[i].adress,
             "port" : station_array[i].port,
             "status" : station_array[i].status,
-            "latitude" : station_array[i].latitude,
-            "longitude" : station_array[i].longitude
+            "lat" : station_array[i].latitude,
+            "lng" : station_array[i].longitude
         };
 
         query_result.push(data);
@@ -428,8 +428,8 @@ router.get('/station/', async (req, res) => {
             "type" : admin_array[i].type,
             "admin" : admin_array[i].admin_name,
             "status" : admin_array[i].install,
-            "latitude" : station_array[i].latitude,
-            "longitude" : station_array[i].longitude
+            "lat" : station_array[i].latitude,
+            "lng" : station_array[i].longitude
         };
 
         query_result.push(data);
