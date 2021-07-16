@@ -624,7 +624,7 @@ router.post('/station/:station_code/update/', async (req, res) => {
 });
 
 //스테이션 등록
-router.get('/station/list/register/', async (req, res) => {
+router.get('/station/register/', async (req, res) => {
     if (checkPermission(req) !== 1 && checkSession(req)){
         res.send("<script>alert('권한이 없거나 로그인 상태가 아닙니다.'); window.close(); </script>");
     } else {
@@ -632,7 +632,7 @@ router.get('/station/list/register/', async (req, res) => {
     }
 });
 
-router.post('/station/list/register/', async (req, res) => {
+router.post('/station/register/', async (req, res) => {
     if(!checkSession(req)){
         res.send("<script>alert('로그인 상태가 아닙니다.'); window.close(); </script>");
     } else {
