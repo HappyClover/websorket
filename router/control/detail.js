@@ -658,6 +658,7 @@ router.post('/station/register/', async (req, res) => {
         } else {
 
             if (isBlank(name) || isBlank(install_date) || isBlank(address) || isBlank(picture) || isBlank(admin) || isBlank(type) || isBlank(port_numb) || isBlank(port_type) || isBlank(port_code)) {
+                console.log(isBlank(name)+" "+ isBlank(install_date) +" "+ isBlank(address) +" "+ isBlank(picture) +" "+ isBlank(admin) +" "+ isBlank(type) +" "+ isBlank(port_numb) +" "+ isBlank(port_type) +" "+ isBlank(port_code))
                 res.send("<script>alert('입력값을 확인 해주세요'); history.go(-1); </script>");
             } else {
                 let query = "INSERT INTO station(name, install_date, adress, picture, admin, type, smps, panel, battery, identifier) value(?,?,?,?,?,?,?,?,?,?)";
