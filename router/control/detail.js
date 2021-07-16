@@ -639,7 +639,7 @@ router.post('/station/register/', async (req, res) => {
         const name = req.body.name;
         const install_date = req.body.install_date;
         const address = req.body.address;
-        const picture = req.body.picture;
+        const picture = isBlank(req.body.picture) ? null : req.body.picture;
         const admin = isBlank(req.body.admin) ? null : req.body.admin;
 
         const type = req.body.type;
@@ -661,8 +661,8 @@ router.post('/station/register/', async (req, res) => {
                 console.log(isBlank(name)+" "+ isBlank(install_date) +" "+ isBlank(address) +" "+ isBlank(picture) +" "+ isBlank(admin) +" "+ isBlank(type) +" "+ isBlank(port_numb) +" "+ isBlank(port_type) +" "+ isBlank(port_code))
                 res.send("<script>alert('입력값을 확인 해주세요'); history.go(-1); </script>");
             } else {
-                let query = "INSERT INTO station(name, install_date, adress, picture, admin, type, smps, panel, battery, identifier) value(?,?,?,?,?,?,?,?,?,?)";
-                let value = [name, install_date, address, picture, admin, type, smps, panel, battery, identifier];
+                let query = "INSERT INTO station(name, install_date, adress, picture, admin_id, type, smps, panel, battery) value(?,?,?,?,(select id from admin where identifier = ? limit 1),?,?,?,?)";
+                let value = [name, install_date, address, picture, admin_id, type, smps, panel, battery];
                 const result = await pool.query(query, value);
                 const station_id = result.insertId;
 
