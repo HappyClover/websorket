@@ -678,7 +678,7 @@ router.post('/station/register/', async (req, res) => {
                     insert_value.push(port_code[i]);
                 }
                 let query_port = "INSERT INTO station_port(station_id, number, type, code) values "+insert_query;
-                const result_port = await pool.query(query, insert_value);
+                const result_port = await pool.query(query_port, insert_value);
 
                 console.log(result_port)
                 res.send("<script>alert('등록되었습니다.'); window.close(); </script>");
