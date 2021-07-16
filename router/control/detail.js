@@ -505,7 +505,7 @@ router.get('/station/', async (req, res) => {
     res.render('./router/control/station/list/index.ejs',{admin, station});
 });
 
-router.get('/station/:station_code/', async (req, res) => {
+router.get('/station/detail/:station_code/', async (req, res) => {
     const station_code = req.body.station_code;
 
     if (!checkSession(req)){
