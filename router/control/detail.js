@@ -662,7 +662,7 @@ router.post('/station/register/', async (req, res) => {
                 res.send("<script>alert('입력값을 확인 해주세요'); history.go(-1); </script>");
             } else {
                 let query = "INSERT INTO station(name, install_date, adress, picture, admin_id, type, smps, panel, battery) value(?,?,?,?,(select id from admin where identifier = ? limit 1),?,?,?,?)";
-                let value = [name, install_date, address, picture, admin_id, type, smps, panel, battery];
+                let value = [name, install_date, address, picture, admin, type, smps, panel, battery];
                 const result = await pool.query(query, value);
                 const station_id = result.insertId;
 
