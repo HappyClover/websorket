@@ -759,6 +759,7 @@ io.on('connection',function (socket){
           console.log(`${data.port} for ${code} result ${response_data.data}`);
 
 
+
           break;
 
 
@@ -771,20 +772,15 @@ io.on('connection',function (socket){
               data: false,
               detail: "충전 대기 상태 포트가 아님"
             }
-
             socket.emit('result',response_data);
-          
             break;
           }
-
-          
 
           response_data = {
             "data" : true,
             "code" : "charge_cancel",
             "port": data.port
           }
-          
 
           var temp = port_list[Number(data.port)-1].getUser();
           var user_info;
@@ -796,9 +792,7 @@ io.on('connection',function (socket){
           }
 
           console.log(user_info);
-
           var result_data = {
-
           };
 
           socket.to(user_info).emit('charge_cancel');

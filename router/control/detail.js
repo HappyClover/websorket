@@ -13,6 +13,7 @@ router.use('/static', express.static('./router/control/static/'));
 router.use('/static', express.static('./router/control/main/static/'));
 router.use('/static', express.static('./router/control/stationList/static/'));
 router.use('/static', express.static('./router/control/station/list/static/'));
+router.use('/static', express.static('./router/control/station/register/static/'));
 router.use('/static', express.static('./router/control/login/static/'));
 
 router.get('/', (req, res) => {
@@ -627,7 +628,7 @@ router.get('/station/list/register/', async (req, res) => {
     if (checkPermission(req) !== 1 && checkSession(req)){
         res.send("<script>alert('권한이 없거나 로그인 상태가 아닙니다.'); window.close(); </script>");
     } else {
-        res.render('index_station.ejs',{admin, station});
+        res.render('./router/control/station/register/index.ejs');
     }
 });
 
