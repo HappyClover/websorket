@@ -642,7 +642,7 @@ router.post('/station/register/', async (req, res) => {
         const install_date = req.body.install_date;
         const address = req.body.address;
         const lat = req.body.lat;
-        const lng = req.body.long;
+        const lng = req.body.lng;
         const picture = isBlank(req.body.picture) ? null : req.body.picture;
         const admin = isBlank(req.body.admin) ? null : req.body.admin;
 
