@@ -652,6 +652,8 @@ router.post('/station/register/', async (req, res) => {
         const port_code = req.body.port_code;
 
         if (checkPermission(req) !== 1) {
+            console.log(checkPermission(req));
+
             res.send("<script>alert('권한이 없습니다.'); window.close(); </script>");
         } else {
 
