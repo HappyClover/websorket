@@ -665,8 +665,8 @@ router.post('/station/register/', async (req, res) => {
                 let value = [name, install_date, address, picture, admin, type, smps, panel, battery];
                 const result = await pool.query(query, value);
                 console.log(result);
-                
-                const station_id = result[1].insertId;
+
+                const station_id = result[0].insertId;
 
                 let insert_query = '';
                 let insert_value = [];
