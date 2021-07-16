@@ -670,14 +670,14 @@ router.post('/station/register/', async (req, res) => {
                 let insert_value = [];
                 for (let i =0; i<port_numb.length; i++){
                     if (insert_query !== '') insert_query= insert_query+", ";
-                    insert_query = insert+`(?,?,?,?)`;
+                    insert_query = insert_query+`(?,?,?,?)`;
 
                     insert_value.push(station_id);
                     insert_value.push(port_numb[i]);
                     insert_value.push(port_type[i]);
                     insert_value.push(port_code[i]);
                 }
-                let query_port = "INSERT INTO station_port(station_id, number, type, code) values"+insert_value;
+                let query_port = "INSERT INTO station_port(station_id, number, type, code) values"+insert_query;
                 const result_port = await pool.query(query, value);
 
                 console.log(result_port)
