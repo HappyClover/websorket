@@ -490,8 +490,8 @@ router.get('/station/', async (req, res) => {
             "type" : admin_array[i].type,
             "admin" : admin_array[i].admin_name,
             "status" : admin_array[i].install,
-            "lat" : station_array[i].latitude,
-            "lng" : station_array[i].longitude
+            "lat" : admin_array[i].latitude,
+            "lng" : admin_array[i].longitude
         };
 
         query_result.push(data);
