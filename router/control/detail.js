@@ -664,7 +664,9 @@ router.post('/station/register/', async (req, res) => {
                 let query = "INSERT INTO station(name, install_date, adress, picture, admin_id, type, smps, panel, battery) value(?,?,?,?,(select id from admin where identifier = ? limit 1),?,?,?,?)";
                 let value = [name, install_date, address, picture, admin, type, smps, panel, battery];
                 const result = await pool.query(query, value);
-                const station_id = result.insertId;
+                console.log(result);
+                
+                const station_id = result[1].insertId;
 
                 let insert_query = '';
                 let insert_value = [];
