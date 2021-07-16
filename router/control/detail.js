@@ -572,7 +572,7 @@ router.get('/station/detail/:station_code/', async (req, res) => {
     }
 });
 
-router.post('/station/:station_code/update/', async (req, res) => {
+router.post('/station/detail/:station_code/update/', async (req, res) => {
     const station_code = req.body.station_code;
     const name = req.body.name;
     const install_date = req.body.install_date;
@@ -625,7 +625,7 @@ router.post('/station/:station_code/update/', async (req, res) => {
 
 //스테이션 등록
 router.get('/station/register/', async (req, res) => {
-    if (checkPermission(req) !== 1 && checkSession(req)){
+    if (checkSession(req)){
         res.send("<script>alert('권한이 없거나 로그인 상태가 아닙니다.'); window.close(); </script>");
     } else {
         res.render('./router/control/station/register/index.ejs');
