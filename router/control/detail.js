@@ -638,7 +638,7 @@ router.post('/station/register/', async (req, res) => {
     } else {
         const name = req.body.name;
         const code = req.body.code;
-        const identifier = req.body.identifier;
+        const identifier = req.body.id;
         const install_date = req.body.install_date;
         const address = req.body.address;
         const lat = req.body.lat;
