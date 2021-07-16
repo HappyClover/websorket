@@ -625,7 +625,7 @@ router.post('/station/detail/:station_code/update/', async (req, res) => {
 
 //스테이션 등록
 router.get('/station/register/', async (req, res) => {
-    if (checkSession(req)){
+    if (checkPermission(req) !== 1 && !checkSession(req)){
         res.send("<script>alert('권한이 없거나 로그인 상태가 아닙니다.'); window.close(); </script>");
     } else {
         res.render('./router/control/station/register/index.ejs');
