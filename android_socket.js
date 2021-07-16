@@ -106,13 +106,6 @@ app.use(subdomain('admin.wingstation.co.kr',router_admin_main));
 app.use(subdomain("app.wingstation.co.kr", router_app));
 
 
-//에러 핸들링
-app.use((req, res, next) => {
-  res.status(404).send('<script>alert("잘못된 경로입니다."); history.go(-1); </script>');
-})
-app.use(express.static('static'));
-
-
 
 app.get('/admin', (req, res) => {
   res.render('index_station.ejs');
@@ -121,6 +114,14 @@ app.get('/admin', (req, res) => {
 app.get('/', (req, res) => {
   res.redirect("http://www.shability.io");
 });
+
+
+//에러 핸들링
+app.use((req, res, next) => {
+  res.status(404).send('<script>alert("잘못된 경로입니다."); history.go(-1); </script>');
+})
+app.use(express.static('static'));
+
 
 let server_https;
 let server_http;
@@ -181,7 +182,7 @@ app.get('/js/smoothie.js', (req, res) => {
   })
 });
 
-
+let using_cnt = 0;
 
 //이 서버에서는 어떤 클라이언트가 connection event를 발생시키는 것인지 듣고 있습니다.
 // callback 으로 넘겨지는 socket에는 현재 클라이언트와 연결되어있는 socket 관련 정보들이 다 들어있습니다.
@@ -259,8 +260,39 @@ io.on('connection',function (socket){
             break;
 
           case 'admin' :
-            AdminIsOn.push(nickname) //
+            //관리자 정보 확인
+            var admin_info = new Promise((resolve,rejects)=>{
+              let admin_query = 'select * from admin where identifier = ?';
+              mysqlDB.query(admin_query, nickname, function (err, rows, fields) {
+                if (!err) {
+                  if(rows.length>0){
+                    id = rows[0].id;
+
+                    WhoAmI = new admin_class(id, nickname, socket.id, login_data.page);
+                    AdminIsOn[nickname] = WhoAmI //
+
+                    add_admin_log(id, 10, "200", "socket login success", getTimeStamp());
+                    shoot_result(socket, "login", true);
+
+                  } else { //조회결과가 없을때
+                    shoot_result(socket, "login", false);
+                    add_admin_log(id, 1, "201", "socket login fail : "+nickname, getTimeStamp());
+                    result = false;
+                  }
+                } else {
+                  console.log('query error : ' + err);
+                  add_admin_log(id, 1, "299", "socket login fail : "+err, getTimeStamp());
+
+                  result = false;
+                }
+              });
+            });
+
+            AdminIsOn.push(nickname);
+
             socket.join(room['admin']);
+
+
             result = true;
             break;
 
@@ -392,6 +424,9 @@ io.on('connection',function (socket){
       // console.log(StationIsOn[staiton_index]);
 
       // var station_id = StationIsOn[staiton_index].id
+
+      data.station=nickname;
+
       io.to(room['admin']).emit('a_change_info', data);
 
       try{
@@ -524,7 +559,7 @@ io.on('connection',function (socket){
           //db상 연결 끊김 알림
           sql_query("update station set status=0, ip=null, socket_id=null where id=?", [WhoAmI.id]);
           //로그 남기기
-          add_station_log(WhoAmI.id, 2, 'disconnected', nickname+' disconnected');
+          add_station_log(WhoAmI.id, 2, 'disconnected', nickname+' disconnected', getTimeStamp());
 
           //서버 전체에 연결 끊김 알림
           socket.emit('logout',data);
@@ -1054,6 +1089,20 @@ function sql_query(query, value){
 function add_station_log(station_id, code, result, msg, date){
   const query = "insert into log_station(station_id, code, result, message, date) values(?,?,?,?,?)";
   const value = [station_id, code, result, msg, date];
+
+  mysqlDB.query(query,value, function (err, rows, fields) {
+    if (!err) {
+      return true;
+    } else {
+      console.log('query error : ' + err);
+      return false;
+    }
+  });
+}
+
+function add_admin_log(admin_id, code, result, msg, date){
+  const query = "insert into log_admin(admin_id, code, result, msg, date) values(?,?,?,?,?)";
+  const value = [admin_id, code, result, msg, date];
 
   mysqlDB.query(query,value, function (err, rows, fields) {
     if (!err) {

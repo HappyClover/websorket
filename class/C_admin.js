@@ -1,74 +1,30 @@
-function C_admin(id, name, socket_id){
+function C_admin(id, uid, name, socket_id){
 	this.id = id;
+	this.uid = uid;
 	this.name = name;
-	this.socket_id = this.socket_id;
+	this.socket_id = socket_id;
 
-	this.pv_charge_a = null;
-	this.pv_charge_v = null;
 
-	this.pv_load_a = null;
-	this.pv_load_v = null;
-
-	this.pv_battery_charge = null;
-	this.pv_battery_temp = null;
-
-	this.pv_device_temp = null;
 }
 
 var proto = C_admin.prototype;
 
-proto.setInfo = function (id, name, socket_id){
+proto.setInfo = function (id, uid, socket_id, page){
 	this.id = id;
-	this.name = name;
+	this.uid = uid;
+	this.page = page;
 	this.socket_id = socket_id;
-}
-
-proto.setValue = function (code, value){
-	switch(code){
-		case 'charge_a':
-			this.pv_charge_a = value;
-			break;
-		case 'charge_v':
-			this.pv_charge_v = value;
-			break;
-		case 'load_a':
-			this.pv_load_a = value;
-			break;
-		case 'load_v':
-			this.pv_load_v = value;
-			break;
-		case 'battery_charge':
-			this.pv_battery_charge = value;
-			break;
-		case 'battery_temp':
-			this.pv_battery_charge = value;
-			break;
-		case 'device_temp':
-			this.pv_device_temp = value;
-			break;
-		}
 }
 
 proto.getInfo = function(){
 	var json = new Object;
 
 	json.id = this.id;
-	json.name = this.name;
+	json.uid = this.uid;
 	json.socket_id = this.socket_id;
-
-	json.charge_a = this.pv_charge_a;
-	json.charge_v = this.pv_charge_v;
-
-	json.load_a = this.pv_load_a;
-	json.load_v = this.pv_load_v;
-
-	json.battery_charge = this.pv_battery_charge;
-	json.battery_temp = this.pv_battery_temp;
-
-	json.device_temp = this.pv_device_temp;
+	json.page = this.page;
 
 	var result = JSON.stringify(json);
-
 	return result;
 }
 

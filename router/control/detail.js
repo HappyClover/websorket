@@ -239,41 +239,103 @@ router.get('/control/status/', async (req, res) => {
     res.render('./router/control/stationList/index.ejs',{admin, station});
 });
 
-//관제시스템 -> 스테이션 현황
+//관제시스템 -> 스테이션 현황 -> 자세히
 router.get('/control/status/:station_code/', async (req, res) => {
-    if (!checkSession(req)){
+    const station_code = req.body.station_code;
+
+    if (!checkSession(req)){ //로그인 세션 검사
         res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
     } else {
-        var query = "select station.*, count(*) as port " +
-            "from station " +
-            "right join station_port on station.id = station_port.station_id " +
-            "group by id" ;
-        //+""
-        var value = [req.session.uid];
-        const station_result = await pool.query(query,value);
-        const station_array = station_result[0];
+        let station_array;
 
-        let query_result = [];
+        switch (checkPermission(req)){
+            case 1:
+                var query = "select station.*, admin.identifier as admin " +
+                    "from station " +
+                    "inner join admin on station.admin_id = admin.id " +
+                    "where code = ?" ;
+                //+""
+                var value = [station_code];
+                var station_result = await pool.query(query,value);
+                station_array = station_result[0];
+                break;
 
-        for(var i = 0; i<station_array.length; i++){
-            let data = {
-                "code" : station_array[i].code,
-                "name" : station_array[i].name,
-                "address" : station_array[i].adress,
-                "port" : station_array[i].port,
-                "status" : station_array[i].status,
-            };
+            case 2:
+            case 3:
+                var query = "select station.*, admin.identifier as admin " +
+                    "from station " +
+                    "inner join admin on station.admin_id = admin.id " +
+                    "where admin.identifier = ? and code = ?" ;
+                //+""
+                var value = [req.session.uid, station_code];
+                var station_result = await pool.query(query,value);
+                station_array = station_result[0];
+                break;
 
-            query_result.push(data);
+            default:
+                break;
         }
 
-        //스테이션 정보
-        //스테이션 번호, 이름, 주소, 포트 수, 상태
-        let station = {
-            'station': query_result
+        if (station_array.length < 1){
+            res.send("<script>alert('일치하는 스테이션 코드가 없습니다.'); window.close();</script>")
+        } else {
+            let code = station_array[0].code,
+                name = station_array[0].name,
+                address = station_array[0].adress,
+                status = station_array[0].status,
+                type = station_array[0].type
+        }
+        res.render('./router/control/stationList/index.ejs',{code, name, address, status, type});
+    }
+});
+
+//관제시스템 -> 스테이션 현황 -> 자세히 -> 수정
+router.post('/control/status/:station_code/update', async (req, res) => {
+    const station_code = req.body.station_code;
+
+    if (!checkSession(req)){ //로그인 세션 검사
+        res.send('<script>alert("로그인이 필요합니다."); location.href="/"; </script>')
+    } else {
+        let station_array;
+
+        switch (checkPermission(req)){
+            case 1:
+                var query = "select station.*, admin.identifier as admin " +
+                    "from station " +
+                    "inner join admin on station.admin_id = admin.id " +
+                    "where code = ?" ;
+                //+""
+                var value = [station_code];
+                var station_result = await pool.query(query,value);
+                station_array = station_result[0];
+                break;
+
+            case 2:
+            case 3:
+                var query = "select station.*, admin.identifier as admin " +
+                    "from station " +
+                    "inner join admin on station.admin_id = admin.id " +
+                    "where admin.identifier = ? and code = ?" ;
+                //+""
+                var value = [req.session.uid, station_code];
+                var station_result = await pool.query(query,value);
+                station_array = station_result[0];
+                break;
+
+            default:
+                break;
         }
 
-        res.render('./router/control/stationList/index.ejs',{admin, station});
+        if (station_array.length < 1){
+            res.send("<script>alert('일치하는 스테이션 코드가 없습니다.'); window.close();</script>")
+        } else {
+            let code = station_array[0].code,
+                name = station_array[0].name,
+                address = station_array[0].adress,
+                status = station_array[0].status,
+                type = station_array[0].type
+        }
+        res.render('./router/control/stationList/index.ejs',{code, name, address, status, type});
     }
 });
 
@@ -450,36 +512,67 @@ router.get('/station/:station_code/', async (req, res) => {
     } else {
         let station_array;
 
-        let query = "select * from station where code = ?";
-        let value = [station_code];
-        const station_result = await pool.query(query, value);
-        station_array = station_result[0];
+        switch (checkPermission(req)){
+            case 1:
+                var query = "select station.*, admin.name as admin, station_port.* " +
+                    "from station " +
+                    "inner join admin on station.admin_id = admin.id " +
+                    "inner join station_port on station.id = port.station_id " +
+                    "where code = ?" ;
+                //+""
+                var value = [station_code];
+                var station_result = await pool.query(query,value);
+                station_array = station_result[0];
+                break;
+
+            case 2:
+            case 3:
+                var query = "select station.*, admin.name as admin " +
+                    "from station " +
+                    "inner join admin on station.admin_id = admin.id " +
+                    "where admin.identifier = ? and code = ?" ;
+                //+""
+                var value = [req.session.uid, station_code];
+                var station_result = await pool.query(query,value);
+                station_array = station_result[0];
+                break;
+
+            default:
+                station_array = [];
+                break;
+        }
 
         if (station_array.length < 1 ) {
             add_admin_log(station_array[0].admin_id,311,490,'존재하지 않는 코드', getTimeStamp());
-            let station_code = station_array[0].station_name
             res.send("<script>alert('잘못된 스테이션 아이디 입니다.'); window.close();</script>");
         } else {
-            let query = "SELECT station.*, admin.identifier FROM station INNER JOIN admin ON station.admin_id = admin.id WHERE admin.identifier = ?";
-            let value = [req.session.uid];
-            station_array = station_result[0];
+            let code = station_array[0].code,
+                name = station_array[0].name,
+                address = station_array[0].adress,
+                install_date = station_array[0].install_date,
+                picture = null,
+                admin = station_array[0].admin,
+                install = station_array[0].install,
+                type = station_array[0].type,
+                smps = station_array[0].smps,
+                port = [];
 
-            if (station_array[0].admin_id === req.session.uid) {
-                res.render("./index.ejs");
-            } else {
-                if (checkPermission(req)===1){
-                    res.render("./index.ejs");
-                } else {
-                    add_admin_log(station_array[0].admin_id,311,491,'미소속 스테이션 접근', getTimeStamp())
-                    res.send("<script>alert('잘못된 스테이션 아이디 입니다.'); window.close();</script>");
-
+            for (let i =0; i<station_array.length; i++){
+                let tmp = {
+                    "number": station_array[0].port_numb,
+                    "type": station_array[0].port_type,
+                    "code": station_array[0].port_code,
                 }
+                port.push(tmp)
             }
+            res.render('./router/control/station/list/index.ejs',{code, name, address, install_date, picture, admin, install, type, smps, port});
+
         }
     }
 });
 
-router.post('/station/list/update/', async (req, res) => {
+router.post('/station/:station_code/update/', async (req, res) => {
+    const station_code = req.body.station_code;
     const name = req.body.name;
     const install_date = req.body.install_date;
     const address = req.body.address;
@@ -487,55 +580,105 @@ router.post('/station/list/update/', async (req, res) => {
     const admin = req.body.admin;
     const type = req.body.type;
     const smps = isBlank(req.body.smps) ? null : req.body.smps ;
-    const port = req.body.port;
+    const port_id = req.body.port_id;
+    const port_code = req.body.port_code;
+    const port_type = req.body.port_type;
     const identifier = isBlank(req.body.identifier) ? null : req.body.identifier;
 
     if (checkPermission(req) !== 1){
-        res.send("<script>alert('권한이 없습니다.'); window.close(); </script>");
-    } else {
-        if (isBlank(name) || isBlank(install_date) || isBlank(address) || isBlank(picture) || isBlank(admin) || isBlank(type) || isBlank(port)){
-            res.send("<script>alert('입력값을 확인 해주세요'); history.go(-1); </script>");
-        } else {
-            var query = "INSERT INTO station(name, install_date, adress, picture. admin, type, smps, port, identifier) value(?,?,?,?,?,?,?,?,?)";
-            const admin_result = await pool.query(query, value);
+        var query = "update station " +
+            "inner join admin on station.admin_id = admin.id " +
+            "set name = ?, install_date = ?, adress = ?, type = ?, smps = ? " +
+            "where admin.identifier = ? and code = ?" ;
 
-            res.send("<script>alert('등록되었습니다.'); window.close(); </script>");
+        var value = [name, install_date, address, type, smps, req.session.uid, station_code];
+        var station_result = await pool.query(query,value);
+        station_array = station_result[0];
+
+        for (let i=0; i<port_code.length; i++){
+            var query = "update station_port " +
+                "set code = ?, type = ? " +
+                "where id = ?" ;
+            var value = [port_code[i], port_type[i], port_id[i]];
+        }
+    } else {
+        var query = "update station " +
+            "inner join admin on station.admin_id = admin.id " +
+            "set name = ?, install_date = ?, adress = ?, type = ?, smps = ?, admin = " +
+            "(select id from admin where identifier = ? limit 1 ) " +
+            "where code = ?" ;
+
+        var value = [name, install_date, address, type, smps, admin, station_code];
+        var station_result = await pool.query(query,value);
+        station_array = station_result[0];
+
+        for (let i=0; i<port_code.length; i++){
+            var query = "update station_port " +
+                "set code = ?, type = ? " +
+                "where id = ?" ;
+            var value = [port_code[i], port_type[i], port_id[i]];
+            await pool.query(query,value);
         }
     }
 });
 
 //스테이션 등록
 router.get('/station/list/register/', async (req, res) => {
-    if (checkPermission(req) !== 1){
-        res.send("<script>alert('권한이 없습니다.'); window.close(); </script>");
+    if (checkPermission(req) !== 1 && checkSession(req)){
+        res.send("<script>alert('권한이 없거나 로그인 상태가 아닙니다.'); window.close(); </script>");
     } else {
         res.render('index_station.ejs',{admin, station});
     }
 });
 
 router.post('/station/list/register/', async (req, res) => {
-    const name = req.body.name;
-    const install_date = req.body.install_date;
-    const address = req.body.address;
-    const picture = req.body.picture;
-    const admin = req.body.admin;
-    const type = req.body.type;
-    const smps = isBlank(req.body.smps) ? null : req.body.smps ;
-    const port = req.body.port;
-    const identifier = isBlank(req.body.identifier) ? null : req.body.identifier;
-
-    if (checkPermission(req) !== 1){
-        res.send("<script>alert('권한이 없습니다.'); window.close(); </script>");
+    if(!checkSession(req)){
+        res.send("<script>alert('로그인 상태가 아닙니다.'); window.close(); </script>");
     } else {
+        const name = req.body.name;
+        const install_date = req.body.install_date;
+        const address = req.body.address;
+        const picture = req.body.picture;
+        const admin = isBlank(req.body.admin) ? null : req.body.admin;
 
-        if (isBlank(name) || isBlank(install_date) || isBlank(address) || isBlank(picture) || isBlank(admin) || isBlank(type) || isBlank(port)){
-            res.send("<script>alert('입력값을 확인 해주세요'); history.go(-1); </script>");
+        const type = req.body.type;
+        const smps = isBlank(req.body.smps) ? null : req.body.smps;
+        const panel = isBlank(req.body.panel) ? null : req.body.panel;
+        const battery = isBlank(req.body.battery) ? null : req.body.battery;
+
+        const port_numb = req.body.port_numb;
+        const port_type = req.body.port_type;
+        const port_code = req.body.port_code;
+
+        if (checkPermission(req) !== 1) {
+            res.send("<script>alert('권한이 없습니다.'); window.close(); </script>");
         } else {
-            var query = "INSERT INTO station(name, install_date, adress, picture. admin, type, smps, port, identifier) value(?,?,?,?,?,?,?,?,?)";
-            let value = [name, install_date, address, picture, admin, type, smps, port, identifier]
-            const admin_result = await pool.query(query, value);
 
-            res.send("<script>alert('등록되었습니다.'); window.close(); </script>");
+            if (isBlank(name) || isBlank(install_date) || isBlank(address) || isBlank(picture) || isBlank(admin) || isBlank(type) || isBlank(port)) {
+                res.send("<script>alert('입력값을 확인 해주세요'); history.go(-1); </script>");
+            } else {
+                let query = "INSERT INTO station(name, install_date, adress, picture, admin, type, smps, panel, battery, identifier) value(?,?,?,?,?,?,?,?,?,?)";
+                let value = [name, install_date, address, picture, admin, type, smps, panel, battery, identifier];
+                const result = await pool.query(query, value);
+                const station_id = result.insertId;
+
+                let insert_query = '';
+                let insert_value = [];
+                for (let i =0; i<port_numb.length; i++){
+                    if (insert_query !== '') insert_query= insert_query+", ";
+                    insert_query = insert+`(?,?,?,?)`;
+
+                    insert_value.push(station_id);
+                    insert_value.push(port_numb[i]);
+                    insert_value.push(port_type[i]);
+                    insert_value.push(port_code[i]);
+                }
+                let query_port = "INSERT INTO station_port(station_id, number, type, code) values"+insert_value;
+                const result_port = await pool.query(query, value);
+
+                console.log(result_port)
+                res.send("<script>alert('등록되었습니다.'); window.close(); </script>");
+            }
         }
     }
 });
